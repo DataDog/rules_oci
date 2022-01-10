@@ -1,0 +1,53 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "pkg",
+    srcs = [
+        "appendlayeringester.go",
+        "bazel.go",
+        "blobindex.go",
+        "deb.go",
+        "desc.go",
+        "fs.go",
+        "handler.go",
+        "image.go",
+        "json.go",
+        "layers.go",
+        "manifest.go",
+        "multiprovider.go",
+        "platforms.go",
+        "provider.go",
+        "push.go",
+        "repoing.go",
+        "split.go",
+        "tar.go",
+        "writer.go",
+    ],
+    importpath = "github.com/DataDog/rules_oci/pkg",
+    visibility = ["//visibility:public"],
+    deps = [
+        "@bazel_gazelle//rule:go_default_library",
+        "@com_github_aws_aws_sdk_go//aws:go_default_library",
+        "@com_github_aws_aws_sdk_go//aws/session:go_default_library",
+        "@com_github_aws_aws_sdk_go//service/s3:go_default_library",
+        "@com_github_aws_aws_sdk_go//service/s3/s3manager:go_default_library",
+        "@com_github_blakesmith_ar//:go_default_library",
+        "@com_github_containerd_containerd//content:go_default_library",
+        "@com_github_containerd_containerd//errdefs:go_default_library",
+        "@com_github_containerd_containerd//images:go_default_library",
+        "@com_github_containerd_containerd//platforms:go_default_library",
+        "@com_github_containerd_containerd//reference/docker:go_default_library",
+        "@com_github_containerd_containerd//remotes:go_default_library",
+        "@com_github_containerd_containerd//remotes/docker:go_default_library",
+        "@com_github_opencontainers_go_digest//:go_default_library",
+        "@com_github_opencontainers_image_spec//specs-go/v1:go_default_library",
+        "@com_github_sirupsen_logrus//:go_default_library",
+    ],
+)
+
+go_test(
+    name = "pkg_test",
+    srcs = ["deb_test.go"],
+    embed = [":pkg"],
+    deps = ["@com_github_stretchr_testify//assert:go_default_library"],
+)
