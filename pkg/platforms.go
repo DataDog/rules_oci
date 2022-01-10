@@ -1,15 +1,14 @@
 package ociutil
 
 import (
-    "context"
-    "fmt"
+	"context"
+	"fmt"
 
-	"github.com/containerd/containerd/images"
-	"github.com/containerd/containerd/errdefs"
 	"github.com/containerd/containerd/content"
+	"github.com/containerd/containerd/errdefs"
+	"github.com/containerd/containerd/images"
 	ocispec "github.com/opencontainers/image-spec/specs-go/v1"
 )
-
 
 // imageConfigToPlatform creates a Platform from an Image Config type
 func ImageConfigToPlatform(cfg ocispec.Image) ocispec.Platform {
@@ -31,7 +30,7 @@ func ResolvePlatformFromDescriptor(ctx context.Context, provider content.Provide
 		return ocispec.Platform{}, err
 	}
 
-    imageConfig, err := ImageConfigFromProvider(ctx, provider, imageManifest.Config)
+	imageConfig, err := ImageConfigFromProvider(ctx, provider, imageManifest.Config)
 	if err != nil {
 		return ocispec.Platform{}, err
 	}

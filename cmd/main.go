@@ -19,9 +19,9 @@ import (
 	"github.com/containerd/containerd/images"
 	"github.com/containerd/containerd/platforms"
 	"github.com/opencontainers/go-digest"
-	ocispec "github.com/opencontainers/image-spec/specs-go/v1"
 	ocispecv "github.com/opencontainers/image-spec/specs-go"
-    log "github.com/sirupsen/logrus"
+	ocispec "github.com/opencontainers/image-spec/specs-go/v1"
+	log "github.com/sirupsen/logrus"
 	"github.com/urfave/cli/v2"
 	orascontent "oras.land/oras-go/pkg/content"
 	"oras.land/oras-go/pkg/oras"
@@ -54,12 +54,12 @@ var app = &cli.App{
 		{
 			Name:   "generate-build-files",
 			Action: GenerateBuildFilesCmd,
-		    Flags: []cli.Flag{
-                &cli.StringFlag {
-                    Name: "image-digest",
-                },
-            },
-        },
+			Flags: []cli.Flag{
+				&cli.StringFlag{
+					Name: "image-digest",
+				},
+			},
+		},
 		{
 			Name:   "create-layer",
 			Action: CreateLayerCmd,
@@ -212,28 +212,28 @@ func appendFileToTarWriter(filePath string, basedir string, tw *tar.Writer) erro
 }
 
 func getLocalProviders(c *cli.Context) ([]content.Provider, error) {
-    paths := c.StringSlice("layout")
+	paths := c.StringSlice("layout")
 
-    providers := make([]content.Provider, 0, len(paths))
-    for _, path := range paths {
-        provider, err := ociutil.LoadBlobIndex(path)
-        if err != nil {
-            return nil, fmt.Errorf("failed to load layout (%v): %w", path, err)
-        }
+	providers := make([]content.Provider, 0, len(paths))
+	for _, path := range paths {
+		provider, err := ociutil.LoadBlobIndex(path)
+		if err != nil {
+			return nil, fmt.Errorf("failed to load layout (%v): %w", path, err)
+		}
 
-        if relPath := c.String("layout-relative"); relPath != "" {
-            blobIdx := provider.(*ociutil.BlobIndex)
+		if relPath := c.String("layout-relative"); relPath != "" {
+			blobIdx := provider.(*ociutil.BlobIndex)
 
-            provider, err = blobIdx.Rel(relPath)
-            if err != nil {
-                return nil, err
-            }
-        }
+			provider, err = blobIdx.Rel(relPath)
+			if err != nil {
+				return nil, err
+			}
+		}
 
-        providers = append(providers, provider)
-    }
+		providers = append(providers, provider)
+	}
 
-    return providers, nil
+	return providers, nil
 }
 
 func DigestCmd(c *cli.Context) error {
@@ -251,12 +251,12 @@ func DigestCmd(c *cli.Context) error {
 }
 
 func PushCmd(c *cli.Context) error {
-    localProviders, err := getLocalProviders(c)
-    if err != nil {
-        return err
-    }
+	localProviders, err := getLocalProviders(c)
+	if err != nil {
+		return err
+	}
 
-    allProviders := ociutil.MultiProvider(localProviders...)
+	allProviders := ociutil.MultiProvider(localProviders...)
 
 	baseDesc, err := ociutil.DescriptorFromFile(c.String("desc"))
 	if err != nil {
@@ -303,10 +303,10 @@ func (k *KeyValueFlag) Set(value string) error {
 	}
 	parts := strings.SplitN(value, "=", 2)
 	if len(parts) < 2 {
-        return fmt.Errorf("not a valid mapping, must be k=k: %v", value)
-    }
+		return fmt.Errorf("not a valid mapping, must be k=k: %v", value)
+	}
 
-    k.m[parts[0]] = parts[1]
+	k.m[parts[0]] = parts[1]
 	return nil
 }
 
@@ -361,23 +361,23 @@ func CreateLayerCmd(c *cli.Context) error {
 }
 
 func AppendLayersCmd(c *cli.Context) error {
-    localProviders, err := getLocalProviders(c)
-    if err != nil {
-        return err
-    }
+	localProviders, err := getLocalProviders(c)
+	if err != nil {
+		return err
+	}
 
-    allLocalProviders := ociutil.MultiProvider(localProviders...)
+	allLocalProviders := ociutil.MultiProvider(localProviders...)
 
 	baseDesc, err := ociutil.DescriptorFromFile(c.String("base"))
 	if err != nil {
 		return err
-    }
+	}
 
-    targetPlatform := ocispec.Platform{
-        OS:           c.String("os"),
-        Architecture: c.String("arch"),
-    }
-    targetPlatformMatch := platforms.Only(targetPlatform)
+	targetPlatform := ocispec.Platform{
+		OS:           c.String("os"),
+		Architecture: c.String("arch"),
+	}
+	targetPlatformMatch := platforms.Only(targetPlatform)
 
 	var manifestDesc ocispec.Descriptor
 	if images.IsIndexType(baseDesc.MediaType) {
@@ -393,22 +393,22 @@ func AppendLayersCmd(c *cli.Context) error {
 	} else if images.IsManifestType(baseDesc.MediaType) {
 		manifestDesc = baseDesc
 
-        if manifestDesc.Platform == nil || manifestDesc.Platform.Architecture == "" || manifestDesc.Platform.OS == "" {
-            platform, err := ociutil.ResolvePlatformFromDescriptor(c.Context, allLocalProviders, manifestDesc)
-            if err != nil {
-                return fmt.Errorf("no platform for base: %w", err)
-            }
+		if manifestDesc.Platform == nil || manifestDesc.Platform.Architecture == "" || manifestDesc.Platform.OS == "" {
+			platform, err := ociutil.ResolvePlatformFromDescriptor(c.Context, allLocalProviders, manifestDesc)
+			if err != nil {
+				return fmt.Errorf("no platform for base: %w", err)
+			}
 
-            manifestDesc.Platform = &platform
-        }
+			manifestDesc.Platform = &platform
+		}
 
-    } else {
+	} else {
 		return fmt.Errorf("Unknown base image type %q", baseDesc.MediaType)
 	}
 
-    if !targetPlatformMatch.Match(*manifestDesc.Platform) {
-        return fmt.Errorf("invalid platform, expected %v, recieved %v", targetPlatform, *manifestDesc.Platform)
-    }
+	if !targetPlatformMatch.Match(*manifestDesc.Platform) {
+		return fmt.Errorf("invalid platform, expected %v, recieved %v", targetPlatform, *manifestDesc.Platform)
+	}
 
 	baseRef, ok := baseDesc.Annotations[ocispec.AnnotationRefName]
 	if ok {
@@ -473,16 +473,16 @@ func AppendLayersCmd(c *cli.Context) error {
 }
 
 func GenerateBuildFilesCmd(c *cli.Context) error {
-    allLocalLayoutsPaths := c.StringSlice("layout")
-    if len(allLocalLayoutsPaths) > 1 {
-        return fmt.Errorf("too many layouts")
-    } else if len(allLocalLayoutsPaths) <= 0 {
-        return fmt.Errorf("need at least one layout")
-    }
+	allLocalLayoutsPaths := c.StringSlice("layout")
+	if len(allLocalLayoutsPaths) > 1 {
+		return fmt.Errorf("too many layouts")
+	} else if len(allLocalLayoutsPaths) <= 0 {
+		return fmt.Errorf("need at least one layout")
+	}
 
-    layoutRootPath := allLocalLayoutsPaths[0]
+	layoutRootPath := allLocalLayoutsPaths[0]
 
-    layout, err := orascontent.NewOCI(layoutRootPath)
+	layout, err := orascontent.NewOCI(layoutRootPath)
 	if err != nil {
 		return err
 	}
@@ -505,28 +505,28 @@ func GenerateBuildFilesCmd(c *cli.Context) error {
 		return err
 	}
 
-    imageTargetDigest := c.String("image-digest")
-    if imageTargetDigest != "" {
-        err = os.MkdirAll(filepath.Join(layoutRootPath, "image"), 0700)
-        if err != nil {
-            return err
-        }
+	imageTargetDigest := c.String("image-digest")
+	if imageTargetDigest != "" {
+		err = os.MkdirAll(filepath.Join(layoutRootPath, "image"), 0700)
+		if err != nil {
+			return err
+		}
 
-        imageTargetBuildFilePath := filepath.Join(layoutRootPath, "image", "BUILD.bazel")
-	    imageTargetBuild := rule.EmptyFile(imageTargetBuildFilePath, "")
+		imageTargetBuildFilePath := filepath.Join(layoutRootPath, "image", "BUILD.bazel")
+		imageTargetBuild := rule.EmptyFile(imageTargetBuildFilePath, "")
 
-        aliasRule := rule.NewRule("alias", "image")
-        aliasRule.SetAttr("actual", dgstToManifestLabel(digest.Digest(imageTargetDigest)))
-        aliasRule.SetAttr("visibility", ociutil.PublicVisibility)
-        aliasRule.Insert(imageTargetBuild)
+		aliasRule := rule.NewRule("alias", "image")
+		aliasRule.SetAttr("actual", dgstToManifestLabel(digest.Digest(imageTargetDigest)))
+		aliasRule.SetAttr("visibility", ociutil.PublicVisibility)
+		aliasRule.Insert(imageTargetBuild)
 
-        err = imageTargetBuild.Save(imageTargetBuildFilePath)
-        if err != nil {
-            return err
-        }
+		err = imageTargetBuild.Save(imageTargetBuildFilePath)
+		if err != nil {
+			return err
+		}
 
-	    log.Debugf("Created BUILD file in image package")
-    }
+		log.Debugf("Created BUILD file in image package")
+	}
 
 	log.Debugf("Done generating build files")
 
@@ -543,17 +543,17 @@ func dgstToManifestLabelName(dgst digest.Digest) string {
 }
 
 func CreateIndexCmd(c *cli.Context) error {
-    localProviders, err := getLocalProviders(c)
-    if err != nil {
-        return err
-    }
+	localProviders, err := getLocalProviders(c)
+	if err != nil {
+		return err
+	}
 
-    bi, err := ociutil.MergeProviders(localProviders...)
-    if err != nil {
-        return err
-    }
+	bi, err := ociutil.MergeProviders(localProviders...)
+	if err != nil {
+		return err
+	}
 
-    descriptorPaths := c.StringSlice("desc")
+	descriptorPaths := c.StringSlice("desc")
 	descriptors := make([]ocispec.Descriptor, 0, len(descriptorPaths))
 
 	for _, descPath := range descriptorPaths {
@@ -562,27 +562,27 @@ func CreateIndexCmd(c *cli.Context) error {
 			return fmt.Errorf("failed to load descriptors for index: %w", err)
 		}
 
-        // Only resolve if the platform is not defined
-        if desc.Platform == nil || desc.Platform.OS == "" || desc.Platform.Architecture == "" {
-            plat, err := ociutil.ResolvePlatformFromDescriptor(c.Context, bi, desc)
-            if err != nil {
-                return fmt.Errorf("failed to resolve platform for manifest: %w", err)
-            }
+		// Only resolve if the platform is not defined
+		if desc.Platform == nil || desc.Platform.OS == "" || desc.Platform.Architecture == "" {
+			plat, err := ociutil.ResolvePlatformFromDescriptor(c.Context, bi, desc)
+			if err != nil {
+				return fmt.Errorf("failed to resolve platform for manifest: %w", err)
+			}
 
-            desc.Platform = &plat
-        }
+			desc.Platform = &plat
+		}
 
 		descriptors = append(descriptors, desc)
 	}
 
-    log.WithField("manifests", descriptors).Debug("creating image index")
+	log.WithField("manifests", descriptors).Debug("creating image index")
 
 	idx := ocispec.Index{
-        Versioned: ocispecv.Versioned{
-            SchemaVersion: 2,
-        },
-        MediaType: ocispec.MediaTypeImageIndex,
-        Manifests: descriptors,
+		Versioned: ocispecv.Versioned{
+			SchemaVersion: 2,
+		},
+		MediaType: ocispec.MediaTypeImageIndex,
+		Manifests: descriptors,
 	}
 
 	desc, err := ociutil.CopyJSONToFileAndCreateDescriptor(&idx, c.String("out-index"))
@@ -597,13 +597,13 @@ func CreateIndexCmd(c *cli.Context) error {
 		return err
 	}
 
-    // Append image index to blob index
-    bi.Blobs[desc.Digest] = c.String("out-index")
+	// Append image index to blob index
+	bi.Blobs[desc.Digest] = c.String("out-index")
 
-    err = bi.WriteToFile(c.String("out-layout"))
-    if err != nil {
-        return err
-    }
+	err = bi.WriteToFile(c.String("out-layout"))
+	if err != nil {
+		return err
+	}
 
 	return nil
 }
@@ -626,7 +626,7 @@ func PullCmd(c *cli.Context) error {
 
 	log.Printf("Resolved descriptor for %v: %#v", name, desc)
 
-    layoutPath := c.StringSlice("layout")[0]
+	layoutPath := c.StringSlice("layout")[0]
 
 	layout, err := orascontent.NewOCI(layoutPath)
 	if err != nil {

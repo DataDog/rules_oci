@@ -7,7 +7,6 @@ import (
 	ocispec "github.com/opencontainers/image-spec/specs-go/v1"
 )
 
-
 // ImageIndexFromProvider fetches an image index from a provider and decodes
 // it.
 //
@@ -37,7 +36,6 @@ func ImageManifestFromProvider(ctx context.Context, provider content.Provider, d
 
 	return cfg, nil
 }
-
 
 // ImageConfigFromProvider fetches an image config from a provider and decodes
 // it. The descriptor must point directly at the image config.

@@ -10,7 +10,7 @@ import (
 
 	"github.com/containerd/containerd/content"
 	"github.com/containerd/containerd/errdefs"
-    //	"github.com/containerd/containerd/images"
+	//	"github.com/containerd/containerd/images"
 	"github.com/opencontainers/go-digest"
 
 	ocispec "github.com/opencontainers/image-spec/specs-go/v1"
@@ -31,26 +31,25 @@ func appendBlobIndexHandler(bi *BlobIndex, handler images.HandlerFunc) images.Ha
 func BlobIndexFromHandler(ctx context.Context, provider content.Provider, root ocispec.Descriptor) (*BlobIndex, error) {
     err := images.Walk(ctx, images.ChildrenHandler(provider), root)
     if err != nil {
-        return nil, err 
+        return nil, err
     }
 
 }
 */
 
 func MergeProviders(providers ...content.Provider) (*BlobIndex, error) {
-    bi := &BlobIndex{}
+	bi := &BlobIndex{}
 
-    for _, p := range providers {
-        if b, ok := p.(*BlobIndex); ok {
-            bi.Merge(b)
-        } else {
-            return nil, fmt.Errorf("only supports BlobIndex")
-        }
-    }
+	for _, p := range providers {
+		if b, ok := p.(*BlobIndex); ok {
+			bi.Merge(b)
+		} else {
+			return nil, fmt.Errorf("only supports BlobIndex")
+		}
+	}
 
-    return bi, nil
+	return bi, nil
 }
-
 
 // LoadBlobIndex loads an JSON file that is an index of all of the blobs in a
 // OCI image index.
@@ -92,13 +91,13 @@ func (bi *BlobIndex) Rel(rel string) (*BlobIndex, error) {
 }
 
 func (bi *BlobIndex) Merge(bim *BlobIndex) {
-    if bi.Blobs == nil {
-        bi.Blobs = make(map[digest.Digest]string)
-    }
+	if bi.Blobs == nil {
+		bi.Blobs = make(map[digest.Digest]string)
+	}
 
-    for k, v := range bim.Blobs {
-        bi.Blobs[k] = v
-    }
+	for k, v := range bim.Blobs {
+		bi.Blobs[k] = v
+	}
 
 }
 

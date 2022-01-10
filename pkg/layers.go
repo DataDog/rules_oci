@@ -140,8 +140,8 @@ func AppendLayers(ctx context.Context, store content.Store, desc ocispec.Descrip
 		return ocispec.Descriptor{}, ocispec.Descriptor{}, fmt.Errorf("no image config (%v) in store: %w", manifest.Config, err)
 	}
 
-    // Get all of the digests of the layers to append to add to the diffids
-    // in the image config
+	// Get all of the digests of the layers to append to add to the diffids
+	// in the image config
 	digests := make([]digest.Digest, 0, len(layers))
 	for _, layer := range layers {
 		digests = append(digests, layer.Digest)
@@ -173,11 +173,10 @@ func AppendLayers(ctx context.Context, store content.Store, desc ocispec.Descrip
 		}
 	}
 
-    manifest.MediaType = desc.MediaType
+	manifest.MediaType = desc.MediaType
 	// Append after we add the base image labels
-    manifest.Layers = append(manifest.Layers, layers...)
+	manifest.Layers = append(manifest.Layers, layers...)
 	imageConfig.RootFS.DiffIDs = append(imageConfig.RootFS.DiffIDs, digests...)
-
 
 	newConfig, err := IngestorJSONEncode(ctx, store, manifest.Config.MediaType, imageConfig)
 	if err != nil {

@@ -51,7 +51,7 @@ func GenerateBuildFilesHandler(handler images.HandlerFunc, layoutRoot string, pr
 
 	layoutBuild.Save(filepath.Join(layoutRoot, "BUILD.bazel"))
 
-    return func(ctx context.Context, desc ocispec.Descriptor) ([]ocispec.Descriptor, error) {
+	return func(ctx context.Context, desc ocispec.Descriptor) ([]ocispec.Descriptor, error) {
 		writemx.Lock()
 		defer writemx.Unlock()
 
@@ -166,13 +166,13 @@ func blobRuleFromDescriptor(desc ocispec.Descriptor) *rule.Rule {
 func imageManifestRule(desc ocispec.Descriptor, manifest ocispec.Manifest) *rule.Rule {
 	r := rule.NewRule("oci_image_manifest", dgstToManifestLabelName(desc.Digest))
 
-    r.SetAttr("descriptor", dgstToLabel(desc.Digest))
+	r.SetAttr("descriptor", dgstToLabel(desc.Digest))
 	r.SetAttr("config", dgstToLabel(manifest.Config.Digest))
 	// TODO(griffin) Not handling shallow well
-    //r.SetAttr("layers", descriptorListToLabels(manifest.Layers))
+	//r.SetAttr("layers", descriptorListToLabels(manifest.Layers))
 	r.SetAttr("annotations", manifest.Annotations)
 	r.SetAttr("visibility", PublicVisibility)
-    r.SetAttr("layout", "//:layout")
+	r.SetAttr("layout", "//:layout")
 
 	return r
 }
@@ -180,11 +180,11 @@ func imageManifestRule(desc ocispec.Descriptor, manifest ocispec.Manifest) *rule
 func imageIndexManifestRule(desc ocispec.Descriptor, manifest ocispec.Index) *rule.Rule {
 	r := rule.NewRule("oci_image_index_manifest", dgstToManifestLabelName(desc.Digest))
 
-    r.SetAttr("descriptor", dgstToLabel(desc.Digest))
+	r.SetAttr("descriptor", dgstToLabel(desc.Digest))
 	r.SetAttr("manifests", descriptorListToLabels(manifest.Manifests))
 	r.SetAttr("annotations", manifest.Annotations)
 	r.SetAttr("visibility", PublicVisibility)
-    r.SetAttr("layout", "//:layout")
+	r.SetAttr("layout", "//:layout")
 
 	return r
 }
