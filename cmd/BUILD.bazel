@@ -6,6 +6,7 @@ go_library(
     importpath = "github.com/DataDog/rules_oci/cmd",
     visibility = ["//visibility:private"],
     deps = [
+        "//pkg/ociutil",
         "@bazel_gazelle//rule:go_default_library",
         "@com_github_containerd_containerd//content:go_default_library",
         "@com_github_containerd_containerd//images:go_default_library",

@@ -7,3 +7,14 @@ load(
 gazelle(
     name = "gazelle",
 )
+
+gazelle(
+    name = "gazelle-update-repos",
+    args = [
+        "-from_file=go.mod",
+        "-to_macro=repositories.bzl%go_repositories",
+        "-prune=true",
+        "-build_file_proto_mode=disable",
+    ],
+    command = "update-repos",
+)
