@@ -1,4 +1,4 @@
-package ociutil
+package deb2layer
 
 import (
 	"archive/tar"
@@ -18,7 +18,8 @@ const (
 	// dpkgStatusDir is the directory to store the control file for dpkg
 	// to recognize the package.
 	dpkgStatusDir = "/var/lib/dpkg/status.d"
-	// pkgMetadataFile is the name of the metadata file within the control
+
+    // pkgMetadataFile is the name of the metadata file within the control
 	// section
 	pkgMetadataFile = "control"
 

@@ -41,7 +41,6 @@ func ImageManifestFromProvider(ctx context.Context, provider content.Provider, d
 // it. The descriptor must point directly at the image config.
 //
 // XXX: This function assumes that the data is json encoded.
-
 func ImageConfigFromProvider(ctx context.Context, provider content.Provider, desc ocispec.Descriptor) (ocispec.Image, error) {
 	var cfg ocispec.Image
 

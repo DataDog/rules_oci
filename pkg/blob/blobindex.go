@@ -10,41 +10,26 @@ import (
 
 	"github.com/containerd/containerd/content"
 	"github.com/containerd/containerd/errdefs"
-	//	"github.com/containerd/containerd/images"
 	"github.com/opencontainers/go-digest"
 
 	ocispec "github.com/opencontainers/image-spec/specs-go/v1"
 )
 
 var (
-	_ content.Provider = &BlobIndex{}
+    ErrNotBlobIndex = fmt.Errorf("provider not a blob index")
+
+	_ content.Provider = &Index{}
 	_ content.ReaderAt = &fileWithSize{}
 )
 
-/*
-func appendBlobIndexHandler(bi *BlobIndex, handler images.HandlerFunc) images.HandlerFunc {
-    return func(ctx context.Context, desc ocispec.Descriptor) ([]ocispec.Descriptor, error) {
-        bi[]
-    }
-}
-
-func BlobIndexFromHandler(ctx context.Context, provider content.Provider, root ocispec.Descriptor) (*BlobIndex, error) {
-    err := images.Walk(ctx, images.ChildrenHandler(provider), root)
-    if err != nil {
-        return nil, err
-    }
-
-}
-*/
-
-func MergeProviders(providers ...content.Provider) (*BlobIndex, error) {
-	bi := &BlobIndex{}
+func MergeIndex(providers ...content.Provider) (*Index, error) {
+	bi := &Index{}
 
 	for _, p := range providers {
-		if b, ok := p.(*BlobIndex); ok {
+		if b, ok := p.(*Index); ok {
 			bi.Merge(b)
 		} else {
-			return nil, fmt.Errorf("only supports BlobIndex")
+			return nil, ErrNotBlobIndex
 		}
 	}
 
@@ -56,13 +41,13 @@ func MergeProviders(providers ...content.Provider) (*BlobIndex, error) {
 //
 // This is useful in Bazel so you don't need to repackage all of the entries in
 // an OCI Layout.
-func LoadBlobIndex(path string) (content.Provider, error) {
+func LoadIndexFromFile(path string) (content.Provider, error) {
 	f, err := os.Open(path)
 	if err != nil {
 		return nil, fmt.Errorf("couldn't open index: %w", err)
 	}
 
-	var idx BlobIndex
+	var idx Index
 
 	err = json.NewDecoder(f).Decode(&idx)
 	if err != nil {
@@ -75,7 +60,7 @@ func LoadBlobIndex(path string) (content.Provider, error) {
 // Rel creates a new index with all paths relative to the provided path.
 //
 // This is used in Bazel when using path vs short_path.
-func (bi *BlobIndex) Rel(rel string) (*BlobIndex, error) {
+func (bi *Index) Rel(rel string) (*Index, error) {
 	clone := bi.Clone()
 
 	for dgst, path := range clone.Blobs {
@@ -90,7 +75,7 @@ func (bi *BlobIndex) Rel(rel string) (*BlobIndex, error) {
 	return clone, nil
 }
 
-func (bi *BlobIndex) Merge(bim *BlobIndex) {
+func (bi *Index) Merge(bim *Index) {
 	if bi.Blobs == nil {
 		bi.Blobs = make(map[digest.Digest]string)
 	}
@@ -101,8 +86,8 @@ func (bi *BlobIndex) Merge(bim *BlobIndex) {
 
 }
 
-func (bi *BlobIndex) Clone() *BlobIndex {
-	newbi := &BlobIndex{
+func (bi *Index) Clone() *Index {
+	newbi := &Index{
 		Blobs: make(map[digest.Digest]string),
 	}
 
@@ -114,12 +99,12 @@ func (bi *BlobIndex) Clone() *BlobIndex {
 }
 
 // WriteTo writes the index to a stream.
-func (bi *BlobIndex) WriteTo(writer io.Writer) error {
+func (bi *Index) WriteTo(writer io.Writer) error {
 	return json.NewEncoder(writer).Encode(bi)
 }
 
 // WriteToFile writes the index to a file.
-func (bi *BlobIndex) WriteToFile(path string) error {
+func (bi *Index) WriteToFile(path string) error {
 	f, err := os.Create(path)
 	if err != nil {
 		return err
@@ -130,14 +115,14 @@ func (bi *BlobIndex) WriteToFile(path string) error {
 }
 
 // BlobIndex is a mapping from digest to a filepath
-type BlobIndex struct {
+type Index struct {
 	// TODO(griffin): add support for top level index
 	// Index digest.Digest
 
 	Blobs map[digest.Digest]string
 }
 
-func (bi *BlobIndex) ReaderAt(ctx context.Context, desc ocispec.Descriptor) (content.ReaderAt, error) {
+func (bi *Index) ReaderAt(ctx context.Context, desc ocispec.Descriptor) (content.ReaderAt, error) {
 	path, ok := bi.Blobs[desc.Digest]
 	if !ok {
 		return nil, errdefs.ErrNotFound

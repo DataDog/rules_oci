@@ -1,4 +1,4 @@
-package ociutil
+package deb2layer
 
 import (
 	"archive/tar"

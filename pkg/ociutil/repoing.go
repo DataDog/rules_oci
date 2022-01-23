@@ -7,7 +7,6 @@ import (
 	"net/http"
 	"time"
 
-	//"github.com/containerd/containerd/content"
 	"github.com/containerd/containerd/content"
 	"github.com/containerd/containerd/errdefs"
 	"github.com/containerd/containerd/remotes"

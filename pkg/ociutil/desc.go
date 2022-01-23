@@ -43,6 +43,8 @@ func CreateDescriptorFromFile(filePath string) (ocispec.Descriptor, io.ReadClose
 	}, file, nil
 }
 
+// CopyJSONToFileAndCreateDescriptor encodes inf to json and then writes it to a
+// file, returning the descriptor.
 func CopyJSONToFileAndCreateDescriptor(inf interface{}, outFile string) (ocispec.Descriptor, error) {
 	var buf bytes.Buffer
 
@@ -51,10 +53,12 @@ func CopyJSONToFileAndCreateDescriptor(inf interface{}, outFile string) (ocispec
 		return ocispec.Descriptor{}, err
 	}
 
-	return CopyToFileAndCreateDescriptor(&buf, outFile)
+	return CopyReaderToFileAndCreateDescriptor(&buf, outFile)
 }
 
-func CopyToFileAndCreateDescriptor(reader io.Reader, outFile string) (ocispec.Descriptor, error) {
+// CopyReaderToFileAndCreateDescriptor copys a reader to a file and then returns
+// a descriptor.
+func CopyReaderToFileAndCreateDescriptor(reader io.Reader, outFile string) (ocispec.Descriptor, error) {
 	f, err := os.Create(outFile)
 	if err != nil {
 		return ocispec.Descriptor{}, err
@@ -64,6 +68,8 @@ func CopyToFileAndCreateDescriptor(reader io.Reader, outFile string) (ocispec.De
 	return CopyAndCreateDescriptor(reader, f)
 }
 
+// CopyAndCreateDescriptor copys a reader to a writer and returns a descriptor,
+// note that this desciptor will only have the Digest and Size fields populated.
 func CopyAndCreateDescriptor(reader io.Reader, writer io.Writer) (ocispec.Descriptor, error) {
 	digester := digest.SHA256.Digester()
 	n, err := io.Copy(io.MultiWriter(writer, digester.Hash()), reader)
@@ -77,7 +83,7 @@ func CopyAndCreateDescriptor(reader io.Reader, writer io.Writer) (ocispec.Descri
 	}, nil
 }
 
-// WriteDescriptorToFile writes an OCI descriptor to a file
+// WriteDescriptorToFile writes an OCI descriptor to a file.
 func WriteDescriptorToFile(path string, desc ocispec.Descriptor) error {
 	f, err := os.Create(path)
 	if err != nil {
@@ -93,8 +99,10 @@ func WriteDescriptorToFile(path string, desc ocispec.Descriptor) error {
 	return nil
 }
 
-// DescriptorFromFile reads an OCI descriptor from a file path
-func DescriptorFromFile(path string) (ocispec.Descriptor, error) {
+// DescriptorFromFile reads an OCI descriptor from a file path.
+//
+// XXX Descriptor must be json encoded
+func ReadDescriptorFromFile(path string) (ocispec.Descriptor, error) {
 	f, err := os.Open(path)
 	if err != nil {
 		return ocispec.Descriptor{}, fmt.Errorf("couldn't read descriptor: %w", err)

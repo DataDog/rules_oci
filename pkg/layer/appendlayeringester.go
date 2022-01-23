@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+    "sync"
 
 	"github.com/containerd/containerd/content"
 	"github.com/containerd/containerd/errdefs"
@@ -12,29 +13,33 @@ import (
 )
 
 var (
-	_ content.Ingester = &appendLayerIngester{}
+    ErrNotSupportedMediaType = fmt.Errorf("not supported media type for ingester")
+
+	_ content.Ingester = &appendIngester{}
 	_ content.Writer   = &fileWriter{}
 )
 
-// NewAppendLayerIngestor creates a containerd/content.Ingestor that will write
+// NewAppendIngester creates a containerd/content.Ingestor that will write
 // out the modified files to a predefined paths. The descriptor WriterOpt is
 // required with an accurate MediaType.
 //
 // This is useful in a Bazel context as we need to predeclare where files will
 // be written to.
-func NewAppendLayerIngestor(manifestPath, configPath string) content.Ingester {
-	return &appendLayerIngester{
+func NewAppendIngester(manifestPath, configPath string) content.Ingester {
+	return &appendIngester{
 		manifestPath: manifestPath,
 		configPath:   configPath,
 	}
 }
 
-type appendLayerIngester struct {
+type appendIngester struct {
 	manifestPath string
 	configPath   string
+
+    mx sync.Mutex
 }
 
-func (ing *appendLayerIngester) Writer(ctx context.Context, opts ...content.WriterOpt) (content.Writer, error) {
+func (ing *appendIngester) Writer(ctx context.Context, opts ...content.WriterOpt) (content.Writer, error) {
 	var options content.WriterOpts
 
 	for _, o := range opts {
@@ -43,13 +48,24 @@ func (ing *appendLayerIngester) Writer(ctx context.Context, opts ...content.Writ
 		}
 	}
 
+    ing.mx.Lock()
+    defer ing.mx.Unlock()
+
 	path := ""
 	if images.IsManifestType(options.Desc.MediaType) {
-		path = ing.manifestPath
-	} else if images.IsConfigType(options.Desc.MediaType) {
-		path = ing.configPath
+		if ing.manifestPath != "" {
+            return nil, fmt.Errorf("%w: already seen manifest", ErrNotSupportedMediaType)
+        }
+
+        path = ing.manifestPath
+    } else if images.IsConfigType(options.Desc.MediaType) {
+		if ing.configPath != "" {
+            return nil, fmt.Errorf("%w: already seen config", ErrNotSupportedMediaType)
+        }
+
+        path = ing.configPath
 	} else {
-		return nil, fmt.Errorf("not supported content type for writer")
+        return nil, fmt.Errorf("%w: %v", ErrNotSupportedMediaType, options.Desc.MediaType)
 	}
 
 	f, err := os.Create(path)
@@ -97,5 +113,5 @@ func (ing *fileWriter) Status() (content.Status, error) {
 }
 
 func (ing *fileWriter) Truncate(size int64) error {
-	return fmt.Errorf("file writer: %w", errdefs.ErrNotImplemented)
+	return fmt.Errorf("append layer file writer: %w", errdefs.ErrNotImplemented)
 }
