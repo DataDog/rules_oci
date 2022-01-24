@@ -1,0 +1,14 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "layer",
+    srcs = ["appendlayeringester.go"],
+    importpath = "github.com/DataDog/rules_oci/pkg/layer",
+    visibility = ["//visibility:public"],
+    deps = [
+        "@com_github_containerd_containerd//content",
+        "@com_github_containerd_containerd//errdefs",
+        "@com_github_containerd_containerd//images",
+        "@com_github_opencontainers_go_digest//:go-digest",
+    ],
+)

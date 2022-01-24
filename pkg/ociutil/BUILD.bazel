@@ -1,12 +1,9 @@
-load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
 
 go_library(
     name = "ociutil",
     srcs = [
-        "appendlayeringester.go",
         "bazel.go",
-        "blobindex.go",
-        "deb.go",
         "desc.go",
         "fs.go",
         "handler.go",
@@ -27,27 +24,19 @@ go_library(
     visibility = ["//visibility:public"],
     deps = [
         "@bazel_gazelle//rule:go_default_library",
-        "@com_github_aws_aws_sdk_go//aws:go_default_library",
-        "@com_github_aws_aws_sdk_go//aws/session:go_default_library",
-        "@com_github_aws_aws_sdk_go//service/s3:go_default_library",
-        "@com_github_aws_aws_sdk_go//service/s3/s3manager:go_default_library",
-        "@com_github_blakesmith_ar//:go_default_library",
-        "@com_github_containerd_containerd//content:go_default_library",
-        "@com_github_containerd_containerd//errdefs:go_default_library",
-        "@com_github_containerd_containerd//images:go_default_library",
-        "@com_github_containerd_containerd//platforms:go_default_library",
-        "@com_github_containerd_containerd//reference/docker:go_default_library",
-        "@com_github_containerd_containerd//remotes:go_default_library",
-        "@com_github_containerd_containerd//remotes/docker:go_default_library",
-        "@com_github_opencontainers_go_digest//:go_default_library",
-        "@com_github_opencontainers_image_spec//specs-go/v1:go_default_library",
-        "@com_github_sirupsen_logrus//:go_default_library",
+        "@com_github_aws_aws_sdk_go//aws",
+        "@com_github_aws_aws_sdk_go//aws/session",
+        "@com_github_aws_aws_sdk_go//service/s3",
+        "@com_github_aws_aws_sdk_go//service/s3/s3manager",
+        "@com_github_containerd_containerd//content",
+        "@com_github_containerd_containerd//errdefs",
+        "@com_github_containerd_containerd//images",
+        "@com_github_containerd_containerd//platforms",
+        "@com_github_containerd_containerd//reference/docker",
+        "@com_github_containerd_containerd//remotes",
+        "@com_github_containerd_containerd//remotes/docker",
+        "@com_github_opencontainers_go_digest//:go-digest",
+        "@com_github_opencontainers_image_spec//specs-go/v1:specs-go",
+        "@com_github_sirupsen_logrus//:logrus",
     ],
-)
-
-go_test(
-    name = "ociutil_test",
-    srcs = ["deb_test.go"],
-    embed = [":ociutil"],
-    deps = ["@com_github_stretchr_testify//assert:go_default_library"],
 )
