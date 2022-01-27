@@ -13,3 +13,9 @@ jobs:
       - uses: actions/checkout@v2
       - uses: bazelbuild/setup-bazelisk@v1
       - run: bazel test //...
+    services:
+      registry:
+        image: registry:2.7.1
+        ports:
+          # Opens tcp port 6379 on the host and service container
+          - 8080:8080
