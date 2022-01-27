@@ -54,13 +54,15 @@ func (ing *appendIngester) Writer(ctx context.Context, opts ...content.WriterOpt
 	path := ""
 	if images.IsManifestType(options.Desc.MediaType) {
 		if ing.manifestPath != "" {
-            return nil, fmt.Errorf("%w: already seen manifest", ErrNotSupportedMediaType)
+            // TODO check seen
+            //return nil, fmt.Errorf("%w: already seen manifest", ErrNotSupportedMediaType)
         }
 
         path = ing.manifestPath
     } else if images.IsConfigType(options.Desc.MediaType) {
 		if ing.configPath != "" {
-            return nil, fmt.Errorf("%w: already seen config", ErrNotSupportedMediaType)
+            // TODO check seen
+            //return nil, fmt.Errorf("%w: already seen config", ErrNotSupportedMediaType)
         }
 
         path = ing.configPath

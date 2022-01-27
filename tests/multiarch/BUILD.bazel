@@ -1,5 +1,6 @@
 load("@io_bazel_rules_go//go:def.bzl", "go_binary", "go_library")
 load(":go.bzl", "go_multiarch_image")
+load("@com_github_datadog_rules_oci//oci:defs.bzl", "oci_push")
 
 go_library(
     name = "multiarch_lib",
@@ -23,4 +24,11 @@ go_multiarch_image(
     base = "@ubuntu_focal//image",
     embed = [":multiarch_lib"],
     visibility = ["//visibility:public"],
+)
+
+oci_push(
+    name = "push",
+    manifest = ":image",
+    registry = "registry.ddbuild.io",
+    repository = "rules_oci/hello-world",
 )

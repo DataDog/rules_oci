@@ -1,6 +1,7 @@
 load(":debug.bzl", "debug_flag")
 
 debug_flag(
-    name = "debug_flag"
+    name = "debug",
     build_setting_default = False,
+    visibility = ["//visibility:public"],
 )
