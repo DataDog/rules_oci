@@ -50,3 +50,6 @@ http_archive(
 
 load("@com_google_protobuf//:protobuf_deps.bzl", "protobuf_deps")
 protobuf_deps()
+
+load("//tests:test_images.bzl", "pull_test_images")
+pull_test_images()

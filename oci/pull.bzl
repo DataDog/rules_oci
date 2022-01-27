@@ -62,7 +62,7 @@ oci_pull = repository_rule(
     implementation = _oci_pull_impl,
     attrs = {
         "registry": attr.string(
-            default = "registry.ddbuild.io",
+            mandatory = True,
         ),
         "repository": attr.string(
             mandatory = True,
@@ -73,7 +73,7 @@ oci_pull = repository_rule(
             mandatory = True,
         ),
         "shallow": attr.bool(
-            default = False,
+            default = True,
         ),
     },
     environ = [

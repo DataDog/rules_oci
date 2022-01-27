@@ -1,7 +1,17 @@
 OCITOOL_ATTR = attr.label(
     executable = True,
-    default = "@com_datadoghq_cnab_tools//cmd/ocitool:ocitool",
+    default = "@com_github_datadog_rules_oci//cmd/ocitool:ocitool",
     cfg = "host",
+)
+
+OCIReferenceInfo = provider(
+    doc = "Refers to any artifact represented by an OCI-like reference URI",
+    fields = {
+        "registry": "the URI where the artifact is stored",
+        "repository": "a namespace for an artifact",
+        "tag": "a organizational reference within a repository",
+        "digest": "a file containing the digest of the artifact",
+    },
 )
 
 OCILayout = provider(

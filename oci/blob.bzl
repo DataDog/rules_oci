@@ -1,4 +1,4 @@
-load("@com_datadoghq_cnab_tools//rules/oci:providers.bzl", "OCIDescriptor")
+load("@com_github_datadog_rules_oci///oci:providers.bzl", "OCIDescriptor")
 
 def _oci_blob_impl(ctx):
     return [OCIDescriptor(

@@ -1,5 +1,4 @@
-load("@io_bazel_rules_go//go:def.bzl", "go_binary", "go_library")
-load("@com_datadoghq_cnab_tools//rules/oci:providers.bzl", "OCIDescriptor", "OCILayout", "OCITOOL_ATTR")
+load("@com_github_datadog_rules_oci//oci:providers.bzl", "OCIDescriptor", "OCILayout", "OCITOOL_ATTR")
 
 def get_descriptor_file(ctx, desc):
     if hasattr(desc, "descriptor_file"):
@@ -165,55 +164,3 @@ oci_image = rule(
         "_ocitool": OCITOOL_ATTR,
     },
 )
-
-def dd_go_image(name, base, archs, binary_name = "", binary_dir = "/app", **kwargs):
-    os = "linux"
-
-    visibility = kwargs.get("visibility", None)
-    tags = kwargs.get("tags", None)
-
-    if binary_name == "":
-        binary_name = name
-
-    manifests = []
-    for arch in archs:
-        go_binary_name = "{name}.{os}-{arch}-go-binary".format(name = name, os = os, arch = arch)
-        go_binary_out = "{binary_name}-{os}-{arch}".format(binary_name = binary_name, os = os, arch = arch)
-        go_binary(
-            name = go_binary_name,
-            goos = os,
-            goarch = arch,
-            out = go_binary_out,
-            **kwargs
-        )
-
-        layer_name = "{name}.{os}-{arch}-go-layer".format(name = name, os = os, arch = arch)
-        oci_image_layer(
-            name = layer_name,
-            files = [
-                go_binary_name,
-            ],
-            symlinks = {
-                "{}/{}".format(binary_dir, binary_name): "{}/{}".format(binary_dir, go_binary_out),
-            },
-            directory = binary_dir,
-        )
-
-        image_name = "{name}.{os}-{arch}-image".format(name = name, os = os, arch = arch)
-        oci_image(
-            name = image_name,
-            base = base,
-            layers = [
-                layer_name,
-            ],
-            os = os,
-            arch = arch,
-        )
-        manifests.append(image_name)
-
-    oci_image_index(
-        name = name,
-        manifests = manifests,
-        tags = tags,
-        visibility = visibility,
-    )

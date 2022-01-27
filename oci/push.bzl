@@ -1,7 +1,5 @@
-load("@com_datadoghq_cnab_tools//rules/oci:providers.bzl", "OCIDescriptor", "OCILayout", "OCITOOL_ATTR")
-load("@com_datadoghq_cnab_tools//rules/artifact:artifact.bzl", "ArtifactReferenceInfo")
-load("@com_datadoghq_cnab_tools//rules/oci:debug.bzl", "DebugInfo")
-
+load("@com_github_datadog_rules_oci//oci:providers.bzl", "OCIDescriptor", "OCILayout", "OCIReferenceInfo", "OCITOOL_ATTR")
+load("@com_github_datadog_rules_oci//oci:debug.bzl", "DebugInfo")
 
 def _oci_push_impl(ctx):
     layout = ctx.attr.manifest[OCILayout]
@@ -55,7 +53,7 @@ def _oci_push_impl(ctx):
                         [ctx.executable._ocitool, ctx.attr.manifest[OCIDescriptor].file, layout.blob_index],
             ),
         ),
-        ArtifactReferenceInfo(
+        OCIReferenceInfo(
             registry = ctx.attr.registry,
             repository = ctx.attr.repository,
             digest = digest_file,
@@ -88,12 +86,12 @@ oci_push = rule(
             """,
         ),
         "_debug": attr.label(
-            default = "//rules/oci:debug",
+            default = "//oci:debug",
             providers = [DebugInfo],
         ),
         "_ocitool": OCITOOL_ATTR,
     },
     provides = [
-        ArtifactReferenceInfo,
+        OCIReferenceInfo,
     ],
 )

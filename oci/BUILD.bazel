@@ -1,0 +1,6 @@
+load(":debug.bzl", "debug_flag")
+
+debug_flag(
+    name = "debug_flag"
+    build_setting_default = False,
+)

@@ -1,0 +1,26 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_binary", "go_library")
+load(":go.bzl", "go_multiarch_image")
+
+go_library(
+    name = "multiarch_lib",
+    srcs = ["main.go"],
+    importpath = "github.com/DataDog/rules_oci/tests/multiarch",
+    visibility = ["//visibility:private"],
+)
+
+go_binary(
+    name = "multiarch",
+    embed = [":multiarch_lib"],
+    visibility = ["//visibility:public"],
+)
+
+go_multiarch_image(
+    name = "image",
+    archs = [
+        "amd64",
+        "arm64",
+    ],
+    base = "@ubuntu_focal//image",
+    embed = [":multiarch_lib"],
+    visibility = ["//visibility:public"],
+)

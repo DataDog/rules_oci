@@ -1,4 +1,4 @@
-load("@com_datadoghq_cnab_tools//rules/oci:providers.bzl", "OCILayout", "OCIDescriptor", "OCIImageIndexManifest", "OCIImageManifest")
+load("@com_github_datadog_rules_oci///oci:providers.bzl", "OCILayout", "OCIDescriptor", "OCIImageIndexManifest", "OCIImageManifest")
 
 def _oci_image_manifest_impl(ctx):
     return [OCIImageManifest(

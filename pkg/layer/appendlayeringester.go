@@ -1,4 +1,4 @@
-package ociutil
+package layer
 
 import (
 	"context"

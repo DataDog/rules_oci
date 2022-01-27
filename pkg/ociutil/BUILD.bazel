@@ -24,10 +24,6 @@ go_library(
     visibility = ["//visibility:public"],
     deps = [
         "@bazel_gazelle//rule:go_default_library",
-        "@com_github_aws_aws_sdk_go//aws",
-        "@com_github_aws_aws_sdk_go//aws/session",
-        "@com_github_aws_aws_sdk_go//service/s3",
-        "@com_github_aws_aws_sdk_go//service/s3/s3manager",
         "@com_github_containerd_containerd//content",
         "@com_github_containerd_containerd//errdefs",
         "@com_github_containerd_containerd//images",

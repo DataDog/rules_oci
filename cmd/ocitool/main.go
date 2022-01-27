@@ -13,6 +13,8 @@ import (
 	"golang.org/x/sync/semaphore"
 
 	"github.com/DataDog/rules_oci/pkg/ociutil"
+	"github.com/DataDog/rules_oci/pkg/blob"
+	"github.com/DataDog/rules_oci/pkg/layer"
 
 	"github.com/bazelbuild/bazel-gazelle/rule"
 	"github.com/containerd/containerd/content"
@@ -216,13 +218,13 @@ func getLocalProviders(c *cli.Context) ([]content.Provider, error) {
 
 	providers := make([]content.Provider, 0, len(paths))
 	for _, path := range paths {
-		provider, err := ociutil.LoadBlobIndex(path)
+		provider, err := blob.LoadIndexFromFile(path)
 		if err != nil {
 			return nil, fmt.Errorf("failed to load layout (%v): %w", path, err)
 		}
 
 		if relPath := c.String("layout-relative"); relPath != "" {
-			blobIdx := provider.(*ociutil.BlobIndex)
+			blobIdx := provider.(*blob.Index)
 
 			provider, err = blobIdx.Rel(relPath)
 			if err != nil {
@@ -237,7 +239,7 @@ func getLocalProviders(c *cli.Context) ([]content.Provider, error) {
 }
 
 func DigestCmd(c *cli.Context) error {
-	desc, err := ociutil.DescriptorFromFile(c.String("desc"))
+	desc, err := ociutil.ReadDescriptorFromFile(c.String("desc"))
 	if err != nil {
 		return err
 	}
@@ -258,7 +260,7 @@ func PushCmd(c *cli.Context) error {
 
 	allProviders := ociutil.MultiProvider(localProviders...)
 
-	baseDesc, err := ociutil.DescriptorFromFile(c.String("desc"))
+	baseDesc, err := ociutil.ReadDescriptorFromFile(c.String("desc"))
 	if err != nil {
 		return err
 	}
@@ -368,7 +370,7 @@ func AppendLayersCmd(c *cli.Context) error {
 
 	allLocalProviders := ociutil.MultiProvider(localProviders...)
 
-	baseDesc, err := ociutil.DescriptorFromFile(c.String("base"))
+	baseDesc, err := ociutil.ReadDescriptorFromFile(c.String("base"))
 	if err != nil {
 		return err
 	}
@@ -423,7 +425,7 @@ func AppendLayersCmd(c *cli.Context) error {
 
 	layerPaths := c.StringSlice("layer")
 
-	layerProvider := &ociutil.BlobIndex{
+	layerProvider := &blob.Index{
 		Blobs: make(map[digest.Digest]string),
 	}
 
@@ -442,9 +444,9 @@ func AppendLayersCmd(c *cli.Context) error {
 
 	log.Printf("created descriptors for layers(n=%v): %#v", len(layerPaths), layerDescs)
 
-	outIngestor := ociutil.NewAppendLayerIngestor(c.String("out-manifest"), c.String("out-config"))
+	outIngestor := layer.NewAppendIngester(c.String("out-manifest"), c.String("out-config"))
 
-	newManifest, newConfig, err := ociutil.AppendLayers(
+	newManifest, newConfig, err := layer.AppendLayers(
 		c.Context,
 		ociutil.SplitStore(outIngestor, ociutil.MultiProvider(allLocalProviders, layerProvider)),
 		manifestDesc,
@@ -548,7 +550,7 @@ func CreateIndexCmd(c *cli.Context) error {
 		return err
 	}
 
-	bi, err := ociutil.MergeProviders(localProviders...)
+	bi, err := blob.MergeIndex(localProviders...)
 	if err != nil {
 		return err
 	}
@@ -557,7 +559,7 @@ func CreateIndexCmd(c *cli.Context) error {
 	descriptors := make([]ocispec.Descriptor, 0, len(descriptorPaths))
 
 	for _, descPath := range descriptorPaths {
-		desc, err := ociutil.DescriptorFromFile(descPath)
+		desc, err := ociutil.ReadDescriptorFromFile(descPath)
 		if err != nil {
 			return fmt.Errorf("failed to load descriptors for index: %w", err)
 		}
