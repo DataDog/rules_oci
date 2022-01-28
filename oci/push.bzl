@@ -1,5 +1,5 @@
 load("@com_github_datadog_rules_oci//oci:providers.bzl", "OCIDescriptor", "OCILayout", "OCIReferenceInfo", "OCITOOL_ATTR")
-load("@com_github_datadog_rules_oci//oci:debug.bzl", "DebugInfo")
+load("@com_github_datadog_rules_oci//oci:debug_flag.bzl", "DebugInfo")
 
 def _oci_push_impl(ctx):
     layout = ctx.attr.manifest[OCILayout]

@@ -1,20 +1,11 @@
-load(
-    "@bazel_gazelle//:def.bzl",
-    "gazelle",
-)
+load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
 
 # gazelle:prefix github.com/DataDog/rules_oci
-gazelle(
-    name = "gazelle",
-)
+# gazelle:go_naming_convention go_default_library
 
-gazelle(
-    name = "gazelle-update-repos",
-    args = [
-        "-from_file=go.mod",
-        "-to_macro=repositories.bzl%go_repositories",
-        "-prune=true",
-        "-build_file_proto_mode=disable",
-    ],
-    command = "update-repos",
+bzl_library(
+    name = "repositories",
+    srcs = ["repositories.bzl"],
+    visibility = ["//visibility:public"],
+    deps = ["@bazel_gazelle//:deps"],
 )
