@@ -1,5 +1,18 @@
+load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
 load("@io_bazel_rules_go//go:def.bzl", "go_library")
 load("@bazel_gazelle//:def.bzl", "DEFAULT_LANGUAGES", "gazelle", "gazelle_binary")
+load("@io_bazel_rules_go//docs:doc_helpers.bzl", "stardoc_with_diff_test", "update_docs")
+
+# Sourced from https://github.com/bazelbuild/rules_go/pull/3000
+# For each doc file, generate MD from bzl_library, then perform diff test
+stardoc_with_diff_test(
+    bzl_library_target = "//oci:defs",
+    out_label = "//docs:docs.md",
+)
+
+update_docs(
+    name = "update",
+)
 
 gazelle(
     name = "gazelle",

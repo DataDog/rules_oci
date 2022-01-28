@@ -60,20 +60,31 @@ def _oci_pull_impl(rctx):
 
 oci_pull = repository_rule(
     implementation = _oci_pull_impl,
+    doc = """
+    """,
     attrs = {
         "registry": attr.string(
             mandatory = True,
+        doc = """
+        """,
+
         ),
         "repository": attr.string(
             mandatory = True,
+            doc = """
+            """,
         ),
         # XXX We're specifically *NOT* supporting pulling by tags as it's
         # difficult for users to control when the tag resolution is done.
         "digest": attr.string(
             mandatory = True,
+            doc = """
+            """,
         ),
         "shallow": attr.bool(
             default = True,
+            doc = """
+            """,
         ),
     },
     environ = [

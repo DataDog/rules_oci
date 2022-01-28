@@ -46,10 +46,22 @@ def _oci_image_layer_impl(ctx):
 
 oci_image_layer = rule(
     implementation = _oci_image_layer_impl,
+    doc = """
+    """,
     attrs = {
-        "files": attr.label_list(),
-        "directory": attr.string(),
-        "symlinks": attr.string_dict(),
+        "files": attr.label_list(
+            doc = """
+
+            """,
+        ),
+        "directory": attr.string(
+            doc = """
+            """,
+        ),
+        "symlinks": attr.string_dict(
+            doc = """
+            """,
+        ),
         "_ocitool": OCITOOL_ATTR,
     },
     outputs = {
@@ -99,8 +111,13 @@ def _oci_image_index_impl(ctx):
 
 oci_image_index = rule(
     implementation = _oci_image_index_impl,
+    doc = """
+    """,
     attrs = {
-        "manifests": attr.label_list(),
+        "manifests": attr.label_list(
+            doc = """
+            """,
+        ),
         "_ocitool": OCITOOL_ATTR,
     },
 )
@@ -150,17 +167,30 @@ def _oci_image_impl(ctx):
 
 oci_image = rule(
     implementation = _oci_image_impl,
+    doc = """
+    """,
     attrs = {
         "base": attr.label(
+            doc = """
+            """,
             mandatory = True,
             providers = [
                 OCIDescriptor,
                 OCILayout,
             ],
         ),
-        "os": attr.string(),
-        "arch": attr.string(),
-        "layers": attr.label_list(),
+        "os": attr.string(
+            doc = """
+            """,
+        ),
+        "arch": attr.string(
+            doc = """
+            """,
+        ),
+        "layers": attr.label_list(
+            doc = """
+            """,
+        ),
         "_ocitool": OCITOOL_ATTR,
     },
 )
