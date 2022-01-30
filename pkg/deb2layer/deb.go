@@ -19,7 +19,7 @@ const (
 	// to recognize the package.
 	dpkgStatusDir = "/var/lib/dpkg/status.d"
 
-    // pkgMetadataFile is the name of the metadata file within the control
+	// pkgMetadataFile is the name of the metadata file within the control
 	// section
 	pkgMetadataFile = "control"
 

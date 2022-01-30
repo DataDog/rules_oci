@@ -16,7 +16,7 @@ import (
 )
 
 var (
-    ErrNotBlobIndex = fmt.Errorf("provider not a blob index")
+	ErrNotBlobIndex = fmt.Errorf("provider not a blob index")
 
 	_ content.Provider = &Index{}
 	_ content.ReaderAt = &fileWithSize{}

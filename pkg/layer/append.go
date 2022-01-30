@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-    "github.com/DataDog/rules_oci/pkg/ociutil"
+	"github.com/DataDog/rules_oci/pkg/ociutil"
 
 	"github.com/containerd/containerd/content"
 	dreference "github.com/containerd/containerd/reference/docker"
@@ -12,8 +12,6 @@ import (
 	"github.com/opencontainers/go-digest"
 	ocispec "github.com/opencontainers/image-spec/specs-go/v1"
 )
-
-
 
 func AppendLayers(ctx context.Context, store content.Store, desc ocispec.Descriptor, layers []ocispec.Descriptor) (ocispec.Descriptor, ocispec.Descriptor, error) {
 	manifest, err := ociutil.ImageManifestFromProvider(ctx, store, desc)

@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 	"os"
-    "sync"
+	"sync"
 
 	"github.com/containerd/containerd/content"
 	"github.com/containerd/containerd/errdefs"
@@ -13,7 +13,7 @@ import (
 )
 
 var (
-    ErrNotSupportedMediaType = fmt.Errorf("not supported media type for ingester")
+	ErrNotSupportedMediaType = fmt.Errorf("not supported media type for ingester")
 
 	_ content.Ingester = &appendIngester{}
 	_ content.Writer   = &fileWriter{}
@@ -36,7 +36,7 @@ type appendIngester struct {
 	manifestPath string
 	configPath   string
 
-    mx sync.Mutex
+	mx sync.Mutex
 }
 
 func (ing *appendIngester) Writer(ctx context.Context, opts ...content.WriterOpt) (content.Writer, error) {
@@ -48,26 +48,26 @@ func (ing *appendIngester) Writer(ctx context.Context, opts ...content.WriterOpt
 		}
 	}
 
-    ing.mx.Lock()
-    defer ing.mx.Unlock()
+	ing.mx.Lock()
+	defer ing.mx.Unlock()
 
 	path := ""
 	if images.IsManifestType(options.Desc.MediaType) {
 		if ing.manifestPath != "" {
-            // TODO check seen
-            //return nil, fmt.Errorf("%w: already seen manifest", ErrNotSupportedMediaType)
-        }
+			// TODO check seen
+			//return nil, fmt.Errorf("%w: already seen manifest", ErrNotSupportedMediaType)
+		}
 
-        path = ing.manifestPath
-    } else if images.IsConfigType(options.Desc.MediaType) {
+		path = ing.manifestPath
+	} else if images.IsConfigType(options.Desc.MediaType) {
 		if ing.configPath != "" {
-            // TODO check seen
-            //return nil, fmt.Errorf("%w: already seen config", ErrNotSupportedMediaType)
-        }
+			// TODO check seen
+			//return nil, fmt.Errorf("%w: already seen config", ErrNotSupportedMediaType)
+		}
 
-        path = ing.configPath
+		path = ing.configPath
 	} else {
-        return nil, fmt.Errorf("%w: %v", ErrNotSupportedMediaType, options.Desc.MediaType)
+		return nil, fmt.Errorf("%w: %v", ErrNotSupportedMediaType, options.Desc.MediaType)
 	}
 
 	f, err := os.Create(path)

@@ -3,6 +3,8 @@ package ociutil
 import (
 	"context"
 
+	"github.com/DataDog/rules_oci/internal/set"
+
 	"github.com/containerd/containerd/content"
 	"github.com/containerd/containerd/images"
 	ocispec "github.com/opencontainers/image-spec/specs-go/v1"
@@ -47,7 +49,7 @@ func CopyContentFromHandler(ctx context.Context, handler images.HandlerFunc, fro
 // ContentTypesFilterHandler filters the children of the handler to only include
 // the listed content types
 func ContentTypesFilterHandler(handler images.HandlerFunc, contentTypes ...string) images.HandlerFunc {
-	set := make(stringSet)
+	set := make(set.String)
 	set.Add(contentTypes...)
 	return func(ctx context.Context, desc ocispec.Descriptor) ([]ocispec.Descriptor, error) {
 		children, err := handler(ctx, desc)
@@ -64,22 +66,4 @@ func ContentTypesFilterHandler(handler images.HandlerFunc, contentTypes ...strin
 
 		return rtChildren, nil
 	}
-}
-
-// StringSet is a set of strings, used to check the existance of strings,
-// this can be replaced once generics are introduced in Go 1.18
-type stringSet map[string]bool
-
-// Add add a variable list of strings to the set
-func (ss stringSet) Add(strs ...string) {
-	for _, st := range strs {
-		ss[st] = true
-	}
-}
-
-// Contains checks if a string is in the set, if it is return true, false
-// otherwise.
-func (ss stringSet) Contains(str string) bool {
-	_, ok := ss[str]
-	return ok
 }

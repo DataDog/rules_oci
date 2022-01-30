@@ -39,3 +39,11 @@ func ResolvePlatformFromDescriptor(ctx context.Context, provider content.Provide
 
 	return platform, nil
 }
+
+func IsEmptyPlatform(plat *ocispec.Platform) bool {
+	if plat == nil || plat.Architecture == "" || plat.OS == "" {
+		return true
+	}
+
+	return false
+}
