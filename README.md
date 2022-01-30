@@ -45,6 +45,8 @@ base images.
 * [ ] Support for custom artifact crawlers to pull artifacts that have children
 not represented by the OCI Image Spec. Ex pulling a full CNAB bundle and all
 dependencies.
+* [ ] Probably should add a benchmark against `rules_docker`. They have different
+goals, but still needed to justify claims
 
 ### Current Limitations
 * [ ] Non-shallow pulls are sometimes broken
