@@ -5,6 +5,15 @@ load(":debug_flag.bzl", "debug_flag")
 
 exports_files(["defs.bzl"])
 
+filegroup(
+    name = "oci-files",
+    srcs = glob([
+        "*.bzl",
+        "*.bazel",
+    ]),
+    visibility = ["//visibility:public"],
+)
+
 debug_flag(
     name = "debug",
     build_setting_default = False,
@@ -55,8 +64,8 @@ bzl_library(
     srcs = ["push.bzl"],
     visibility = ["//visibility:public"],
     deps = [
-        "@com_github_datadog_rules_oci//oci:providers",
         "@com_github_datadog_rules_oci//oci:debug_flag",
+        "@com_github_datadog_rules_oci//oci:providers",
     ],
 )
 

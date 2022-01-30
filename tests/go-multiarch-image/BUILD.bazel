@@ -6,7 +6,7 @@ load("@com_github_datadog_rules_oci//oci:defs.bzl", "oci_push")
 go_library(
     name = "go_default_library",
     srcs = ["main.go"],
-    importpath = "github.com/DataDog/rules_oci/tests/multiarch",
+    importpath = "github.com/DataDog/rules_oci/tests/go-multiarch-image",
     visibility = ["//visibility:private"],
 )
 
