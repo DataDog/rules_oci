@@ -1,27 +1,27 @@
-load("@com_github_datadog_rules_oci//oci:providers.bzl", "OCILayout", "OCIDescriptor", "OCIImageIndexManifest", "OCIImageManifest")
+load("@com_github_datadog_rules_oci//oci:providers.bzl", "OCILayoutInfo", "OCIDescriptorInfo", "OCIImageIndexManifestInfo", "OCIImageManifestInfo")
 
 def _oci_image_manifest_impl(ctx):
-    return [OCIImageManifest(
-        config = ctx.attr.config[OCIDescriptor],
-        layers = [l[OCIDescriptor] for l in ctx.attr.layers],
+    return [OCIImageManifestInfo(
+        config = ctx.attr.config[OCIDescriptorInfo],
+        layers = [l[OCIDescriptorInfo] for l in ctx.attr.layers],
         annotations = ctx.attr.annotations,
-    ), ctx.attr.layout[OCILayout], ctx.attr.descriptor[OCIDescriptor]]
+    ), ctx.attr.layout[OCILayoutInfo], ctx.attr.descriptor[OCIDescriptorInfo]]
 
 oci_image_manifest = rule(
     implementation = _oci_image_manifest_impl,
-    provides = [OCIImageManifest],
+    provides = [OCIImageManifestInfo],
     attrs = {
         "descriptor": attr.label(
             mandatory = True,
-            providers = [OCIDescriptor],
+            providers = [OCIDescriptorInfo],
         ),
         "config": attr.label(
             mandatory = True,
-            providers = [OCIDescriptor],
+            providers = [OCIDescriptorInfo],
         ),
         "layers": attr.label_list(
             mandatory = False,
-            providers = [OCIDescriptor],
+            providers = [OCIDescriptorInfo],
         ),
         "annotations": attr.string_dict(),
         "layout": attr.label(),
@@ -29,23 +29,23 @@ oci_image_manifest = rule(
 )
 
 def _oci_image_index_manifest_impl(ctx):
-    return [OCIImageIndexManifest(
-        manifests = [m[OCIDescriptor] for m in ctx.attr.manifests],
-    ), ctx.attr.layout[OCILayout], ctx.attr.descriptor[OCIDescriptor]]
+    return [OCIImageIndexManifestInfo(
+        manifests = [m[OCIDescriptorInfo] for m in ctx.attr.manifests],
+    ), ctx.attr.layout[OCILayoutInfo], ctx.attr.descriptor[OCIDescriptorInfo]]
 
 oci_image_index_manifest = rule(
     implementation = _oci_image_index_manifest_impl,
     attrs = {
         "descriptor": attr.label(
             mandatory = True,
-            providers = [OCIDescriptor],
+            providers = [OCIDescriptorInfo],
         ),
         "manifests": attr.label_list(
             mandatory = False,
-            providers = [OCIDescriptor],
+            providers = [OCIDescriptorInfo],
         ),
         "annotations": attr.string_dict(),
         "layout": attr.label(),
     },
-    provides = [OCIImageIndexManifest],
+    provides = [OCIImageIndexManifestInfo],
 )

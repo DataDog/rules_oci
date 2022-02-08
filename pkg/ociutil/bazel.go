@@ -8,17 +8,29 @@ import (
 	"sync"
 
 	"github.com/bazelbuild/bazel-gazelle/rule"
-	"github.com/containerd/containerd/content"
 	"github.com/containerd/containerd/images"
 	"github.com/opencontainers/go-digest"
 	ocispec "github.com/opencontainers/image-spec/specs-go/v1"
+	orascontent "oras.land/oras-go/pkg/content"
 )
 
 // GenerateBuildFilesHandler generates build files while walking a tree.
 // TODO Ideally, this should actually be a content.WalkFunc, but ocilayout doesn't
 // implement this interface yet
-func GenerateBuildFilesHandler(handler images.HandlerFunc, layoutRoot string, provider content.Provider) images.HandlerFunc {
-	blobBuildFiles := make(map[digest.Algorithm]*rule.File)
+func GenerateBuildFilesHandler(ctx context.Context, handler images.HandlerFunc, layoutRoot string) error {
+	layout, err := orascontent.NewOCI(layoutRoot)
+	if err != nil {
+		return err
+	}
+
+	refs := layout.ListReferences()
+	refDescs := make([]ocispec.Descriptor, 0, len(refs))
+
+	for _, r := range refs {
+		refDescs = append(refDescs, r)
+	}
+
+    blobBuildFiles := make(map[digest.Algorithm]*rule.File)
 	var writemx sync.Mutex
 
 	// TODO Currently only supporting SHA256
@@ -51,7 +63,7 @@ func GenerateBuildFilesHandler(handler images.HandlerFunc, layoutRoot string, pr
 
 	layoutBuild.Save(filepath.Join(layoutRoot, "BUILD.bazel"))
 
-	return func(ctx context.Context, desc ocispec.Descriptor) ([]ocispec.Descriptor, error) {
+    genFunc := func(ctx context.Context, desc ocispec.Descriptor) ([]ocispec.Descriptor, error) {
 		writemx.Lock()
 		defer writemx.Unlock()
 
@@ -72,7 +84,7 @@ func GenerateBuildFilesHandler(handler images.HandlerFunc, layoutRoot string, pr
 		// complete graph
 		switch desc.MediaType {
 		case ocispec.MediaTypeImageManifest, images.MediaTypeDockerSchema2Manifest:
-			manifest, err := ImageManifestFromProvider(ctx, provider, desc)
+			manifest, err := ImageManifestFromProvider(ctx, layout, desc)
 			if err != nil {
 				return nil, err
 			}
@@ -80,7 +92,7 @@ func GenerateBuildFilesHandler(handler images.HandlerFunc, layoutRoot string, pr
 			imageManifestRule(desc, manifest).Insert(f)
 			break
 		case ocispec.MediaTypeImageIndex, images.MediaTypeDockerSchema2ManifestList:
-			index, err := ImageIndexFromProvider(ctx, provider, desc)
+			index, err := ImageIndexFromProvider(ctx, layout, desc)
 			if err != nil {
 				return nil, err
 			}
@@ -106,6 +118,15 @@ func GenerateBuildFilesHandler(handler images.HandlerFunc, layoutRoot string, pr
 
 		return handler(ctx, desc)
 	}
+
+	err = images.Walk(
+		context.Background(),
+	    images.HandlerFunc(genFunc),
+		refDescs...,
+	)
+
+
+    return nil
 }
 
 func blobExists(layoutRoot string, dgst digest.Digest) bool {

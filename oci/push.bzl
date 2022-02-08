@@ -1,8 +1,8 @@
-load("@com_github_datadog_rules_oci//oci:providers.bzl", "OCIDescriptor", "OCILayout", "OCIReferenceInfo", "OCITOOL_ATTR")
+load("@com_github_datadog_rules_oci//oci:providers.bzl", "OCIDescriptorInfo", "OCILayoutInfo", "OCIReferenceInfo", "OCITOOL_ATTR")
 load("@com_github_datadog_rules_oci//oci:debug_flag.bzl", "DebugInfo")
 
 def _oci_push_impl(ctx):
-    layout = ctx.attr.manifest[OCILayout]
+    layout = ctx.attr.manifest[OCILayoutInfo]
 
     ref = "{registry}/{repository}".format(
         registry = ctx.attr.registry,
@@ -14,11 +14,11 @@ def _oci_push_impl(ctx):
         executable = ctx.executable._ocitool,
         arguments = [
             "digest",
-            "--desc={desc}".format(desc = ctx.attr.manifest[OCIDescriptor].file.path),
+            "--desc={desc}".format(desc = ctx.attr.manifest[OCIDescriptorInfo].file.path),
             "--out={out}".format(out = digest_file.path),
         ],
         inputs = [
-            ctx.attr.manifest[OCIDescriptor].file,
+            ctx.attr.manifest[OCIDescriptorInfo].file,
         ],
         outputs = [
             digest_file,
@@ -38,7 +38,7 @@ def _oci_push_impl(ctx):
             root = ctx.bin_dir.path,
             tool = ctx.executable._ocitool.short_path,
             layout = layout.blob_index.short_path,
-            desc = ctx.attr.manifest[OCIDescriptor].file.short_path,
+            desc = ctx.attr.manifest[OCIDescriptorInfo].file.short_path,
             ref = ref,
             debug = str(ctx.attr._debug[DebugInfo].debug),
         ),
@@ -50,7 +50,7 @@ def _oci_push_impl(ctx):
         DefaultInfo(
             runfiles = ctx.runfiles(
                 files = layout.files.to_list() +
-                        [ctx.executable._ocitool, ctx.attr.manifest[OCIDescriptor].file, layout.blob_index],
+                        [ctx.executable._ocitool, ctx.attr.manifest[OCIDescriptorInfo].file, layout.blob_index],
             ),
         ),
         OCIReferenceInfo(
@@ -69,11 +69,11 @@ oci_push = rule(
     attrs = {
         "manifest": attr.label(
             doc = """
-                A manifest to push to a registry. If an OCILayout index, then
+                A manifest to push to a registry. If an OCILayoutInfo index, then
                 push all artifacts with a 'org.opencontainers.image.ref.name'
                 annotation.
             """,
-            providers = [OCILayout],
+            providers = [OCILayoutInfo],
         ),
         "registry": attr.string(
             doc = """

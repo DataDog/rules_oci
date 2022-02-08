@@ -14,14 +14,14 @@ OCIReferenceInfo = provider(
     },
 )
 
-OCILayout = provider(
+OCILayoutInfo = provider(
     fields = {
         "blob_index": "",
         "files": "",
     },
 )
 
-OCIDescriptor = provider(
+OCIDescriptorInfo = provider(
     doc = "",
     fields = {
         "file": "A file object of the content this descriptor describes",
@@ -34,7 +34,7 @@ OCIDescriptor = provider(
     },
 )
 
-OCIImageManifest = provider(
+OCIImageManifestInfo = provider(
     doc = "",
     fields = {
         "config": "Descriptor that points to a configuration object",
@@ -43,7 +43,7 @@ OCIImageManifest = provider(
     },
 )
 
-OCIImageIndexManifest = provider(
+OCIImageIndexManifestInfo = provider(
     doc = "",
     fields = {
         "manifests": "List of desciptors",
@@ -51,7 +51,7 @@ OCIImageIndexManifest = provider(
     },
 )
 
-OCIPlatform = provider(
+OCIPlatformInfo = provider(
     doc = "Platform describes the platform which the image in the manifest runs on",
     fields = {
         "architecture": "Architecture field specifies the CPU architecture, in the GOARCH format.",

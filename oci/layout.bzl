@@ -1,10 +1,10 @@
-load("@com_github_datadog_rules_oci//oci:providers.bzl", "OCIDescriptor", "OCIImageIndexManifest", "OCILayout")
+load("@com_github_datadog_rules_oci//oci:providers.bzl", "OCIDescriptorInfo", "OCIImageIndexManifestInfo", "OCILayoutInfo")
 
 def _oci_layout_index_impl(ctx):
     blobs_map = {}
     all_files = []
     for blob in ctx.attr.blobs:
-        desc = blob[OCIDescriptor]
+        desc = blob[OCIDescriptorInfo]
         blobs_map[desc.digest] = desc.file.path
         all_files.append(desc.file)
 
@@ -20,7 +20,7 @@ def _oci_layout_index_impl(ctx):
     )
 
     return [
-        OCILayout(
+        OCILayoutInfo(
             blob_index = ctx.outputs.json,
             files = depset(all_files),
         ),
@@ -30,14 +30,14 @@ oci_layout_index = rule(
     implementation = _oci_layout_index_impl,
     attrs = {
         "index": attr.label(
-            providers = [OCIDescriptor],
+            providers = [OCIDescriptorInfo],
         ),
         "blobs": attr.label_list(
-            providers = [OCIDescriptor],
+            providers = [OCIDescriptorInfo],
         ),
     },
     outputs = {
         "json": "%{name}.layout.json",
     },
-    provides = [OCILayout],
+    provides = [OCILayoutInfo],
 )

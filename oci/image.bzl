@@ -39,7 +39,7 @@ def _oci_image_layer_impl(ctx):
     )
 
     return [
-        OCIDescriptor(
+        OCIDescriptorInfo(
             descriptor_file = descriptor_file,
         ),
     ]
@@ -47,19 +47,25 @@ def _oci_image_layer_impl(ctx):
 oci_image_layer = rule(
     implementation = _oci_image_layer_impl,
     doc = """
+Creates a new layer (in the tar format) that can be included in a `oci_image`.
     """,
     attrs = {
         "files": attr.label_list(
             doc = """
-
+List of files to include in the image, inserted at directory.
             """,
         ),
         "directory": attr.string(
             doc = """
+A folder to store the list of files. By default this stores in the root of the
+image.
             """,
+            default = "/",
         ),
+        # TODO map of string to file so we don't need to worry about file names
         "symlinks": attr.string_dict(
             doc = """
+Symlinks to create within the file, with the key representing to and value from.
             """,
         ),
         "_ocitool": OCITOOL_ATTR,
@@ -84,7 +90,6 @@ def _oci_image_index_impl(ctx):
         executable = ctx.executable._ocitool,
         arguments = ["--layout={}".format(m[OCILayout].blob_index.path) for m in ctx.attr.manifests] +
         [
-            "--debug",
                         "create-index",
                         "--out-index={}".format(index_file.path),
                         "--out-layout={}".format(layout_file.path),
@@ -100,10 +105,10 @@ def _oci_image_index_impl(ctx):
     )
 
     return [
-        OCIDescriptor(
+        OCIDescriptorInfo(
             file = index_desc_file,
         ),
-        OCILayout(
+        OCILayoutInfo(
             blob_index = layout_file,
             files = depset(direct = [index_file, layout_file], transitive = [layout_files]),
         ),
@@ -112,10 +117,12 @@ def _oci_image_index_impl(ctx):
 oci_image_index = rule(
     implementation = _oci_image_index_impl,
     doc = """
+Combine multiple manifests into an index.
     """,
     attrs = {
         "manifests": attr.label_list(
             doc = """
+List of manifests to add to an index.
             """,
         ),
         "_ocitool": OCITOOL_ATTR,
@@ -123,9 +130,9 @@ oci_image_index = rule(
 )
 
 def _oci_image_impl(ctx):
-    layout = ctx.attr.base[OCILayout]
+    layout = ctx.attr.base[OCILayoutInfo]
 
-    base_desc = get_descriptor_file(ctx, ctx.attr.base[OCIDescriptor])
+    base_desc = get_descriptor_file(ctx, ctx.attr.base[OCIDescriptorInfo])
 
     manifest_desc_file = ctx.actions.declare_file("{}.manifest.descriptor.json".format(ctx.label.name))
     manifest_file = ctx.actions.declare_file("{}.manifest.json".format(ctx.label.name))
@@ -156,10 +163,10 @@ def _oci_image_impl(ctx):
     )
 
     return [
-        OCIDescriptor(
+        OCIDescriptorInfo(
             descriptor_file = manifest_desc_file,
         ),
-        OCILayout(
+        OCILayoutInfo(
             blob_index = layout_file,
             files = depset(ctx.files.layers + [manifest_file, config_file, layout_file]),
         ),
@@ -175,8 +182,8 @@ oci_image = rule(
             """,
             mandatory = True,
             providers = [
-                OCIDescriptor,
-                OCILayout,
+                OCIDescriptorInfo,
+                OCILayoutInfo,
             ],
         ),
         "os": attr.string(

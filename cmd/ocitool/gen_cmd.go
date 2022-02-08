@@ -27,19 +27,6 @@ func GenerateBuildFilesCmd(c *cli.Context) error {
 
 	layoutRootPath := allLocalLayoutsPaths[0]
 
-	layout, err := orascontent.NewOCI(layoutRootPath)
-	if err != nil {
-		return err
-	}
-
-	refs := layout.ListReferences()
-	refDescs := make([]ocispec.Descriptor, 0, len(refs))
-
-	for _, r := range refs {
-		refDescs = append(refDescs, r)
-	}
-
-	log.Debugf("layout root: %#v", refs)
 
 	err = images.Walk(
 		context.Background(),
