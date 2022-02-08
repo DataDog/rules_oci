@@ -12,6 +12,7 @@ release_rules_oci(
     name = "release",
     binaries = [
         ":ocitool.all",
+        "//bin:bin-files",
     ],
     rules = ["//oci:oci-files"],
 )

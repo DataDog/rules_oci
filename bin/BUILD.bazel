@@ -1,0 +1,12 @@
+load("//oci:toolchain.bzl", "create_compiled_oci_toolchains")
+
+filegroup(
+    name = "bin-files",
+    srcs = glob([
+        "*.bzl",
+        "*.bazel",
+    ]),
+    visibility = ["//visibility:public"],
+)
+
+create_compiled_oci_toolchains(name = "oci_toolchain")

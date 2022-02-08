@@ -1,4 +1,4 @@
-load("@com_github_datadog_rules_oci//oci:providers.bzl", "OCIDescriptor", "OCILayout", "OCITOOL_ATTR")
+load("@com_github_datadog_rules_oci//oci:providers.bzl", "OCIDescriptor", "OCILayout")
 
 def get_descriptor_file(ctx, desc):
     if hasattr(desc, "descriptor_file"):
@@ -19,10 +19,12 @@ def get_descriptor_file(ctx, desc):
     return out
 
 def _oci_image_layer_impl(ctx):
+    toolchain = ctx.toolchains["@com_github_datadog_rules_oci//oci:toolchain"]
+
     descriptor_file = ctx.actions.declare_file("{}.descriptor.json".format(ctx.label.name))
 
     ctx.actions.run(
-        executable = ctx.executable._ocitool,
+        executable = toolchain.sdk.ocitool,
         arguments = [
                         "create-layer",
                         "--out={}".format(ctx.outputs.layer.path),
@@ -62,14 +64,16 @@ oci_image_layer = rule(
             doc = """
             """,
         ),
-        "_ocitool": OCITOOL_ATTR,
     },
+    toolchains = ["@com_github_datadog_rules_oci//oci:toolchain"],
     outputs = {
         "layer": "%{name}-layer.tar",
     },
 )
 
 def _oci_image_index_impl(ctx):
+    toolchain = ctx.toolchains["@com_github_datadog_rules_oci//oci:toolchain"]
+
     layout_files = depset(None, transitive = [m[OCILayout].files for m in ctx.attr.manifests])
 
     index_desc_file = ctx.actions.declare_file("{}.index.descriptor.json".format(ctx.label.name))
@@ -81,7 +85,7 @@ def _oci_image_index_impl(ctx):
         desc_files.append(get_descriptor_file(ctx, manifest[OCIDescriptor]))
 
     ctx.actions.run(
-        executable = ctx.executable._ocitool,
+        executable = toolchain.sdk.ocitool,
         arguments = ["--layout={}".format(m[OCILayout].blob_index.path) for m in ctx.attr.manifests] +
         [
             "--debug",
@@ -118,11 +122,13 @@ oci_image_index = rule(
             doc = """
             """,
         ),
-        "_ocitool": OCITOOL_ATTR,
     },
+    toolchains = ["@com_github_datadog_rules_oci//oci:toolchain"],
 )
 
 def _oci_image_impl(ctx):
+    toolchain = ctx.toolchains["@com_github_datadog_rules_oci//oci:toolchain"]
+
     layout = ctx.attr.base[OCILayout]
 
     base_desc = get_descriptor_file(ctx, ctx.attr.base[OCIDescriptor])
@@ -133,7 +139,7 @@ def _oci_image_impl(ctx):
     layout_file = ctx.actions.declare_file("{}.layout.json".format(ctx.label.name))
 
     ctx.actions.run(
-        executable = ctx.executable._ocitool,
+        executable = toolchain.sdk.ocitool,
         arguments = [
                         "--layout={}".format(layout.blob_index.path),
                         "append-layers",
@@ -191,6 +197,6 @@ oci_image = rule(
             doc = """
             """,
         ),
-        "_ocitool": OCITOOL_ATTR,
     },
+    toolchains = ["@com_github_datadog_rules_oci//oci:toolchain"],
 )

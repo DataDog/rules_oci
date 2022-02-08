@@ -14,7 +14,7 @@ def failout(msg, cmd_result):
 
 def pull(rctx, layout_root, repository, digest, registry = "", shallow = False):
     cmd = [
-        "ocitool",
+        rctx.path(_repo_toolchain(rctx, "ocitool")),
         "--layout={layout_root}".format(layout_root = layout_root),
         "pull",
         "--shallow={shallow}".format(shallow = shallow),
@@ -31,7 +31,7 @@ def pull(rctx, layout_root, repository, digest, registry = "", shallow = False):
 
 def generate_build_files(rctx, layout_root, digest=""):
     cmd = [
-        "ocitool",
+        rctx.path(_repo_toolchain(rctx, "ocitool")),
         "--debug",
         "--layout={layout_root}".format(layout_root = layout_root),
         "generate-build-files",
@@ -86,8 +86,42 @@ oci_pull = repository_rule(
             doc = """
             """,
         ),
+        "_ocitool_darwin_amd64": attr.label(
+            default = "@com_github_datadog_rules_oci//bin:ocitool-darwin-amd64",
+        ),
+        "_ocitool_darwin_arm64": attr.label(
+            default = "@com_github_datadog_rules_oci//bin:ocitool-darwin-arm64",
+        ),
+        "_ocitool_linux_amd64": attr.label(
+            default = "@com_github_datadog_rules_oci//bin:ocitool-linux-amd64",
+        ),
+        "_ocitool_linux_arm64": attr.label(
+            default = "@com_github_datadog_rules_oci//bin:ocitool-linux-arm64",
+        ),
     },
     environ = [
         OCI_CACHE_DIR_ENV,
     ],
 )
+
+def _repo_toolchain(rctx, tool_name):
+    goos = ""
+    goarch = ""
+
+    if rctx.os.name.lower().startswith("mac os"):
+        goos = "darwin"
+    elif rctx.os.name.lower().startswith("linux"):
+        goos = "linux"
+    else:
+        fail("unknown os: {}".format(rctx.os.name))
+
+    # TODO update to use rctx.os.arch when released
+    arch = rctx.execute(["uname", "-m"]).stdout.strip()
+    if arch.lower().find("x86") != -1:
+        goarch = "amd64"
+    elif arch.lower().find("arm64") != -1 or arch.lower().find("aarch64") != -1:
+        goarch = "arm64"
+    else:
+        fail("unknown arch: {}".format(rctx.os.arch))
+
+    return getattr(rctx.attr, "_{tool}_{os}_{arch}".format(tool=tool_name, os=goos, arch=goarch))

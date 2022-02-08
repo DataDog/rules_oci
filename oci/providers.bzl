@@ -1,9 +1,3 @@
-OCITOOL_ATTR = attr.label(
-    executable = True,
-    default = "@com_github_datadog_rules_oci//cmd/ocitool:ocitool",
-    cfg = "host",
-)
-
 OCIReferenceInfo = provider(
     doc = "Refers to any artifact represented by an OCI-like reference URI",
     fields = {

@@ -5,6 +5,11 @@ load(":debug_flag.bzl", "debug_flag")
 
 exports_files(["defs.bzl"])
 
+toolchain_type(
+    name = "toolchain",
+    visibility = ["//visibility:public"],
+)
+
 filegroup(
     name = "oci-files",
     srcs = glob([

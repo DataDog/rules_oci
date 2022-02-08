@@ -146,7 +146,7 @@ var app = &cli.App{
 					Name: "config-desc",
 				},
 				&cli.StringSliceFlag{
-					Name: "layer",
+					Name: "layer-desc",
 				},
 				&cli.StringFlag{
 					Name: "out-manifest",
@@ -159,7 +159,20 @@ var app = &cli.App{
 				},
 			},
 		},
-	},
+        {
+            Name: "push-blob",
+            Hidden: true,
+            Action: PushBlobCmd,
+			Flags: []cli.Flag{
+				&cli.StringFlag{
+					Name: "ref",
+				},
+				&cli.StringFlag{
+					Name: "file",
+				},
+			},
+        },
+    },
 	Flags: []cli.Flag{
 		&cli.BoolFlag{
 			Name:  "debug",

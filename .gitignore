@@ -2,3 +2,5 @@ bazel-bin
 bazel-out
 bazel-rules_oci
 bazel-testlogs
+
+bin/ocitool-

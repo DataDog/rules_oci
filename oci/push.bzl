@@ -1,7 +1,9 @@
-load("@com_github_datadog_rules_oci//oci:providers.bzl", "OCIDescriptor", "OCILayout", "OCIReferenceInfo", "OCITOOL_ATTR")
+load("@com_github_datadog_rules_oci//oci:providers.bzl", "OCIDescriptor", "OCILayout", "OCIReferenceInfo")
 load("@com_github_datadog_rules_oci//oci:debug_flag.bzl", "DebugInfo")
 
 def _oci_push_impl(ctx):
+    toolchain = ctx.toolchains["@com_github_datadog_rules_oci//oci:toolchain"]
+
     layout = ctx.attr.manifest[OCILayout]
 
     ref = "{registry}/{repository}".format(
@@ -11,7 +13,7 @@ def _oci_push_impl(ctx):
 
     digest_file = ctx.actions.declare_file("{name}.digest".format(name = ctx.label.name))
     ctx.actions.run(
-        executable = ctx.executable._ocitool,
+        executable = toolchain.sdk.ocitool,
         arguments = [
             "digest",
             "--desc={desc}".format(desc = ctx.attr.manifest[OCIDescriptor].file.path),
@@ -36,7 +38,7 @@ def _oci_push_impl(ctx):
         --target-ref {ref} \\
         """.format(
             root = ctx.bin_dir.path,
-            tool = ctx.executable._ocitool.short_path,
+            tool = toolchain.sdk.ocitool.short_path,
             layout = layout.blob_index.short_path,
             desc = ctx.attr.manifest[OCIDescriptor].file.short_path,
             ref = ref,
@@ -50,7 +52,7 @@ def _oci_push_impl(ctx):
         DefaultInfo(
             runfiles = ctx.runfiles(
                 files = layout.files.to_list() +
-                        [ctx.executable._ocitool, ctx.attr.manifest[OCIDescriptor].file, layout.blob_index],
+                        [toolchain.sdk.ocitool, ctx.attr.manifest[OCIDescriptor].file, layout.blob_index],
             ),
         ),
         OCIReferenceInfo(
@@ -89,9 +91,9 @@ oci_push = rule(
             default = "//oci:debug",
             providers = [DebugInfo],
         ),
-        "_ocitool": OCITOOL_ATTR,
     },
     provides = [
         OCIReferenceInfo,
     ],
+    toolchains = ["@com_github_datadog_rules_oci//oci:toolchain"],
 )

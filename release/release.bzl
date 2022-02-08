@@ -35,10 +35,19 @@ def go_binary_multi(name, embed, gooss = DEFAULT_GOOSS, goarchs = DEFAULT_GOARCH
     )
 
 def release_rules_oci(name, rules, binaries, **kwargs):
+
+    top_name = "{}.top".format(name)
+    pkg_tar(
+        name = top_name,
+        empty_files = ["BUILD.bazel"],
+        package_dir = "",
+    )
+
     rules_name = "{}.rules".format(name)
     pkg_tar(
         name = rules_name,
         srcs = rules,
+        package_dir = "/oci"
     )
 
     binaries_name = "{}.bin".format(name)
@@ -46,6 +55,7 @@ def release_rules_oci(name, rules, binaries, **kwargs):
         name = binaries_name,
         srcs = binaries,
         mode = "0755",
+        package_dir = "/bin",
     )
 
     pkg_tar(
@@ -54,6 +64,7 @@ def release_rules_oci(name, rules, binaries, **kwargs):
         deps = [
             rules_name,
             binaries_name,
+            top_name,
         ],
         **kwargs,
     )
