@@ -85,8 +85,9 @@ var app = &cli.App{
 				&cli.StringFlag{
 					Name: "arch",
 				},
-				&cli.StringFlag{
-					Name: "annotations",
+				&cli.GenericFlag{
+					Name:  "annotations",
+					Value: &flagutil.KeyValueFlag{},
 				},
 				&cli.StringFlag{
 					Name: "out-manifest",
@@ -133,8 +134,9 @@ var app = &cli.App{
 				&cli.StringSliceFlag{
 					Name: "desc",
 				},
-				&cli.StringFlag{
-					Name: "annotations",
+				&cli.GenericFlag{
+					Name:  "annotations",
+					Value: &flagutil.KeyValueFlag{},
 				},
 				&cli.StringFlag{
 					Name: "out-index",

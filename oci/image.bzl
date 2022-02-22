@@ -80,8 +80,6 @@ def _oci_image_index_impl(ctx):
     index_file = ctx.actions.declare_file("{}.index.json".format(ctx.label.name))
     layout_file = ctx.actions.declare_file("{}.index.layout.json".format(ctx.label.name))
 
-    annotation_strs = ["{}={}".format(key, value) for key, value in ctx.attr.annoations]
-
     desc_files = []
     for manifest in ctx.attr.manifests:
         desc_files.append(get_descriptor_file(ctx, manifest[OCIDescriptor]))
@@ -92,12 +90,12 @@ def _oci_image_index_impl(ctx):
         [
             "--debug",
                         "create-index",
-                        "--annotations={}".format(",".join(annotation_strs)),
                         "--out-index={}".format(index_file.path),
                         "--out-layout={}".format(layout_file.path),
                         "--outd={}".format(index_desc_file.path),
                     ] +
-                    ["--desc={}".format(d.path) for d in desc_files],
+                    ["--desc={}".format(d.path) for d in desc_files] +
+                    ["--annotations={}={}".format(k, v) for k, v in ctx.attr.annotations.items()],
         inputs = desc_files + layout_files.to_list(),
         outputs = [
             index_file,
@@ -155,13 +153,13 @@ def _oci_image_impl(ctx):
                         "--base={}".format(base_desc.path),
                         "--os={}".format(ctx.attr.os),
                         "--arch={}".format(ctx.attr.arch),
-                        "--annoations={}".format(",".join(annotation_strs)),
                         "--out-manifest={}".format(manifest_file.path),
                         "--out-config={}".format(config_file.path),
                         "--out-layout={}".format(layout_file.path),
                         "--outd={}".format(manifest_desc_file.path),
                     ] +
-                    ["--layer={}".format(f.path) for f in ctx.files.layers],
+                    ["--layer={}".format(f.path) for f in ctx.files.layers] +
+                    ["--annotations={}={}".format(k, v) for k, v in ctx.attr.annotations.items()],
         inputs = [base_desc, layout.blob_index] + ctx.files.layers + layout.files.to_list(),
         outputs = [
             manifest_file,

@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 
+	"github.com/DataDog/rules_oci/internal/flagutil"
 	"github.com/DataDog/rules_oci/pkg/blob"
 	"github.com/DataDog/rules_oci/pkg/layer"
 	"github.com/DataDog/rules_oci/pkg/ociutil"
@@ -68,11 +69,7 @@ func AppendLayersCmd(c *cli.Context) error {
 	if manifestDesc.Annotations == nil {
 		manifestDesc.Annotations = make(map[string]string)
 	}
-	annotations, err := parseAnnotationsFlag(c.String("annotations"))
-	if err != nil {
-		return err
-	}
-	for k, v := range annotations {
+	for k, v := range c.Generic("annotations").(*flagutil.KeyValueFlag).Map {
 		manifestDesc.Annotations[k] = v
 	}
 	baseRef, ok := baseDesc.Annotations[ocispec.AnnotationRefName]
