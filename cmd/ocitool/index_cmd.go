@@ -31,12 +31,18 @@ func CreateIndexCmd(c *cli.Context) error {
 	}
 	log.WithField("manifests", descriptors).Debug("creating image index")
 
+	annotations, err := parseAnnotationsFlag(c.String("annotations"))
+	if err != nil {
+		return err
+	}
+
 	idx := ocispec.Index{
 		Versioned: ocispecv.Versioned{
 			SchemaVersion: 2,
 		},
-		MediaType: ocispec.MediaTypeImageIndex,
-		Manifests: descriptors,
+		MediaType:   ocispec.MediaTypeImageIndex,
+		Manifests:   descriptors,
+		Annotations: annotations,
 	}
 
 	// Save index to file and update descriptor

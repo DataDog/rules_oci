@@ -80,6 +80,8 @@ def _oci_image_index_impl(ctx):
     index_file = ctx.actions.declare_file("{}.index.json".format(ctx.label.name))
     layout_file = ctx.actions.declare_file("{}.index.layout.json".format(ctx.label.name))
 
+    annotation_strs = ["{}={}".format(key, value) for key, value in ctx.attr.annoations]
+
     desc_files = []
     for manifest in ctx.attr.manifests:
         desc_files.append(get_descriptor_file(ctx, manifest[OCIDescriptor]))
@@ -90,6 +92,7 @@ def _oci_image_index_impl(ctx):
         [
             "--debug",
                         "create-index",
+                        "--annotations={}".format(",".join(annotation_strs)),
                         "--out-index={}".format(index_file.path),
                         "--out-layout={}".format(layout_file.path),
                         "--outd={}".format(index_desc_file.path),
@@ -122,6 +125,10 @@ oci_image_index = rule(
             doc = """
             """,
         ),
+        "annotations": attr.string_dict(
+            doc = """
+            """,
+        ),
     },
     toolchains = ["@com_github_datadog_rules_oci//oci:toolchain"],
 )
@@ -138,6 +145,8 @@ def _oci_image_impl(ctx):
     config_file = ctx.actions.declare_file("{}.config.json".format(ctx.label.name))
     layout_file = ctx.actions.declare_file("{}.layout.json".format(ctx.label.name))
 
+    annotation_strs = ["{}={}".format(key, value) for key, value in ctx.attr.annoations]
+
     ctx.actions.run(
         executable = toolchain.sdk.ocitool,
         arguments = [
@@ -146,6 +155,7 @@ def _oci_image_impl(ctx):
                         "--base={}".format(base_desc.path),
                         "--os={}".format(ctx.attr.os),
                         "--arch={}".format(ctx.attr.arch),
+                        "--annoations={}".format(",".join(annotation_strs)),
                         "--out-manifest={}".format(manifest_file.path),
                         "--out-config={}".format(config_file.path),
                         "--out-layout={}".format(layout_file.path),
@@ -194,6 +204,10 @@ oci_image = rule(
             """,
         ),
         "layers": attr.label_list(
+            doc = """
+            """,
+        ),
+        "annotations": attr.string_dict(
             doc = """
             """,
         ),

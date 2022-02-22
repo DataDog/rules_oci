@@ -65,12 +65,18 @@ func AppendLayersCmd(c *cli.Context) error {
 		return fmt.Errorf("invalid platform, expected %v, recieved %v", targetPlatform, *manifestDesc.Platform)
 	}
 
+	if manifestDesc.Annotations == nil {
+		manifestDesc.Annotations = make(map[string]string)
+	}
+	annotations, err := parseAnnotationsFlag(c.String("annotations"))
+	if err != nil {
+		return err
+	}
+	for k, v := range annotations {
+		manifestDesc.Annotations[k] = v
+	}
 	baseRef, ok := baseDesc.Annotations[ocispec.AnnotationRefName]
 	if ok {
-		if manifestDesc.Annotations == nil {
-			manifestDesc.Annotations = make(map[string]string)
-		}
-
 		manifestDesc.Annotations[ocispec.AnnotationRefName] = baseRef
 	}
 

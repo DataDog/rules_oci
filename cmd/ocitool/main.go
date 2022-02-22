@@ -1,6 +1,9 @@
 package main
 
 import (
+	"fmt"
+	"strings"
+
 	"github.com/DataDog/rules_oci/internal/flagutil"
 	log "github.com/sirupsen/logrus"
 	"github.com/urfave/cli/v2"
@@ -83,6 +86,9 @@ var app = &cli.App{
 					Name: "arch",
 				},
 				&cli.StringFlag{
+					Name: "annotations",
+				},
+				&cli.StringFlag{
 					Name: "out-manifest",
 				},
 				&cli.StringFlag{
@@ -128,6 +134,9 @@ var app = &cli.App{
 					Name: "desc",
 				},
 				&cli.StringFlag{
+					Name: "annotations",
+				},
+				&cli.StringFlag{
 					Name: "out-index",
 				},
 				&cli.StringFlag{
@@ -159,10 +168,10 @@ var app = &cli.App{
 				},
 			},
 		},
-        {
-            Name: "push-blob",
-            Hidden: true,
-            Action: PushBlobCmd,
+		{
+			Name:   "push-blob",
+			Hidden: true,
+			Action: PushBlobCmd,
 			Flags: []cli.Flag{
 				&cli.StringFlag{
 					Name: "ref",
@@ -171,8 +180,8 @@ var app = &cli.App{
 					Name: "file",
 				},
 			},
-        },
-    },
+		},
+	},
 	Flags: []cli.Flag{
 		&cli.BoolFlag{
 			Name:  "debug",
@@ -189,6 +198,18 @@ var app = &cli.App{
 			Value: 1, // TODO raise, used by pull impl
 		},
 	},
+}
+
+func parseAnnotationsFlag(raw string) (map[string]string, error) {
+	annotations := map[string]string{}
+	for _, annotation := range strings.Split(raw, ",") {
+		keyVal := strings.Split(annotation, "=")
+		if len(keyVal) != 2 {
+			return nil, fmt.Errorf("expected format KEY=VALUE, got %q", annotation)
+		}
+		annotations[keyVal[0]] = keyVal[1]
+	}
+	return annotations, nil
 }
 
 func main() {
