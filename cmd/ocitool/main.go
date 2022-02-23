@@ -1,9 +1,6 @@
 package main
 
 import (
-	"fmt"
-	"strings"
-
 	"github.com/DataDog/rules_oci/internal/flagutil"
 	log "github.com/sirupsen/logrus"
 	"github.com/urfave/cli/v2"
@@ -200,18 +197,6 @@ var app = &cli.App{
 			Value: 1, // TODO raise, used by pull impl
 		},
 	},
-}
-
-func parseAnnotationsFlag(raw string) (map[string]string, error) {
-	annotations := map[string]string{}
-	for _, annotation := range strings.Split(raw, ",") {
-		keyVal := strings.Split(annotation, "=")
-		if len(keyVal) != 2 {
-			return nil, fmt.Errorf("expected format KEY=VALUE, got %q", annotation)
-		}
-		annotations[keyVal[0]] = keyVal[1]
-	}
-	return annotations, nil
 }
 
 func main() {
