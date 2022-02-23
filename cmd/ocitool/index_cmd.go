@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 
+	"github.com/DataDog/rules_oci/internal/flagutil"
 	"github.com/DataDog/rules_oci/pkg/blob"
 	"github.com/DataDog/rules_oci/pkg/ociutil"
 
@@ -35,8 +36,9 @@ func CreateIndexCmd(c *cli.Context) error {
 		Versioned: ocispecv.Versioned{
 			SchemaVersion: 2,
 		},
-		MediaType: ocispec.MediaTypeImageIndex,
-		Manifests: descriptors,
+		MediaType:   ocispec.MediaTypeImageIndex,
+		Manifests:   descriptors,
+		Annotations: c.Generic("annotations").(*flagutil.KeyValueFlag).Map,
 	}
 
 	// Save index to file and update descriptor

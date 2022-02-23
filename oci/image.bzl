@@ -94,7 +94,8 @@ def _oci_image_index_impl(ctx):
                         "--out-layout={}".format(layout_file.path),
                         "--outd={}".format(index_desc_file.path),
                     ] +
-                    ["--desc={}".format(d.path) for d in desc_files],
+                    ["--desc={}".format(d.path) for d in desc_files] +
+                    ["--annotations={}={}".format(k, v) for k, v in ctx.attr.annotations.items()],
         inputs = desc_files + layout_files.to_list(),
         outputs = [
             index_file,
@@ -122,6 +123,10 @@ oci_image_index = rule(
             doc = """
             """,
         ),
+        "annotations": attr.string_dict(
+            doc = """
+            """,
+        ),
     },
     toolchains = ["@com_github_datadog_rules_oci//oci:toolchain"],
 )
@@ -138,6 +143,8 @@ def _oci_image_impl(ctx):
     config_file = ctx.actions.declare_file("{}.config.json".format(ctx.label.name))
     layout_file = ctx.actions.declare_file("{}.layout.json".format(ctx.label.name))
 
+    annotation_strs = ["{}={}".format(key, value) for key, value in ctx.attr.annoations]
+
     ctx.actions.run(
         executable = toolchain.sdk.ocitool,
         arguments = [
@@ -151,7 +158,8 @@ def _oci_image_impl(ctx):
                         "--out-layout={}".format(layout_file.path),
                         "--outd={}".format(manifest_desc_file.path),
                     ] +
-                    ["--layer={}".format(f.path) for f in ctx.files.layers],
+                    ["--layer={}".format(f.path) for f in ctx.files.layers] +
+                    ["--annotations={}={}".format(k, v) for k, v in ctx.attr.annotations.items()],
         inputs = [base_desc, layout.blob_index] + ctx.files.layers + layout.files.to_list(),
         outputs = [
             manifest_file,
@@ -194,6 +202,10 @@ oci_image = rule(
             """,
         ),
         "layers": attr.label_list(
+            doc = """
+            """,
+        ),
+        "annotations": attr.string_dict(
             doc = """
             """,
         ),

@@ -82,6 +82,10 @@ var app = &cli.App{
 				&cli.StringFlag{
 					Name: "arch",
 				},
+				&cli.GenericFlag{
+					Name:  "annotations",
+					Value: &flagutil.KeyValueFlag{},
+				},
 				&cli.StringFlag{
 					Name: "out-manifest",
 				},
@@ -127,6 +131,10 @@ var app = &cli.App{
 				&cli.StringSliceFlag{
 					Name: "desc",
 				},
+				&cli.GenericFlag{
+					Name:  "annotations",
+					Value: &flagutil.KeyValueFlag{},
+				},
 				&cli.StringFlag{
 					Name: "out-index",
 				},
@@ -159,10 +167,10 @@ var app = &cli.App{
 				},
 			},
 		},
-        {
-            Name: "push-blob",
-            Hidden: true,
-            Action: PushBlobCmd,
+		{
+			Name:   "push-blob",
+			Hidden: true,
+			Action: PushBlobCmd,
 			Flags: []cli.Flag{
 				&cli.StringFlag{
 					Name: "ref",
@@ -171,8 +179,8 @@ var app = &cli.App{
 					Name: "file",
 				},
 			},
-        },
-    },
+		},
+	},
 	Flags: []cli.Flag{
 		&cli.BoolFlag{
 			Name:  "debug",
