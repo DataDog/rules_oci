@@ -11,6 +11,12 @@ def _oci_push_impl(ctx):
         repository = ctx.attr.repository,
     )
 
+    if ctx.attr.tag:
+        ref = "{ref}:{tag}".format(
+            ref = ref,
+            tag = ctx.attr.tag,
+        )
+
     digest_file = ctx.actions.declare_file("{name}.digest".format(name = ctx.label.name))
     ctx.actions.run(
         executable = toolchain.sdk.ocitool,
@@ -85,6 +91,11 @@ oci_push = rule(
         "repository": attr.string(
             doc = """
                 A repository to push to, if not present consult the toolchain.
+            """,
+        ),
+        "tag": attr.string(
+            doc = """
+                (optional) A tag to include in the target reference."
             """,
         ),
         "_debug": attr.label(
