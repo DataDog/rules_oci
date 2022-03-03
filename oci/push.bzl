@@ -12,10 +12,10 @@ def _oci_push_impl(ctx):
     )
 
     tag = ctx.expand_make_variables("tag", ctx.attr.tag, {})
-    if ctx.attr.tag:
+    if tag:
         ref = "{ref}:{tag}".format(
             ref = ref,
-            tag = ctx.attr.tag,
+            tag = tag,
         )
 
     digest_file = ctx.actions.declare_file("{name}.digest".format(name = ctx.label.name))
