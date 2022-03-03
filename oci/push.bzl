@@ -11,6 +11,7 @@ def _oci_push_impl(ctx):
         repository = ctx.attr.repository,
     )
 
+    tag = ctx.expand_make_variables("tag", ctx.attr.tag, {})
     if ctx.attr.tag:
         ref = "{ref}:{tag}".format(
             ref = ref,
