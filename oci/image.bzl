@@ -55,6 +55,7 @@ oci_image_layer = rule(
             doc = """
 
             """,
+            allow_files = True,
         ),
         "directory": attr.string(
             doc = """

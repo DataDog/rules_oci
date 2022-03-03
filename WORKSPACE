@@ -84,3 +84,7 @@ http_archive(
 )
 load("@rules_pkg//:deps.bzl", "rules_pkg_dependencies")
 rules_pkg_dependencies()
+
+register_toolchains(
+    "@com_github_datadog_rules_oci//:oci_local_toolchain",
+)
