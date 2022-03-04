@@ -70,6 +70,10 @@ func AppendLayersCmd(c *cli.Context) error {
 	if manifestDesc.Annotations == nil {
 		manifestDesc.Annotations = make(map[string]string)
 	}
+	baseRef, ok := baseDesc.Annotations[ocispec.AnnotationRefName]
+	if ok {
+		manifestDesc.Annotations[ocispec.AnnotationRefName] = baseRef
+	}
 	// let us override annotations off the base
 	for k, v := range c.Generic("annotations").(*flagutil.KeyValueFlag).Map {
 		manifestDesc.Annotations[k] = v
