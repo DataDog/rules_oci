@@ -3,7 +3,7 @@ package layer
 import (
 	"context"
 	"fmt"
-    "time"
+	"time"
 
 	"github.com/DataDog/rules_oci/pkg/ociutil"
 
@@ -32,15 +32,15 @@ func AppendLayers(ctx context.Context, store content.Store, desc ocispec.Descrip
 		digests = append(digests, layer.Digest)
 	}
 
-    if imageConfig.Config.Labels == nil {
- 		imageConfig.Config.Labels = map[string]string{}
- 	}
- 	// ensure the config has all the labels on the descriptor
- 	for k, v := range labels {
- 		imageConfig.Config.Labels[k] = v
- 	}
+	if imageConfig.Config.Labels == nil {
+		imageConfig.Config.Labels = map[string]string{}
+	}
+	// ensure the config has all the labels on the descriptor
+	for k, v := range labels {
+		imageConfig.Config.Labels[k] = v
+	}
 
-    imageConfig.Created = &created
+	imageConfig.Created = &created
 
 	// Update image with base image reference
 	if refName, ok := desc.Annotations[ocispec.AnnotationRefName]; ok {

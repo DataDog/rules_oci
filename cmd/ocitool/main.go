@@ -71,9 +71,9 @@ var app = &cli.App{
 					Required: true,
 				},
 				&cli.StringFlag{
-                    Name: "bazel-version-file",
-                },
-                &cli.StringSliceFlag{
+					Name: "bazel-version-file",
+				},
+				&cli.StringSliceFlag{
 					Name: "layer",
 				},
 				&cli.StringFlag{
@@ -168,7 +168,7 @@ var app = &cli.App{
 				&cli.StringFlag{
 					Name: "outd",
 				},
-            },
+			},
 		},
 		{
 			Name:   "push-blob",
