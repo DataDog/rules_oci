@@ -70,14 +70,14 @@ func AppendLayers(ctx context.Context, store content.Store, desc ocispec.Descrip
 	manifest.Layers = append(manifest.Layers, layers...)
 	imageConfig.RootFS.DiffIDs = append(imageConfig.RootFS.DiffIDs, digests...)
 
-	newConfig, err := ociutil.IngestorJSONEncode(ctx, store, manifest.Config.MediaType, imageConfig, desc.Annotations)
+	newConfig, err := ociutil.IngestorJSONEncode(ctx, store, manifest.Config.MediaType, imageConfig)
 	if err != nil {
 		return ocispec.Descriptor{}, ocispec.Descriptor{}, err
 	}
 
 	manifest.Config = newConfig
 
-	newManifest, err := ociutil.IngestorJSONEncode(ctx, store, desc.MediaType, manifest, desc.Annotations)
+	newManifest, err := ociutil.IngestorJSONEncode(ctx, store, desc.MediaType, manifest)
 	if err != nil {
 		return ocispec.Descriptor{}, ocispec.Descriptor{}, err
 	}

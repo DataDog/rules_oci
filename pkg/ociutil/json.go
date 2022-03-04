@@ -48,16 +48,15 @@ func ProviderJSONDecode(ctx context.Context, provider content.Provider, desc oci
 }
 
 // IngestorJSONEncode encodes json and saves it to a ingester.
-func IngestorJSONEncode(ctx context.Context, ing content.Ingester, mediaType string, inf interface{}, annotations map[string]string) (ocispec.Descriptor, error) {
+func IngestorJSONEncode(ctx context.Context, ing content.Ingester, mediaType string, inf interface{}) (ocispec.Descriptor, error) {
 	data, err := json.Marshal(inf)
 	if err != nil {
 		return ocispec.Descriptor{}, fmt.Errorf("unable to marshal JSON: %w", err)
 	}
 	desc := ocispec.Descriptor{
-		MediaType:   mediaType,
-		Size:        int64(len(data)),
-		Digest:      digest.SHA256.FromBytes(data),
-		Annotations: annotations,
+		MediaType: mediaType,
+		Size:      int64(len(data)),
+		Digest:    digest.SHA256.FromBytes(data),
 	}
 
 	writer, err := ing.Writer(ctx, content.WithDescriptor(desc))
