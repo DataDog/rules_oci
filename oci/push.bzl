@@ -27,7 +27,7 @@ def _oci_push_impl(ctx):
             "--out={out}".format(out = digest_file.path),
         ],
         inputs = [
-            ctx.attr.manifest[OCIDescriptor].file,
+            ctx.attr.manifest[OCIDescriptor].descriptor_file,
         ],
         outputs = [
             digest_file,
