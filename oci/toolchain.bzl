@@ -72,10 +72,16 @@ oci_sdk = rule(
     provides = [OCISDK],
 )
 
-def oci_sdk_local(name, **kwargs):
+def oci_local_toolchain(name, **kwargs):
+    sdk_name = "{}.sdk".format(name)
     oci_sdk(
-        name = name,
+        name = sdk_name,
         ocitool = "@com_github_datadog_rules_oci//cmd/ocitool"
+    )
+
+    oci_toolchain(
+        name = name,
+        sdk = sdk_name,
     )
 
 def create_compiled_oci_toolchains(name):
