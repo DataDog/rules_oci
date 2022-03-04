@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/DataDog/rules_oci/internal/flagutil"
 	"github.com/DataDog/rules_oci/pkg/blob"
@@ -69,13 +70,17 @@ func AppendLayersCmd(c *cli.Context) error {
 	if manifestDesc.Annotations == nil {
 		manifestDesc.Annotations = make(map[string]string)
 	}
-	for k, v := range c.Generic("annotations").(*flagutil.KeyValueFlag).Map {
-		manifestDesc.Annotations[k] = v
-	}
 	baseRef, ok := baseDesc.Annotations[ocispec.AnnotationRefName]
 	if ok {
 		manifestDesc.Annotations[ocispec.AnnotationRefName] = baseRef
 	}
+	// let us override annotations off the base
+	for k, v := range c.Generic("annotations").(*flagutil.KeyValueFlag).Map {
+		manifestDesc.Annotations[k] = v
+	}
+	now := time.Now().UTC()
+	created := now.Format(time.RFC3339)
+	manifestDesc.Annotations[ocispec.AnnotationCreated] = created
 
 	log.WithField("base_desc", manifestDesc).Debugf("using as base")
 

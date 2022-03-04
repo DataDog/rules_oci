@@ -24,6 +24,14 @@ func AppendLayers(ctx context.Context, store content.Store, desc ocispec.Descrip
 		return ocispec.Descriptor{}, ocispec.Descriptor{}, fmt.Errorf("no image config (%v) in store: %w", manifest.Config, err)
 	}
 
+	if imageConfig.Config.Labels == nil {
+		imageConfig.Config.Labels = map[string]string{}
+	}
+	// ensure the config has all the labels on the descriptor
+	for k, v := range desc.Annotations {
+		imageConfig.Config.Labels[k] = v
+	}
+
 	// Get all of the digests of the layers to append to add to the diffids
 	// in the image config
 	digests := make([]digest.Digest, 0, len(layers))
@@ -62,14 +70,14 @@ func AppendLayers(ctx context.Context, store content.Store, desc ocispec.Descrip
 	manifest.Layers = append(manifest.Layers, layers...)
 	imageConfig.RootFS.DiffIDs = append(imageConfig.RootFS.DiffIDs, digests...)
 
-	newConfig, err := ociutil.IngestorJSONEncode(ctx, store, manifest.Config.MediaType, imageConfig)
+	newConfig, err := ociutil.IngestorJSONEncode(ctx, store, manifest.Config.MediaType, imageConfig, desc.Annotations)
 	if err != nil {
 		return ocispec.Descriptor{}, ocispec.Descriptor{}, err
 	}
 
 	manifest.Config = newConfig
 
-	newManifest, err := ociutil.IngestorJSONEncode(ctx, store, desc.MediaType, manifest)
+	newManifest, err := ociutil.IngestorJSONEncode(ctx, store, desc.MediaType, manifest, desc.Annotations)
 	if err != nil {
 		return ocispec.Descriptor{}, ocispec.Descriptor{}, err
 	}
