@@ -3,6 +3,7 @@ package layer
 import (
 	"context"
 	"fmt"
+    "time"
 
 	"github.com/DataDog/rules_oci/pkg/ociutil"
 
@@ -13,7 +14,7 @@ import (
 	ocispec "github.com/opencontainers/image-spec/specs-go/v1"
 )
 
-func AppendLayers(ctx context.Context, store content.Store, desc ocispec.Descriptor, layers []ocispec.Descriptor) (ocispec.Descriptor, ocispec.Descriptor, error) {
+func AppendLayers(ctx context.Context, store content.Store, desc ocispec.Descriptor, layers []ocispec.Descriptor, labels map[string]string, created time.Time) (ocispec.Descriptor, ocispec.Descriptor, error) {
 	manifest, err := ociutil.ImageManifestFromProvider(ctx, store, desc)
 	if err != nil {
 		return ocispec.Descriptor{}, ocispec.Descriptor{}, fmt.Errorf("no image manifest (%v) in store: %w", desc, err)
@@ -30,6 +31,16 @@ func AppendLayers(ctx context.Context, store content.Store, desc ocispec.Descrip
 	for _, layer := range layers {
 		digests = append(digests, layer.Digest)
 	}
+
+    if imageConfig.Config.Labels == nil {
+ 		imageConfig.Config.Labels = map[string]string{}
+ 	}
+ 	// ensure the config has all the labels on the descriptor
+ 	for k, v := range labels {
+ 		imageConfig.Config.Labels[k] = v
+ 	}
+
+    imageConfig.Created = &created
 
 	// Update image with base image reference
 	if refName, ok := desc.Annotations[ocispec.AnnotationRefName]; ok {

@@ -144,13 +144,12 @@ def _oci_image_impl(ctx):
     config_file = ctx.actions.declare_file("{}.config.json".format(ctx.label.name))
     layout_file = ctx.actions.declare_file("{}.layout.json".format(ctx.label.name))
 
-    annotation_strs = ["{}={}".format(key, value) for key, value in ctx.attr.annoations]
-
     ctx.actions.run(
         executable = toolchain.sdk.ocitool,
         arguments = [
                         "--layout={}".format(layout.blob_index.path),
                         "append-layers",
+                        "--bazel-version-file={}".format(ctx.version_file.path),
                         "--base={}".format(base_desc.path),
                         "--os={}".format(ctx.attr.os),
                         "--arch={}".format(ctx.attr.arch),
@@ -161,7 +160,7 @@ def _oci_image_impl(ctx):
                     ] +
                     ["--layer={}".format(f.path) for f in ctx.files.layers] +
                     ["--annotations={}={}".format(k, v) for k, v in ctx.attr.annotations.items()],
-        inputs = [base_desc, layout.blob_index] + ctx.files.layers + layout.files.to_list(),
+        inputs = [ctx.version_file, base_desc, layout.blob_index] + ctx.files.layers + layout.files.to_list(),
         outputs = [
             manifest_file,
             config_file,
