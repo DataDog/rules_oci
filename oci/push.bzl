@@ -23,7 +23,7 @@ def _oci_push_impl(ctx):
         executable = toolchain.sdk.ocitool,
         arguments = [
             "digest",
-            "--desc={desc}".format(desc = ctx.attr.manifest[OCIDescriptor].file.path),
+            "--desc={desc}".format(desc = ctx.attr.manifest[OCIDescriptor].descriptor_file.path),
             "--out={out}".format(out = digest_file.path),
         ],
         inputs = [
