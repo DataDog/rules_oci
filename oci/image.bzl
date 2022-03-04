@@ -144,7 +144,7 @@ def _oci_image_impl(ctx):
     config_file = ctx.actions.declare_file("{}.config.json".format(ctx.label.name))
     layout_file = ctx.actions.declare_file("{}.layout.json".format(ctx.label.name))
 
-    annotation_strs = ["{}={}".format(key, value) for key, value in ctx.attr.annoations]
+    annotation_strs = ["{}={}".format(key, value) for key, value in ctx.attr.annotations]
 
     ctx.actions.run(
         executable = toolchain.sdk.ocitool,
