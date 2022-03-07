@@ -149,7 +149,7 @@ def _oci_image_impl(ctx):
         arguments = [
                         "--layout={}".format(layout.blob_index.path),
                         "append-layers",
-                        "--bazel-version-file={}".(ctx.version_file.path),
+                        "--bazel-version-file={}".format(ctx.version_file.path),
                         "--base={}".format(base_desc.path),
                         "--os={}".format(ctx.attr.os),
                         "--arch={}".format(ctx.attr.arch),
