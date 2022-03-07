@@ -67,20 +67,13 @@ func AppendLayersCmd(c *cli.Context) error {
 		return fmt.Errorf("invalid platform, expected %v, recieved %v", targetPlatform, *manifestDesc.Platform)
 	}
 
-	if manifestDesc.Annotations == nil {
-		manifestDesc.Annotations = make(map[string]string)
-	}
-	baseRef, ok := baseDesc.Annotations[ocispec.AnnotationRefName]
-	if ok {
-		manifestDesc.Annotations[ocispec.AnnotationRefName] = baseRef
-	}
-	// let us override annotations off the base
-	for k, v := range c.Generic("annotations").(*flagutil.KeyValueFlag).Map {
-		manifestDesc.Annotations[k] = v
+	annotations := c.Generic("annotations").(*flagutil.KeyValueFlag).Map
+	if annotations == nil {
+		annotations = map[string]string{}
 	}
 	now := time.Now().UTC()
 	created := now.Format(time.RFC3339)
-	manifestDesc.Annotations[ocispec.AnnotationCreated] = created
+	annotations[ocispec.AnnotationCreated] = created
 
 	log.WithField("base_desc", manifestDesc).Debugf("using as base")
 
@@ -112,6 +105,7 @@ func AppendLayersCmd(c *cli.Context) error {
 		ociutil.SplitStore(outIngestor, ociutil.MultiProvider(allLocalProviders, layerProvider)),
 		manifestDesc,
 		layerDescs,
+		annotations,
 	)
 	if err != nil {
 		return err

@@ -13,7 +13,7 @@ import (
 	ocispec "github.com/opencontainers/image-spec/specs-go/v1"
 )
 
-func AppendLayers(ctx context.Context, store content.Store, desc ocispec.Descriptor, layers []ocispec.Descriptor) (ocispec.Descriptor, ocispec.Descriptor, error) {
+func AppendLayers(ctx context.Context, store content.Store, desc ocispec.Descriptor, layers []ocispec.Descriptor, annotations map[string]string) (ocispec.Descriptor, ocispec.Descriptor, error) {
 	manifest, err := ociutil.ImageManifestFromProvider(ctx, store, desc)
 	if err != nil {
 		return ocispec.Descriptor{}, ocispec.Descriptor{}, fmt.Errorf("no image manifest (%v) in store: %w", desc, err)
@@ -24,13 +24,9 @@ func AppendLayers(ctx context.Context, store content.Store, desc ocispec.Descrip
 		return ocispec.Descriptor{}, ocispec.Descriptor{}, fmt.Errorf("no image config (%v) in store: %w", manifest.Config, err)
 	}
 
-	if imageConfig.Config.Labels == nil {
-		imageConfig.Config.Labels = map[string]string{}
-	}
-	// ensure the config has all the labels on the descriptor
-	for k, v := range desc.Annotations {
-		imageConfig.Config.Labels[k] = v
-	}
+	baseRef := desc.Annotations[ocispec.AnnotationRefName]
+	imageConfig.Config.Labels = annotations
+	desc.Annotations = annotations
 
 	// Get all of the digests of the layers to append to add to the diffids
 	// in the image config
@@ -40,8 +36,8 @@ func AppendLayers(ctx context.Context, store content.Store, desc ocispec.Descrip
 	}
 
 	// Update image with base image reference
-	if refName, ok := desc.Annotations[ocispec.AnnotationRefName]; ok {
-		refTy, err := dreference.ParseNamed(refName)
+	if baseRef != "" {
+		refTy, err := dreference.ParseNamed(baseRef)
 		if err != nil {
 			return ocispec.Descriptor{}, ocispec.Descriptor{}, err
 		}
