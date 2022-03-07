@@ -3,6 +3,7 @@ package layer
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/DataDog/rules_oci/pkg/ociutil"
 
@@ -13,7 +14,7 @@ import (
 	ocispec "github.com/opencontainers/image-spec/specs-go/v1"
 )
 
-func AppendLayers(ctx context.Context, store content.Store, desc ocispec.Descriptor, layers []ocispec.Descriptor, annotations map[string]string) (ocispec.Descriptor, ocispec.Descriptor, error) {
+func AppendLayers(ctx context.Context, store content.Store, desc ocispec.Descriptor, layers []ocispec.Descriptor, annotations map[string]string, created time.Time) (ocispec.Descriptor, ocispec.Descriptor, error) {
 	manifest, err := ociutil.ImageManifestFromProvider(ctx, store, desc)
 	if err != nil {
 		return ocispec.Descriptor{}, ocispec.Descriptor{}, fmt.Errorf("no image manifest (%v) in store: %w", desc, err)
@@ -25,8 +26,13 @@ func AppendLayers(ctx context.Context, store content.Store, desc ocispec.Descrip
 	}
 
 	baseRef := desc.Annotations[ocispec.AnnotationRefName]
+
+	createdLabel := created.Format(time.RFC3339)
+	annotations[ocispec.AnnotationCreated] = createdLabel
+
 	imageConfig.Config.Labels = annotations
 	desc.Annotations = annotations
+	imageConfig.Created = &created
 
 	// Get all of the digests of the layers to append to add to the diffids
 	// in the image config

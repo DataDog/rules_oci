@@ -51,6 +51,9 @@ def go_multiarch_image(name, base, archs, binary_name = "", binary_dir = "/app",
             ],
             os = os,
             arch = arch,
+            annotations = {
+                "test": "image-manifest",
+            },
         )
         manifests.append(image_name)
 
@@ -59,4 +62,7 @@ def go_multiarch_image(name, base, archs, binary_name = "", binary_dir = "/app",
         manifests = manifests,
         tags = tags,
         visibility = visibility,
+        annotations = {
+            "test": "image-index",
+        },
     )

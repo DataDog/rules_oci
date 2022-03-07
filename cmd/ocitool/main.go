@@ -70,6 +70,9 @@ var app = &cli.App{
 					Name:     "base",
 					Required: true,
 				},
+				&cli.StringFlag{
+					Name: "bazel-version-file",
+				},
 				&cli.StringSliceFlag{
 					Name: "layer",
 				},

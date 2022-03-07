@@ -149,6 +149,7 @@ def _oci_image_impl(ctx):
         arguments = [
                         "--layout={}".format(layout.blob_index.path),
                         "append-layers",
+                        "--bazel-version-file={}".(ctx.version_file.path),
                         "--base={}".format(base_desc.path),
                         "--os={}".format(ctx.attr.os),
                         "--arch={}".format(ctx.attr.arch),
@@ -159,7 +160,7 @@ def _oci_image_impl(ctx):
                     ] +
                     ["--layer={}".format(f.path) for f in ctx.files.layers] +
                     ["--annotations={}={}".format(k, v) for k, v in ctx.attr.annotations.items()],
-        inputs = [base_desc, layout.blob_index] + ctx.files.layers + layout.files.to_list(),
+        inputs = [ctx.version_file, base_desc, layout.blob_index] + ctx.files.layers + layout.files.to_list(),
         outputs = [
             manifest_file,
             config_file,
