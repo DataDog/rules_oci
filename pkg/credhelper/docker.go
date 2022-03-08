@@ -1,15 +1,19 @@
 package credhelper
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
+	"net/http"
 	"os"
 	"path/filepath"
 
+	"github.com/containerd/containerd/errdefs"
 	"github.com/containerd/containerd/remotes/docker"
 	helperclient "github.com/docker/docker-credential-helpers/client"
 	"github.com/mitchellh/go-homedir"
+	log "github.com/sirupsen/logrus"
 )
 
 const (
@@ -68,6 +72,33 @@ func ReadHostDockerConfig() (DockerConfig, error) {
 	return ReadDockerConfig(f)
 }
 
+func seedAuthHeaders(host docker.RegistryHost) error {
+	if host.Authorizer == nil {
+		return nil
+	}
+
+	cli := http.DefaultClient
+	if host.Client != nil {
+		cli = host.Client
+	}
+
+	v2URL := fmt.Sprintf("%s://%s%s/", host.Scheme, host.Host, host.Path)
+	resp, err := cli.Get(v2URL)
+	if err != nil {
+		return err
+	}
+
+	if resp.StatusCode == http.StatusUnauthorized {
+		log.WithField("url", v2URL).Debug("seeding authorization headers")
+		err = host.Authorizer.AddResponses(context.Background(), []*http.Response{resp})
+		if err != nil && !errdefs.IsNotImplemented(err) {
+			return err
+		}
+	}
+
+	return nil
+}
+
 func RegistryHostsFromDockerConfig() docker.RegistryHosts {
 	return func(host string) ([]docker.RegistryHost, error) {
 		// FIXME This should be cached somewhere
@@ -103,6 +134,11 @@ func RegistryHostsFromDockerConfig() docker.RegistryHosts {
 
 			return creds.Username, creds.Secret, nil
 		}))
+
+		err = seedAuthHeaders(registryHost)
+		if err != nil {
+			return nil, err
+		}
 
 		return []docker.RegistryHost{registryHost}, nil
 	}
