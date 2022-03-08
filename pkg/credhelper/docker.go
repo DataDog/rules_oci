@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 
 	"github.com/containerd/containerd/remotes/docker"
-	"github.com/docker/docker-credential-helpers/client"
+	helperclient "github.com/docker/docker-credential-helpers/client"
 	"github.com/mitchellh/go-homedir"
 )
 
@@ -66,46 +66,38 @@ func ReadHostDockerConfig() (DockerConfig, error) {
 	return ReadDockerConfig(f)
 }
 
-func HelperToRegistryHost(reg, helper string) docker.RegistryHosts {
+func RegistryHostsFromDockerConfig() docker.RegistryHosts {
 	return func(host string) ([]docker.RegistryHost, error) {
-        if host != reg {
+        // FIXME This should be cached somewhere
+        cfg, err := ReadHostDockerConfig()
+        if err != nil {
+            return nil, err
+        }
+
+        helperName, ok := cfg.CredentialHelpers[host]
+        if !ok {
             return nil, nil
         }
 
-		return []docker.RegistryHost{
-			{
-				Host:         reg,
-				Scheme:       "https",
-				Path:         "/v2",
-				Capabilities: docker.HostCapabilityPull | docker.HostCapabilityResolve | docker.HostCapabilityPush,
-				Authorizer: docker.NewDockerAuthorizer(docker.WithAuthCreds(func(host string) (string, string, error) {
-					p := helperclient.NewShellProgramFunc(fmt.Sprintf("docker-credential-%s", helper))
+		registryHost := docker.RegistryHost{
+			Host:         host,
+			Scheme:       "https",
+			Path:         "/v2",
+			Capabilities: docker.HostCapabilityPull | docker.HostCapabilityResolve | docker.HostCapabilityPush,
+		}
 
-					creds, err := helperclient.Get(p, fmt.Sprintf("%s://%s"))
-					if err != nil {
-						return "", "", err
-					}
+		registryHost.Authorizer = docker.NewDockerAuthorizer(docker.WithAuthCreds(func(host string) (string, string, error) {
+			p := helperclient.NewShellProgramFunc(fmt.Sprintf("docker-credential-%s", helperName))
 
-					return creds.Username, creds.Secret, nil
-				})),
-			},
-		}, nil
+			creds, err := helperclient.Get(p, fmt.Sprintf("%s://%s", registryHost.Scheme, registryHost.Host))
+			if err != nil {
+				return "", "", err
+			}
+
+			return creds.Username, creds.Secret, nil
+		}))
+
+		return []docker.RegistryHost{registryHost}, nil
 	}
 }
 
-func GetHostsFromDockerConfig() (docker.RegistryHosts, error) {
-	cfg, err := ReadHostDockerConfig()
-	if err != nil {
-		return nil, err
-	}
-
-	var hosts []docker.RegistryHosts
-	for name, helper := range cfg.CredentialHelpers {
-		hosts = append(hosts, HelperToRegistryHost(name, helper))
-	}
-
-    // Support for Docker Hub
-    hosts = append(hosts, docker.ConfigureDefaultRegistries())
-
-	return docker.Registries(hosts...), nil
-}

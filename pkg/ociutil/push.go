@@ -8,6 +8,8 @@ import (
 	"fmt"
 	"os"
 
+    "github.com/DataDog/rules_oci/pkg/credhelper"
+
 	"github.com/containerd/containerd/content"
 	"github.com/containerd/containerd/errdefs"
 	dref "github.com/containerd/containerd/reference/docker"
@@ -18,12 +20,18 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-// NewDDRegistryResolver returns a general purpose resolver for use with
-// dd-registry.
-//
-// TODO(griffin): Add built-in Vault auth
-func NewDDRegistryResolver() Resolver {
-	return Resolver{Resolver: ExtendedResolver(docker.NewResolver(docker.ResolverOptions{}))}
+// DefaultResolver returns a resolver with credential helper auth and ocitool
+// extensions.
+func DefaultResolver() Resolver {
+	return Resolver{
+        Resolver: ExtendedResolver(docker.NewResolver(docker.ResolverOptions{
+            Hosts: docker.Registries(
+                credhelper.RegistryHostsFromDockerConfig(),
+                // Support for Docker Hub
+                docker.ConfigureDefaultRegistries(),
+            ),
+        })),
+    }
 }
 
 type Resolver struct {
