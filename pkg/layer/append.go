@@ -27,9 +27,10 @@ func AppendLayers(ctx context.Context, store content.Store, desc ocispec.Descrip
 
 	baseRef := desc.Annotations[ocispec.AnnotationRefName]
 
-	createdLabel := created.Format(time.RFC3339)
-	annotations[ocispec.AnnotationCreated] = createdLabel
+	createdAnnotation := created.Format(time.RFC3339)
+	annotations[ocispec.AnnotationCreated] = createdAnnotation
 
+	// FIXME: add labels attribute to set this separately
 	imageConfig.Config.Labels = annotations
 	desc.Annotations = annotations
 	imageConfig.Created = &created
