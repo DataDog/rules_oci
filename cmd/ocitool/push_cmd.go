@@ -23,7 +23,7 @@ func PushCmd(c *cli.Context) error {
 		return err
 	}
 
-	resolver := ociutil.NewDDRegistryResolver()
+    resolver := ociutil.DefaultResolver()
 
 	ref := c.String("target-ref")
 

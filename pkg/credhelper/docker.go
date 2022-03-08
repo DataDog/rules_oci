@@ -27,6 +27,8 @@ func GetConfigDir() (string, error) {
 		if err != nil {
 			return "", err
 		}
+
+		base = filepath.Join(base, ".docker")
 	}
 
 	return filepath.Join(base, DefaultDockerConfigName), nil
@@ -68,16 +70,21 @@ func ReadHostDockerConfig() (DockerConfig, error) {
 
 func RegistryHostsFromDockerConfig() docker.RegistryHosts {
 	return func(host string) ([]docker.RegistryHost, error) {
-        // FIXME This should be cached somewhere
-        cfg, err := ReadHostDockerConfig()
-        if err != nil {
-            return nil, err
-        }
+		// FIXME This should be cached somewhere
+		cfg, err := ReadHostDockerConfig()
+		if err != nil {
+			return nil, err
+		}
 
-        helperName, ok := cfg.CredentialHelpers[host]
-        if !ok {
-            return nil, nil
-        }
+		// Don't error if the file doesn't exist
+		if os.IsNotExist(err) {
+			return nil, nil
+		}
+
+		helperName, ok := cfg.CredentialHelpers[host]
+		if !ok {
+			return nil, nil
+		}
 
 		registryHost := docker.RegistryHost{
 			Host:         host,
@@ -100,4 +107,3 @@ func RegistryHostsFromDockerConfig() docker.RegistryHosts {
 		return []docker.RegistryHost{registryHost}, nil
 	}
 }
-

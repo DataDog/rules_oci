@@ -9,7 +9,7 @@ import (
 )
 
 func PushBlobCmd(c *cli.Context) error {
-    resolver := ociutil.NewDDRegistryResolver()
+    resolver := ociutil.DefaultResolver()
 
     desc, err := resolver.PushBlob(c.Context, c.String("file"), c.String("ref"), "")
     if err != nil {
