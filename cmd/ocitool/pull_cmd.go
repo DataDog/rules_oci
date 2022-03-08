@@ -13,11 +13,11 @@ import (
 )
 
 func PullCmd(c *cli.Context) error {
-	res := ociutil.NewDDRegistryResolver()
+	resolver := ociutil.DefaultResolver()
 
 	ref := c.Args().First()
 
-	name, desc, err := res.Resolve(c.Context, ref)
+	name, desc, err := resolver.Resolve(c.Context, ref)
 	if err != nil {
 		return err
 	}
@@ -39,7 +39,7 @@ func PullCmd(c *cli.Context) error {
 
 	log.Debugf("found layout at '%v'", layoutPath)
 
-	remoteFetcher, err := res.Fetcher(c.Context, name)
+	remoteFetcher, err := resolver.Fetcher(c.Context, name)
 	if err != nil {
 		return err
 	}

@@ -1,7 +1,7 @@
 package main
 
 import (
-    "fmt"
+	"fmt"
 
 	"github.com/DataDog/rules_oci/pkg/blob"
 	"github.com/DataDog/rules_oci/pkg/ociutil"
@@ -9,7 +9,7 @@ import (
 	ocispecv "github.com/opencontainers/image-spec/specs-go"
 	ocispec "github.com/opencontainers/image-spec/specs-go/v1"
 	log "github.com/sirupsen/logrus"
-    "github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v2"
 )
 
 func CreateImageManifestCmd(c *cli.Context) error {
@@ -23,28 +23,28 @@ func CreateImageManifestCmd(c *cli.Context) error {
 		return err
 	}
 
-    configDesc, err := ociutil.ReadDescriptorFromFile(c.String("config-desc"))
+	configDesc, err := ociutil.ReadDescriptorFromFile(c.String("config-desc"))
 	if err != nil {
 		return err
 	}
 
 	descriptorPaths := c.StringSlice("layer-desc")
-    descriptors, err := FilePathsToDescriptors(c.Context, descriptorPaths, true, bi)
+	descriptors, err := FilePathsToDescriptors(c.Context, descriptorPaths, true, bi)
 	if err != nil {
 		return err
 	}
 	log.WithField("manifests", descriptors).Debug("creating image manifest")
 
-    manifest := ocispec.Manifest{
+	manifest := ocispec.Manifest{
 		Versioned: ocispecv.Versioned{
 			SchemaVersion: 2,
 		},
 		MediaType: ocispec.MediaTypeImageManifest,
-        Config: configDesc,
-        Layers: descriptors,
-    }
+		Config:    configDesc,
+		Layers:    descriptors,
+	}
 
-    desc, err := ociutil.CopyJSONToFileAndCreateDescriptor(&manifest, c.String("out-manifest"))
+	desc, err := ociutil.CopyJSONToFileAndCreateDescriptor(&manifest, c.String("out-manifest"))
 	if err != nil {
 		return fmt.Errorf("failed to write manifest: %w", err)
 	}
@@ -62,5 +62,5 @@ func CreateImageManifestCmd(c *cli.Context) error {
 		return err
 	}
 
-    return nil
+	return nil
 }

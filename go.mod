@@ -4,8 +4,11 @@ go 1.17
 
 require (
 	github.com/bazelbuild/bazel-gazelle v0.24.0
+	github.com/bazelbuild/buildtools v0.0.0-20211007154642-8dd79e56e98e
 	github.com/blakesmith/ar v0.0.0-20190502131153-809d4375e1fb
 	github.com/containerd/containerd v1.5.9
+	github.com/docker/docker-credential-helpers v0.6.4
+	github.com/mitchellh/go-homedir v1.1.0
 	github.com/opencontainers/go-digest v1.0.0
 	github.com/opencontainers/image-spec v1.0.2
 	github.com/sirupsen/logrus v1.8.1
@@ -17,7 +20,6 @@ require (
 
 require (
 	github.com/Azure/go-ansiterm v0.0.0-20170929234023-d6e3b3328b78 // indirect
-	github.com/bazelbuild/buildtools v0.0.0-20211007154642-8dd79e56e98e // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/cespare/xxhash/v2 v2.1.1 // indirect
 	github.com/cpuguy83/go-md2man/v2 v2.0.0 // indirect
@@ -25,7 +27,6 @@ require (
 	github.com/docker/cli v20.10.11+incompatible // indirect
 	github.com/docker/distribution v2.7.1+incompatible // indirect
 	github.com/docker/docker v20.10.11+incompatible // indirect
-	github.com/docker/docker-credential-helpers v0.6.4 // indirect
 	github.com/docker/go-connections v0.4.0 // indirect
 	github.com/docker/go-metrics v0.0.1 // indirect
 	github.com/docker/go-units v0.4.0 // indirect
@@ -48,6 +49,7 @@ require (
 	go.opencensus.io v0.23.0 // indirect
 	golang.org/x/net v0.0.0-20220107192237-5cfca573fb4d // indirect
 	golang.org/x/sys v0.0.0-20211216021012-1d35b9e2eb4e // indirect
+	golang.org/x/tools v0.1.7 // indirect
 	google.golang.org/genproto v0.0.0-20220107163113-42d7afdf6368 // indirect
 	google.golang.org/grpc v1.43.0 // indirect
 	google.golang.org/protobuf v1.27.1 // indirect

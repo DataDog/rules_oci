@@ -1,7 +1,6 @@
 load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
 load("//oci:toolchain.bzl", "oci_local_toolchain")
 
-
 # gazelle:prefix github.com/DataDog/rules_oci
 # gazelle:go_naming_convention go_default_library
 # gazelle:lang go
