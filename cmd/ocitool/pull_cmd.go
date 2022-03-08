@@ -13,7 +13,7 @@ import (
 )
 
 func PullCmd(c *cli.Context) error {
-    resolver := ociutil.DefaultResolver()
+	resolver := ociutil.DefaultResolver()
 
 	ref := c.Args().First()
 

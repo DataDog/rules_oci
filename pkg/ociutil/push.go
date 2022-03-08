@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"os"
 
-    "github.com/DataDog/rules_oci/pkg/credhelper"
+	"github.com/DataDog/rules_oci/pkg/credhelper"
 
 	"github.com/containerd/containerd/content"
 	"github.com/containerd/containerd/errdefs"
@@ -24,14 +24,14 @@ import (
 // extensions.
 func DefaultResolver() Resolver {
 	return Resolver{
-        Resolver: ExtendedResolver(docker.NewResolver(docker.ResolverOptions{
-            Hosts: docker.Registries(
-                credhelper.RegistryHostsFromDockerConfig(),
-                // Support for Docker Hub
-                docker.ConfigureDefaultRegistries(),
-            ),
-        })),
-    }
+		Resolver: ExtendedResolver(docker.NewResolver(docker.ResolverOptions{
+			Hosts: docker.Registries(
+				credhelper.RegistryHostsFromDockerConfig(),
+				// Support for Docker Hub
+				docker.ConfigureDefaultRegistries(),
+			),
+		})),
+	}
 }
 
 type Resolver struct {
