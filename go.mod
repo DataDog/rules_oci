@@ -6,7 +6,7 @@ require (
 	github.com/bazelbuild/bazel-gazelle v0.24.0
 	github.com/bazelbuild/buildtools v0.0.0-20211007154642-8dd79e56e98e
 	github.com/blakesmith/ar v0.0.0-20190502131153-809d4375e1fb
-	github.com/containerd/containerd v1.5.9
+	github.com/containerd/containerd v1.5.10
 	github.com/docker/docker-credential-helpers v0.6.4
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/opencontainers/go-digest v1.0.0
