@@ -11,16 +11,23 @@ def _oci_push_impl(ctx):
         repository = ctx.attr.repository,
     )
 
+    tag = ctx.expand_make_variables("tag", ctx.attr.tag, {})
+    if tag:
+        ref = "{ref}:{tag}".format(
+            ref = ref,
+            tag = tag,
+        )
+
     digest_file = ctx.actions.declare_file("{name}.digest".format(name = ctx.label.name))
     ctx.actions.run(
         executable = toolchain.sdk.ocitool,
         arguments = [
             "digest",
-            "--desc={desc}".format(desc = ctx.attr.manifest[OCIDescriptor].file.path),
+            "--desc={desc}".format(desc = ctx.attr.manifest[OCIDescriptor].descriptor_file.path),
             "--out={out}".format(out = digest_file.path),
         ],
         inputs = [
-            ctx.attr.manifest[OCIDescriptor].file,
+            ctx.attr.manifest[OCIDescriptor].descriptor_file,
         ],
         outputs = [
             digest_file,
@@ -40,7 +47,7 @@ def _oci_push_impl(ctx):
             root = ctx.bin_dir.path,
             tool = toolchain.sdk.ocitool.short_path,
             layout = layout.blob_index.short_path,
-            desc = ctx.attr.manifest[OCIDescriptor].file.short_path,
+            desc = ctx.attr.manifest[OCIDescriptor].descriptor_file.short_path,
             ref = ref,
             debug = str(ctx.attr._debug[DebugInfo].debug),
         ),
@@ -52,7 +59,7 @@ def _oci_push_impl(ctx):
         DefaultInfo(
             runfiles = ctx.runfiles(
                 files = layout.files.to_list() +
-                        [toolchain.sdk.ocitool, ctx.attr.manifest[OCIDescriptor].file, layout.blob_index],
+                        [toolchain.sdk.ocitool, ctx.attr.manifest[OCIDescriptor].descriptor_file, layout.blob_index],
             ),
         ),
         OCIReferenceInfo(
@@ -85,6 +92,11 @@ oci_push = rule(
         "repository": attr.string(
             doc = """
                 A repository to push to, if not present consult the toolchain.
+            """,
+        ),
+        "tag": attr.string(
+            doc = """
+                (optional) A tag to include in the target reference."
             """,
         ),
         "_debug": attr.label(

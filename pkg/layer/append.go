@@ -3,6 +3,7 @@ package layer
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/DataDog/rules_oci/pkg/ociutil"
 
@@ -13,7 +14,7 @@ import (
 	ocispec "github.com/opencontainers/image-spec/specs-go/v1"
 )
 
-func AppendLayers(ctx context.Context, store content.Store, desc ocispec.Descriptor, layers []ocispec.Descriptor) (ocispec.Descriptor, ocispec.Descriptor, error) {
+func AppendLayers(ctx context.Context, store content.Store, desc ocispec.Descriptor, layers []ocispec.Descriptor, annotations map[string]string, created time.Time) (ocispec.Descriptor, ocispec.Descriptor, error) {
 	manifest, err := ociutil.ImageManifestFromProvider(ctx, store, desc)
 	if err != nil {
 		return ocispec.Descriptor{}, ocispec.Descriptor{}, fmt.Errorf("no image manifest (%v) in store: %w", desc, err)
@@ -24,6 +25,16 @@ func AppendLayers(ctx context.Context, store content.Store, desc ocispec.Descrip
 		return ocispec.Descriptor{}, ocispec.Descriptor{}, fmt.Errorf("no image config (%v) in store: %w", manifest.Config, err)
 	}
 
+	baseRef := desc.Annotations[ocispec.AnnotationRefName]
+
+	createdAnnotation := created.Format(time.RFC3339)
+	annotations[ocispec.AnnotationCreated] = createdAnnotation
+
+	// FIXME: add labels attribute to set this separately
+	imageConfig.Config.Labels = annotations
+	desc.Annotations = annotations
+	imageConfig.Created = &created
+
 	// Get all of the digests of the layers to append to add to the diffids
 	// in the image config
 	digests := make([]digest.Digest, 0, len(layers))
@@ -32,8 +43,8 @@ func AppendLayers(ctx context.Context, store content.Store, desc ocispec.Descrip
 	}
 
 	// Update image with base image reference
-	if refName, ok := desc.Annotations[ocispec.AnnotationRefName]; ok {
-		refTy, err := dreference.ParseNamed(refName)
+	if baseRef != "" {
+		refTy, err := dreference.ParseNamed(baseRef)
 		if err != nil {
 			return ocispec.Descriptor{}, ocispec.Descriptor{}, err
 		}

@@ -1,7 +1,13 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
+	"io"
+	"os"
+	"strconv"
+	"strings"
+	"time"
 
 	"github.com/DataDog/rules_oci/internal/flagutil"
 	"github.com/DataDog/rules_oci/pkg/blob"
@@ -16,10 +22,48 @@ import (
 	"github.com/urfave/cli/v2"
 )
 
+func loadStamp(r io.Reader) (map[string]string, error) {
+	mp := make(map[string]string)
+	sc := bufio.NewScanner(r)
+	for sc.Scan() {
+		line := strings.Split(sc.Text(), " ")
+		if len(line) < 2 {
+			return nil, fmt.Errorf("failed to parse line: %v", sc.Text())
+		}
+		mp[line[0]] = line[1]
+	}
+	return mp, nil
+}
+
 func AppendLayersCmd(c *cli.Context) error {
 	localProviders, err := LoadLocalProviders(c.StringSlice("layout"), c.String("layout-relative"))
 	if err != nil {
 		return err
+	}
+
+	var stampVars map[string]string
+	bazelVersionFilePath := c.String("bazel-version-file")
+	if bazelVersionFilePath != "" {
+		file, err := os.Open(bazelVersionFilePath)
+		if err != nil {
+			return err
+		}
+
+		stampVars, err = loadStamp(file)
+		file.Close()
+		if err != nil {
+			return err
+		}
+	}
+
+	createdTimestamp := time.Unix(0, 0)
+	if timeStr, ok := stampVars["BUILD_TIMESTAMP"]; ok {
+		timeInt, err := strconv.ParseInt(timeStr, 10, 0)
+		if err != nil {
+			return err
+		}
+
+		createdTimestamp = time.Unix(timeInt, 0)
 	}
 
 	allLocalProviders := ociutil.MultiProvider(localProviders...)
@@ -66,17 +110,6 @@ func AppendLayersCmd(c *cli.Context) error {
 		return fmt.Errorf("invalid platform, expected %v, recieved %v", targetPlatform, *manifestDesc.Platform)
 	}
 
-	if manifestDesc.Annotations == nil {
-		manifestDesc.Annotations = make(map[string]string)
-	}
-	for k, v := range c.Generic("annotations").(*flagutil.KeyValueFlag).Map {
-		manifestDesc.Annotations[k] = v
-	}
-	baseRef, ok := baseDesc.Annotations[ocispec.AnnotationRefName]
-	if ok {
-		manifestDesc.Annotations[ocispec.AnnotationRefName] = baseRef
-	}
-
 	log.WithField("base_desc", manifestDesc).Debugf("using as base")
 
 	layerPaths := c.StringSlice("layer")
@@ -107,6 +140,8 @@ func AppendLayersCmd(c *cli.Context) error {
 		ociutil.SplitStore(outIngestor, ociutil.MultiProvider(allLocalProviders, layerProvider)),
 		manifestDesc,
 		layerDescs,
+		c.Generic("annotations").(*flagutil.KeyValueFlag).Map,
+		createdTimestamp,
 	)
 	if err != nil {
 		return err
