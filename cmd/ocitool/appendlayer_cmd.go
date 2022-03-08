@@ -110,6 +110,14 @@ func AppendLayersCmd(c *cli.Context) error {
 		return fmt.Errorf("invalid platform, expected %v, recieved %v", targetPlatform, *manifestDesc.Platform)
 	}
 
+	if manifestDesc.Annotations == nil {
+		manifestDesc.Annotations = make(map[string]string)
+	}
+	baseRef, ok := baseDesc.Annotations[ocispec.AnnotationRefName]
+	if ok {
+		manifestDesc.Annotations[ocispec.AnnotationRefName] = baseRef
+	}
+
 	log.WithField("base_desc", manifestDesc).Debugf("using as base")
 
 	layerPaths := c.StringSlice("layer")
