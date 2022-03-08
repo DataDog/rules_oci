@@ -25,6 +25,7 @@ go_library(
     visibility = ["//visibility:public"],
     deps = [
         "//internal/set:go_default_library",
+        "//pkg/credhelper:go_default_library",
         "@bazel_gazelle//rule:go_default_library",
         "@com_github_containerd_containerd//content:go_default_library",
         "@com_github_containerd_containerd//errdefs:go_default_library",
