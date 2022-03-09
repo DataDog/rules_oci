@@ -68,7 +68,9 @@ func AppendLayersCmd(c *cli.Context) error {
 
 	allLocalProviders := ociutil.MultiProvider(localProviders...)
 
-	baseDesc, err := ociutil.ReadDescriptorFromFile(c.String("base"))
+	// Read the base descriptor, at this point we don't know if it's a image
+	// manifest or index, so it's an unknown media type.
+	baseUnknownDesc, err := ociutil.ReadDescriptorFromFile(c.String("base"))
 	if err != nil {
 		return err
 	}
@@ -79,38 +81,51 @@ func AppendLayersCmd(c *cli.Context) error {
 	}
 	targetPlatformMatch := platforms.Only(targetPlatform)
 
-	var manifestDesc ocispec.Descriptor
-	if images.IsIndexType(baseDesc.MediaType) {
-		index, err := ociutil.ImageIndexFromProvider(c.Context, allLocalProviders, baseDesc)
+	// Resolve the unknown descriptor into an image manifest, if an index
+	// match the requested platform.
+	var baseManifestDesc ocispec.Descriptor
+	if images.IsIndexType(baseUnknownDesc.MediaType) {
+		index, err := ociutil.ImageIndexFromProvider(c.Context, allLocalProviders, baseUnknownDesc)
 		if err != nil {
 			return err
 		}
 
-		manifestDesc, err = ociutil.ManifestFromIndex(index, targetPlatformMatch)
+		baseManifestDesc, err = ociutil.ManifestFromIndex(index, targetPlatformMatch)
 		if err != nil {
 			return err
 		}
-	} else if images.IsManifestType(baseDesc.MediaType) {
-		manifestDesc = baseDesc
+	} else if images.IsManifestType(baseUnknownDesc.MediaType) {
+		baseManifestDesc = baseUnknownDesc
 
-		if ociutil.IsEmptyPlatform(manifestDesc.Platform) {
-			platform, err := ociutil.ResolvePlatformFromDescriptor(c.Context, allLocalProviders, manifestDesc)
+		if ociutil.IsEmptyPlatform(baseManifestDesc.Platform) {
+			platform, err := ociutil.ResolvePlatformFromDescriptor(c.Context, allLocalProviders, baseManifestDesc)
 			if err != nil {
 				return fmt.Errorf("no platform for base: %w", err)
 			}
 
-			manifestDesc.Platform = &platform
+			baseManifestDesc.Platform = &platform
 		}
 
 	} else {
-		return fmt.Errorf("Unknown base image type %q", baseDesc.MediaType)
+		return fmt.Errorf("Unknown base image type %q", baseUnknownDesc.MediaType)
 	}
 
-	if !targetPlatformMatch.Match(*manifestDesc.Platform) {
-		return fmt.Errorf("invalid platform, expected %v, recieved %v", targetPlatform, *manifestDesc.Platform)
+	if !targetPlatformMatch.Match(*baseManifestDesc.Platform) {
+		return fmt.Errorf("invalid platform, expected %v, recieved %v", targetPlatform, *baseManifestDesc.Platform)
 	}
 
-	log.WithField("base_desc", manifestDesc).Debugf("using as base")
+	// Copy the annotation with the original reference of the base image
+	// so that we know when we push the image where those layers come from
+	// for mount calls.
+	if baseManifestDesc.Annotations == nil {
+		baseManifestDesc.Annotations = make(map[string]string)
+	}
+	baseRef, ok := baseUnknownDesc.Annotations[ocispec.AnnotationRefName]
+	if ok {
+		baseManifestDesc.Annotations[ocispec.AnnotationRefName] = baseRef
+	}
+
+	log.WithField("base_desc", baseManifestDesc).Debugf("using as base")
 
 	layerPaths := c.StringSlice("layer")
 
@@ -138,7 +153,7 @@ func AppendLayersCmd(c *cli.Context) error {
 	newManifest, newConfig, err := layer.AppendLayers(
 		c.Context,
 		ociutil.SplitStore(outIngestor, ociutil.MultiProvider(allLocalProviders, layerProvider)),
-		manifestDesc,
+		baseManifestDesc,
 		layerDescs,
 		c.Generic("annotations").(*flagutil.KeyValueFlag).Map,
 		createdTimestamp,

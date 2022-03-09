@@ -254,7 +254,7 @@ func CopyContent(ctx context.Context, from content.Provider, to content.Ingester
 
 	reader, err := from.ReaderAt(ctx, desc)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to create reader from ingestor: %w", err)
 	}
 
 	ref := desc.Digest.String()
@@ -265,17 +265,15 @@ func CopyContent(ctx context.Context, from content.Provider, to content.Ingester
 	cw, err := to.Writer(ctx, content.WithRef(ref), content.WithDescriptor(desc))
 	if errors.Is(err, errdefs.ErrAlreadyExists) {
 		return nil
-	}
-	if err != nil {
-		return err
+	} else if err != nil {
+		return fmt.Errorf("failed to write content to ingestor: %w", err)
 	}
 
 	err = content.Copy(ctx, cw, content.NewReader(reader), desc.Size, desc.Digest)
 	if errors.Is(err, errdefs.ErrAlreadyExists) {
 		return nil
-	}
-	if err != nil {
-		return err
+	} else if err != nil {
+		return fmt.Errorf("failed to copy content from provider to ingestor: %w", err)
 	}
 
 	return nil

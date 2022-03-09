@@ -20,7 +20,7 @@ func PushCmd(c *cli.Context) error {
 
 	baseDesc, err := ociutil.ReadDescriptorFromFile(c.String("desc"))
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to read base descriptor: %w", err)
 	}
 
 	resolver := ociutil.DefaultResolver()
@@ -29,7 +29,7 @@ func PushCmd(c *cli.Context) error {
 
 	pusher, err := resolver.Pusher(c.Context, ref)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to create pusher: %w", err)
 	}
 
 	regIng, ok := pusher.(content.Ingester)
@@ -41,7 +41,7 @@ func PushCmd(c *cli.Context) error {
 
 	err = ociutil.CopyContentFromHandler(c.Context, imagesHandler, allProviders, regIng, baseDesc)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to push content to registry: %w", err)
 	}
 
 	fmt.Printf("Reference: %v@%v\n", ref, baseDesc.Digest.String())
