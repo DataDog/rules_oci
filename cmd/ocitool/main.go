@@ -60,6 +60,10 @@ var app = &cli.App{
 					Name:  "symlink",
 					Value: &flagutil.KeyValueFlag{},
 				},
+				&cli.GenericFlag{
+					Name:  "file-map",
+					Value: &flagutil.KeyValueFlag{},
+				},
 			},
 		},
 		{
@@ -89,7 +93,7 @@ var app = &cli.App{
 					Name:  "annotations",
 					Value: &flagutil.KeyValueFlag{},
 				},
-				&cli.StringFlag{
+                &cli.StringFlag{
 					Name: "out-manifest",
 				},
 				&cli.StringFlag{
