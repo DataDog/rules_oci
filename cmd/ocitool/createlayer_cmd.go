@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"io"
 	"os"
-    "path/filepath"
+	"path/filepath"
 
 	"github.com/DataDog/rules_oci/internal/flagutil"
 	"github.com/DataDog/rules_oci/internal/tarutil"
@@ -37,12 +37,12 @@ func CreateLayerCmd(c *cli.Context) error {
 		}
 	}
 
-    for filePath, storePath := range c.Generic("file-map").(*flagutil.KeyValueFlag).Map {
-        err = tarutil.AppendFileToTarWriter(filePath, storePath, tw)
+	for filePath, storePath := range c.Generic("file-map").(*flagutil.KeyValueFlag).Map {
+		err = tarutil.AppendFileToTarWriter(filePath, storePath, tw)
 		if err != nil {
 			return err
 		}
-    }
+	}
 
 	for k, v := range c.Generic("symlink").(*flagutil.KeyValueFlag).Map {
 		err = tw.WriteHeader(&tar.Header{

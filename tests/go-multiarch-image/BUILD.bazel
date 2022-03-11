@@ -29,7 +29,7 @@ go_multiarch_image(
 
 oci_push(
     name = "push",
-    manifest = ":image",
+    manifest = "//tests/go-multiarch-image:image.linux-amd64-image",
     registry = "registry.ddbuild.io",
     repository = "rules_oci/hello-world",
 )

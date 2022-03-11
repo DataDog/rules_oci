@@ -94,6 +94,11 @@ func AppendLayersCmd(c *cli.Context) error {
 		if err != nil {
 			return err
 		}
+
+		if !targetPlatformMatch.Match(*baseManifestDesc.Platform) {
+			return fmt.Errorf("invalid platform, expected %v, recieved %v", targetPlatform, *baseManifestDesc.Platform)
+		}
+
 	} else if images.IsManifestType(baseUnknownDesc.MediaType) {
 		baseManifestDesc = baseUnknownDesc
 
@@ -108,10 +113,6 @@ func AppendLayersCmd(c *cli.Context) error {
 
 	} else {
 		return fmt.Errorf("Unknown base image type %q", baseUnknownDesc.MediaType)
-	}
-
-	if !targetPlatformMatch.Match(*baseManifestDesc.Platform) {
-		return fmt.Errorf("invalid platform, expected %v, recieved %v", targetPlatform, *baseManifestDesc.Platform)
 	}
 
 	// Copy the annotation with the original reference of the base image

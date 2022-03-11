@@ -111,7 +111,7 @@ def _oci_image_index_impl(ctx):
 
     return [
         OCIDescriptor(
-            file = index_desc_file,
+            descriptor_file = index_desc_file,
         ),
         OCILayout(
             blob_index = layout_file,
