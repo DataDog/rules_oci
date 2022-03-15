@@ -147,9 +147,10 @@ func (resolver Resolver) PushImageIndexShallow(ctx context.Context, idx ocispec.
 	}
 
 	desc := ocispec.Descriptor{
-		MediaType: ocispec.MediaTypeImageIndex,
-		Size:      int64(len(data)),
-		Digest:    digest.SHA256.FromBytes(data),
+		MediaType:   ocispec.MediaTypeImageIndex,
+		Size:        int64(len(data)),
+		Digest:      digest.SHA256.FromBytes(data),
+		Annotations: idx.Annotations,
 	}
 
 	writer, err := pusher.Push(ctx, desc)
@@ -167,7 +168,7 @@ func (resolver Resolver) PushImageIndexShallow(ctx context.Context, idx ocispec.
 		return ocispec.Descriptor{}, err
 	}
 
-	err = writer.Commit(ctx, desc.Size, desc.Digest)
+	err = writer.Commit(ctx, desc.Size, desc.Digest, content.WithLabels(idx.Annotations))
 	if err != nil {
 		return ocispec.Descriptor{}, err
 	}
