@@ -24,7 +24,20 @@ import (
 // DefaultResolver returns a resolver with credential helper auth and ocitool
 // extensions.
 func DefaultResolver() Resolver {
-	headers := http.Header{}
+	return newResolver(nil)
+}
+
+// ResolverWithHeaders returns a resolver with credential helper auth and ocitool
+// extensions.
+func ResolverWithHeaders(headers map[string]string) Resolver {
+	return newResolver(headers)
+}
+
+func newResolver(headers map[string]string) Resolver {
+	hdrs := http.Header{}
+	for k, v := range headers {
+		hdrs.Add(k, v)
+	}
 	return Resolver{
 		Resolver: ExtendedResolver(docker.NewResolver(docker.ResolverOptions{
 			Hosts: docker.Registries(
@@ -32,6 +45,7 @@ func DefaultResolver() Resolver {
 				// Support for Docker Hub
 				docker.ConfigureDefaultRegistries(),
 			),
+			Headers: hdrs,
 		})),
 	}
 }

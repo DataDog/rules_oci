@@ -117,6 +117,10 @@ var app = &cli.App{
 				&cli.StringFlag{
 					Name: "target-ref",
 				},
+				&cli.GenericFlag{
+					Name:  "headers",
+					Value: &flagutil.KeyValueFlag{},
+				},
 			},
 		},
 		{
