@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"net/http"
 	"os"
 
 	"github.com/DataDog/rules_oci/pkg/credhelper"
@@ -23,6 +24,7 @@ import (
 // DefaultResolver returns a resolver with credential helper auth and ocitool
 // extensions.
 func DefaultResolver() Resolver {
+	headers := http.Header{}
 	return Resolver{
 		Resolver: ExtendedResolver(docker.NewResolver(docker.ResolverOptions{
 			Hosts: docker.Registries(

@@ -34,6 +34,8 @@ def _oci_push_impl(ctx):
         ],
     )
 
+    headers = ""
+    [headers.append(" --headers={}={}".format(k, v)) for k, v in ctx.attr.headers.items()]
     ctx.actions.write(
         content = """
         {tool}  \\
@@ -43,6 +45,7 @@ def _oci_push_impl(ctx):
         --layout-relative {root} \\
         --desc {desc} \\
         --target-ref {ref} \\
+        {headers} \\
         """.format(
             root = ctx.bin_dir.path,
             tool = toolchain.sdk.ocitool.short_path,
@@ -50,6 +53,7 @@ def _oci_push_impl(ctx):
             desc = ctx.attr.manifest[OCIDescriptor].descriptor_file.short_path,
             ref = ref,
             debug = str(ctx.attr._debug[DebugInfo].debug),
+            headers = headers,
         ),
         output = ctx.outputs.executable,
         is_executable = True,
@@ -97,6 +101,11 @@ oci_push = rule(
         "tag": attr.string(
             doc = """
                 (optional) A tag to include in the target reference."
+            """,
+        ),
+        "headers": attr.string(
+            doc = """
+                (optional) A list of key/values to include with the push.
             """,
         ),
         "_debug": attr.label(
