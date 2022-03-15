@@ -35,7 +35,9 @@ def _oci_push_impl(ctx):
     )
 
     headers = ""
-    [headers.append(" --headers={}={}".format(k, v)) for k, v in ctx.attr.headers.items()]
+    for k, v in ctx.attr.headers.items():
+        headers = headers + " --headers={}={}".format(k, v)
+
     ctx.actions.write(
         content = """
         {tool}  \\
@@ -103,7 +105,7 @@ oci_push = rule(
                 (optional) A tag to include in the target reference."
             """,
         ),
-        "headers": attr.string(
+        "headers": attr.string_dict(
             doc = """
                 (optional) A list of key/values to include with the push.
             """,
