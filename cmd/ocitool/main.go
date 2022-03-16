@@ -60,6 +60,10 @@ var app = &cli.App{
 					Name:  "symlink",
 					Value: &flagutil.KeyValueFlag{},
 				},
+				&cli.GenericFlag{
+					Name:  "file-map",
+					Value: &flagutil.KeyValueFlag{},
+				},
 			},
 		},
 		{

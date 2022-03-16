@@ -32,8 +32,9 @@ def _oci_image_layer_impl(ctx):
                         "--dir={}".format(ctx.attr.directory),
                     ] +
                     ["--file={}".format(f.path) for f in ctx.files.files] +
-                    ["--symlink={}={}".format(k, v) for k, v in ctx.attr.symlinks.items()],
-        inputs = ctx.files.files,
+                    ["--symlink={}={}".format(k, v) for k, v in ctx.attr.symlinks.items()] +
+                    ["--file-map={}={}".format(k.files.to_list()[0].path, v) for k, v in ctx.attr.file_map.items()],
+        inputs = ctx.files.files + ctx.files.file_map,
         outputs = [
             descriptor_file,
             ctx.outputs.layer,
@@ -64,6 +65,9 @@ oci_image_layer = rule(
         "symlinks": attr.string_dict(
             doc = """
             """,
+        ),
+        "file_map": attr.label_keyed_string_dict(
+            allow_files =  True,
         ),
     },
     toolchains = ["@com_github_datadog_rules_oci//oci:toolchain"],
@@ -107,7 +111,7 @@ def _oci_image_index_impl(ctx):
 
     return [
         OCIDescriptor(
-            file = index_desc_file,
+            descriptor_file = index_desc_file,
         ),
         OCILayout(
             blob_index = layout_file,

@@ -33,13 +33,9 @@ def go_multiarch_image(name, base, archs, binary_name = "", binary_dir = "/app",
         layer_name = "{name}.{os}-{arch}-go-layer".format(name = name, os = os, arch = arch)
         oci_image_layer(
             name = layer_name,
-            files = [
-                go_binary_name,
-            ],
-            symlinks = {
-                "{}/{}".format(binary_dir, binary_name): "{}/{}".format(binary_dir, go_binary_out),
+            file_map = {
+                go_binary_name: "{}/{}".format(binary_dir, binary_name),
             },
-            directory = binary_dir,
         )
 
         image_name = "{name}.{os}-{arch}-image".format(name = name, os = os, arch = arch)

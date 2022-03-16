@@ -4,13 +4,12 @@ import (
 	"archive/tar"
 	"io"
 	"os"
-	"path/filepath"
 	"time"
 )
 
 // AppendFileToTarWriter appends a file (given as a filepath) to a tarfile
 // through the tarfile interface.
-func AppendFileToTarWriter(filePath string, basedir string, tw *tar.Writer) error {
+func AppendFileToTarWriter(filePath string, loc string, tw *tar.Writer) error {
 	f, err := os.Open(filePath)
 	if err != nil {
 		return err
@@ -31,7 +30,7 @@ func AppendFileToTarWriter(filePath string, basedir string, tw *tar.Writer) erro
 	hdr.ModTime = time.Time{}
 	hdr.AccessTime = time.Time{}
 
-	hdr.Name = filepath.Join(basedir, filepath.Base(fi.Name()))
+	hdr.Name = loc
 
 	if err := tw.WriteHeader(hdr); err != nil {
 		return err

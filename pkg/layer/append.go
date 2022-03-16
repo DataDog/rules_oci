@@ -15,6 +15,10 @@ import (
 )
 
 func AppendLayers(ctx context.Context, store content.Store, desc ocispec.Descriptor, layers []ocispec.Descriptor, annotations map[string]string, created time.Time) (ocispec.Descriptor, ocispec.Descriptor, error) {
+	if annotations == nil {
+		annotations = make(map[string]string)
+	}
+
 	manifest, err := ociutil.ImageManifestFromProvider(ctx, store, desc)
 	if err != nil {
 		return ocispec.Descriptor{}, ocispec.Descriptor{}, fmt.Errorf("no image manifest (%v) in store: %w", desc, err)
