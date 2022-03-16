@@ -121,6 +121,10 @@ var app = &cli.App{
 					Name:  "headers",
 					Value: &flagutil.KeyValueFlag{},
 				},
+				&cli.GenericFlag{
+					Name:  "x_meta_headers",
+					Value: &flagutil.KeyValueFlag{},
+				},
 			},
 		},
 		{

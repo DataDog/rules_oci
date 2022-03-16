@@ -24,7 +24,13 @@ func PushCmd(c *cli.Context) error {
 		return fmt.Errorf("failed to read base descriptor: %w", err)
 	}
 
-	resolver := ociutil.ResolverWithHeaders(c.Generic("headers").(*flagutil.KeyValueFlag).Map)
+	headers := c.Generic("headers").(*flagutil.KeyValueFlag).Map
+	// tack on the X-Meta- prefix
+	for k, v := range c.Generic("x_meta_headers").(*flagutil.KeyValueFlag).Map {
+		headers["X-Meta-"+k] = v
+	}
+
+	resolver := ociutil.ResolverWithHeaders(headers)
 
 	ref := c.String("target-ref")
 
