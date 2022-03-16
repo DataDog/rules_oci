@@ -25,6 +25,9 @@ func PushCmd(c *cli.Context) error {
 	}
 
 	headers := c.Generic("headers").(*flagutil.KeyValueFlag).Map
+	if headers == nil {
+		headers = map[string]string{}
+	}
 	// tack on the X-Meta- prefix
 	for k, v := range c.Generic("x_meta_headers").(*flagutil.KeyValueFlag).Map {
 		headers["X-Meta-"+k] = v
