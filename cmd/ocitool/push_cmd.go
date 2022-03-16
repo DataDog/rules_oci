@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 
+	"github.com/DataDog/rules_oci/internal/flagutil"
 	"github.com/DataDog/rules_oci/pkg/ociutil"
 
 	"github.com/containerd/containerd/content"
@@ -23,7 +24,16 @@ func PushCmd(c *cli.Context) error {
 		return fmt.Errorf("failed to read base descriptor: %w", err)
 	}
 
-	resolver := ociutil.DefaultResolver()
+	headers := c.Generic("headers").(*flagutil.KeyValueFlag).Map
+	if headers == nil {
+		headers = map[string]string{}
+	}
+	// tack on the X-Meta- prefix
+	for k, v := range c.Generic("x_meta_headers").(*flagutil.KeyValueFlag).Map {
+		headers["X-Meta-"+k] = v
+	}
+
+	resolver := ociutil.ResolverWithHeaders(headers)
 
 	ref := c.String("target-ref")
 

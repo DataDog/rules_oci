@@ -34,6 +34,14 @@ def _oci_push_impl(ctx):
         ],
     )
 
+    headers = ""
+    for k, v in ctx.attr.headers.items():
+        headers = headers + " --headers={}={}".format(k, v)
+
+    xheaders = ""
+    for k, v in ctx.attr.x_meta_headers.items():
+        xheaders = xheaders + " --x_meta_headers={}={}".format(k, v)
+
     ctx.actions.write(
         content = """
         {tool}  \\
@@ -43,6 +51,8 @@ def _oci_push_impl(ctx):
         --layout-relative {root} \\
         --desc {desc} \\
         --target-ref {ref} \\
+        {headers} \\
+        {xheaders} \\
         """.format(
             root = ctx.bin_dir.path,
             tool = toolchain.sdk.ocitool.short_path,
@@ -50,6 +60,8 @@ def _oci_push_impl(ctx):
             desc = ctx.attr.manifest[OCIDescriptor].descriptor_file.short_path,
             ref = ref,
             debug = str(ctx.attr._debug[DebugInfo].debug),
+            headers = headers,
+            xheaders = xheaders,
         ),
         output = ctx.outputs.executable,
         is_executable = True,
@@ -97,6 +109,16 @@ oci_push = rule(
         "tag": attr.string(
             doc = """
                 (optional) A tag to include in the target reference."
+            """,
+        ),
+        "headers": attr.string_dict(
+            doc = """
+                (optional) A list of key/values to to be sent to the registry as headers.
+            """,
+        ),
+        "x_meta_headers": attr.string_dict(
+            doc = """
+                (optional) A list of key/values to to be sent to the registry as headers with an X-Meta- prefix.
             """,
         ),
         "_debug": attr.label(
