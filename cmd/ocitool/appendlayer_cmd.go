@@ -141,7 +141,7 @@ func AppendLayersCmd(c *cli.Context) error {
 			return err
 		}
 		reader.Close()
-		ld.MediaType = images.MediaTypeDockerSchema2Layer
+		ld.MediaType = ocispec.MediaTypeImageLayer
 
 		layerProvider.Blobs[ld.Digest] = lp
 		layerDescs = append(layerDescs, ld)
