@@ -37,6 +37,7 @@ func AppendLayers(ctx context.Context, store content.Store, desc ocispec.Descrip
 	// FIXME: add labels attribute to set this separately
 	imageConfig.Config.Labels = annotations
 	desc.Annotations = annotations
+	manifest.Annotations = annotations
 	imageConfig.Created = &created
 
 	// Get all of the digests of the layers to append to add to the diffids
@@ -72,6 +73,8 @@ func AppendLayers(ctx context.Context, store content.Store, desc ocispec.Descrip
 		}
 	}
 
+	// we're OCI now
+	desc.MediaType = ocispec.MediaTypeImageManifest
 	manifest.MediaType = desc.MediaType
 	// Append after we add the base image labels
 	manifest.Layers = append(manifest.Layers, layers...)
