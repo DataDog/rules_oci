@@ -117,6 +117,9 @@ var app = &cli.App{
 				&cli.StringFlag{
 					Name: "target-ref",
 				},
+				&cli.StringFlag{
+					Name: "parent-tag",
+				},
 				&cli.GenericFlag{
 					Name:  "headers",
 					Value: &flagutil.KeyValueFlag{},

@@ -12,11 +12,6 @@ def _oci_push_impl(ctx):
     )
 
     tag = ctx.expand_make_variables("tag", ctx.attr.tag, {})
-    if tag:
-        ref = "{ref}:{tag}".format(
-            ref = ref,
-            tag = tag,
-        )
 
     digest_file = ctx.actions.declare_file("{name}.digest".format(name = ctx.label.name))
     ctx.actions.run(
@@ -51,6 +46,7 @@ def _oci_push_impl(ctx):
         --layout-relative {root} \\
         --desc {desc} \\
         --target-ref {ref} \\
+        --parent-tag {tag} \\
         {headers} \\
         {xheaders} \\
         """.format(
@@ -108,7 +104,7 @@ oci_push = rule(
         ),
         "tag": attr.string(
             doc = """
-                (optional) A tag to include in the target reference."
+                (optional) A tag to include in the target reference. This will not be included on child images."
             """,
         ),
         "headers": attr.string_dict(

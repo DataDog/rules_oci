@@ -5,7 +5,6 @@ import (
 
 	"github.com/DataDog/rules_oci/internal/flagutil"
 	"github.com/DataDog/rules_oci/pkg/ociutil"
-	ocispec "github.com/opencontainers/image-spec/specs-go/v1"
 
 	"github.com/containerd/containerd/content"
 	"github.com/containerd/containerd/images"
@@ -48,18 +47,32 @@ func PushCmd(c *cli.Context) error {
 		return fmt.Errorf("pusher not an ingester: %T", pusher)
 	}
 
-	switch baseDesc.MediaType {
-	// We only want do a shallow push for indexes.
-	// This allows us to use separate tags for the index vs the child images
-	case images.MediaTypeDockerSchema2ManifestList, ocispec.MediaTypeImageIndex:
-		err = ociutil.CopyContent(c.Context, allProviders, regIng, baseDesc)
-	default:
-		imagesHandler := images.ChildrenHandler(allProviders)
-		err = ociutil.CopyContentFromHandler(c.Context, imagesHandler, allProviders, regIng, baseDesc)
+	// take care of copying any children first
+	imagesHandler := images.ChildrenHandler(allProviders)
+	err = ociutil.CopyChildrenFromHandler(c.Context, imagesHandler, allProviders, regIng, baseDesc)
+	if err != nil {
+		return fmt.Errorf("failed to push child content to registry: %w", err)
 	}
 
+	// if a tag exists, use it for the parent
+	tag := c.String("parent-tag")
+	if tag != "" {
+		ref = ref + ":" + tag
+		pusher, err = resolver.Pusher(c.Context, ref)
+		if err != nil {
+			return fmt.Errorf("failed to create parent pusher: %w", err)
+		}
+
+		regIng, ok = pusher.(content.Ingester)
+		if !ok {
+			return fmt.Errorf("parent pusher not an ingester: %T", pusher)
+		}
+	}
+
+	// push the parent last (in case of image index)
+	err = ociutil.CopyContent(c.Context, allProviders, regIng, baseDesc)
 	if err != nil {
-		return fmt.Errorf("failed to push content to registry: %w", err)
+		return fmt.Errorf("failed to push parent content to registry: %w", err)
 	}
 
 	fmt.Printf("Reference: %v@%v\n", ref, baseDesc.Digest.String())
