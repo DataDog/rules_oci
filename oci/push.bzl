@@ -55,6 +55,7 @@ def _oci_push_impl(ctx):
             layout = layout.blob_index.short_path,
             desc = ctx.attr.manifest[OCIDescriptor].descriptor_file.short_path,
             ref = ref,
+            tag = tag,
             debug = str(ctx.attr._debug[DebugInfo].debug),
             headers = headers,
             xheaders = xheaders,
