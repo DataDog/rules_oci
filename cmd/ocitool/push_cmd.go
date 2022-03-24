@@ -5,6 +5,7 @@ import (
 
 	"github.com/DataDog/rules_oci/internal/flagutil"
 	"github.com/DataDog/rules_oci/pkg/ociutil"
+	ocispec "github.com/opencontainers/image-spec/specs-go/v1"
 
 	"github.com/containerd/containerd/content"
 	"github.com/containerd/containerd/images"
@@ -47,9 +48,16 @@ func PushCmd(c *cli.Context) error {
 		return fmt.Errorf("pusher not an ingester: %T", pusher)
 	}
 
-	imagesHandler := images.ChildrenHandler(allProviders)
+	switch baseDesc.MediaType {
+	// We only want do a shallow push for indexes.
+	// This allows us to use separate tags for the index vs the child images
+	case images.MediaTypeDockerSchema2ManifestList, ocispec.MediaTypeImageIndex:
+		err = ociutil.CopyContent(c.Context, allProviders, regIng, baseDesc)
+	default:
+		imagesHandler := images.ChildrenHandler(allProviders)
+		err = ociutil.CopyContentFromHandler(c.Context, imagesHandler, allProviders, regIng, baseDesc)
+	}
 
-	err = ociutil.CopyContentFromHandler(c.Context, imagesHandler, allProviders, regIng, baseDesc)
 	if err != nil {
 		return fmt.Errorf("failed to push content to registry: %w", err)
 	}
