@@ -27,7 +27,9 @@ func CreateLayerCmd(c *cli.Context) error {
 		return err
 	}
 
-	gw := gzip.NewWriter(out)
+	digester := digest.SHA256.Digester()
+	wc := ociutil.NewWriterCounter(io.MultiWriter(out, digester.Hash()))
+	gw := gzip.NewWriter(wc)
 	gw.Name = path.Base(out.Name())
 	defer gw.Close()
 
@@ -64,24 +66,10 @@ func CreateLayerCmd(c *cli.Context) error {
 	tw.Close()
 	gw.Close()
 
-	// grab the digest and size from the files now that they are compressed
-	_, err = out.Seek(0, io.SeekStart)
-	if err != nil {
-		return fmt.Errorf("unable to reset uncompressed file: %w", err)
-	}
-	gzDigest, err := digest.SHA256.FromReader(out)
-	if err != nil {
-		return fmt.Errorf("unable to create diff ID of file: %w", err)
-	}
-	stats, err := out.Stat()
-	if err != nil {
-		return err
-	}
-
 	desc := ocispec.Descriptor{
 		MediaType: ocispec.MediaTypeImageLayerGzip,
-		Size:      stats.Size(),
-		Digest:    gzDigest,
+		Size:      int64(wc.Count()),
+		Digest:    digester.Digest(),
 	}
 
 	err = ociutil.WriteDescriptorToFile(c.String("outd"), desc)
