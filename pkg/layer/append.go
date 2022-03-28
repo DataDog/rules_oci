@@ -40,11 +40,15 @@ func AppendLayers(ctx context.Context, store content.Store, desc ocispec.Descrip
 	manifest.Annotations = annotations
 	imageConfig.Created = &created
 
-	// Get all of the digests of the layers to append to add to the diffids
-	// in the image config
-	digests := make([]digest.Digest, 0, len(layers))
+	diffIDs := make([]digest.Digest, 0, len(layers))
 	for _, layer := range layers {
-		digests = append(digests, layer.Digest)
+		diffID, err := ociutil.GetLayerDiffID(ctx, store, layer)
+		if err != nil {
+			return ocispec.Descriptor{}, ocispec.Descriptor{},
+				fmt.Errorf("failed to get diff ID of layer %q: %w", layer.Digest, err)
+		}
+		diffIDs = append(diffIDs, diffID)
+
 	}
 
 	// Update image with base image reference
@@ -78,7 +82,7 @@ func AppendLayers(ctx context.Context, store content.Store, desc ocispec.Descrip
 	manifest.MediaType = desc.MediaType
 	// Append after we add the base image labels
 	manifest.Layers = append(manifest.Layers, layers...)
-	imageConfig.RootFS.DiffIDs = append(imageConfig.RootFS.DiffIDs, digests...)
+	imageConfig.RootFS.DiffIDs = append(imageConfig.RootFS.DiffIDs, diffIDs...)
 
 	newConfig, err := ociutil.IngestorJSONEncode(ctx, store, ocispec.MediaTypeImageConfig, imageConfig)
 	if err != nil {

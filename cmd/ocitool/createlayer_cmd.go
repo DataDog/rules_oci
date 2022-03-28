@@ -2,9 +2,11 @@ package main
 
 import (
 	"archive/tar"
+	"compress/gzip"
 	"fmt"
 	"io"
 	"os"
+	"path"
 	"path/filepath"
 
 	"github.com/DataDog/rules_oci/internal/flagutil"
@@ -25,9 +27,11 @@ func CreateLayerCmd(c *cli.Context) error {
 		return err
 	}
 
-	digester := digest.SHA256.Digester()
-	wc := ociutil.NewWriterCounter(io.MultiWriter(out, digester.Hash()))
-	tw := tar.NewWriter(wc)
+	gw := gzip.NewWriter(out)
+	gw.Name = path.Base(out.Name())
+	defer gw.Close()
+
+	tw := tar.NewWriter(gw)
 	defer tw.Close()
 
 	for _, filePath := range files {
@@ -58,11 +62,26 @@ func CreateLayerCmd(c *cli.Context) error {
 	// Need to flush before we count bytes and digest, might as well close since
 	// it's not needed anymore.
 	tw.Close()
+	gw.Close()
+
+	// grab the digest and size from the files now that they are compressed
+	_, err = out.Seek(0, io.SeekStart)
+	if err != nil {
+		return fmt.Errorf("unable to reset uncompressed file: %w", err)
+	}
+	gzDigest, err := digest.SHA256.FromReader(out)
+	if err != nil {
+		return fmt.Errorf("unable to create diff ID of file: %w", err)
+	}
+	stats, err := out.Stat()
+	if err != nil {
+		return err
+	}
 
 	desc := ocispec.Descriptor{
-		MediaType: ocispec.MediaTypeImageLayer,
-		Size:      int64(wc.Count()),
-		Digest:    digester.Digest(),
+		MediaType: ocispec.MediaTypeImageLayerGzip,
+		Size:      stats.Size(),
+		Digest:    gzDigest,
 	}
 
 	err = ociutil.WriteDescriptorToFile(c.String("outd"), desc)
