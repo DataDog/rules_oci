@@ -141,7 +141,7 @@ func AppendLayersCmd(c *cli.Context) error {
 			return err
 		}
 		reader.Close()
-		ld.MediaType = ocispec.MediaTypeImageLayer
+		ld.MediaType = ocispec.MediaTypeImageLayerGzip
 
 		layerProvider.Blobs[ld.Digest] = lp
 		layerDescs = append(layerDescs, ld)

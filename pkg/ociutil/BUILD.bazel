@@ -5,6 +5,7 @@ go_library(
     srcs = [
         "bazel.go",
         "desc.go",
+        "diff.go",
         "fetch.go",
         "fs.go",
         "handler.go",

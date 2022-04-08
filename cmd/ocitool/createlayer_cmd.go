@@ -2,9 +2,11 @@ package main
 
 import (
 	"archive/tar"
+	"compress/gzip"
 	"fmt"
 	"io"
 	"os"
+	"path"
 	"path/filepath"
 
 	"github.com/DataDog/rules_oci/internal/flagutil"
@@ -27,7 +29,11 @@ func CreateLayerCmd(c *cli.Context) error {
 
 	digester := digest.SHA256.Digester()
 	wc := ociutil.NewWriterCounter(io.MultiWriter(out, digester.Hash()))
-	tw := tar.NewWriter(wc)
+	gw := gzip.NewWriter(wc)
+	gw.Name = path.Base(out.Name())
+	defer gw.Close()
+
+	tw := tar.NewWriter(gw)
 	defer tw.Close()
 
 	for _, filePath := range files {
@@ -58,9 +64,10 @@ func CreateLayerCmd(c *cli.Context) error {
 	// Need to flush before we count bytes and digest, might as well close since
 	// it's not needed anymore.
 	tw.Close()
+	gw.Close()
 
 	desc := ocispec.Descriptor{
-		MediaType: ocispec.MediaTypeImageLayer,
+		MediaType: ocispec.MediaTypeImageLayerGzip,
 		Size:      int64(wc.Count()),
 		Digest:    digester.Digest(),
 	}
