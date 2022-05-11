@@ -1,3 +1,7 @@
+// Unless explicitly stated otherwise all files in this repository are licensed under the MIT License.
+//
+// This product includes software developed at Datadog (https://www.datadoghq.com/). Copyright 2021 Datadog, Inc.
+
 /* Copyright 2020 The Bazel Authors. All rights reserved.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
