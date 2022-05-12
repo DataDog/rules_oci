@@ -1,6 +1,14 @@
-// Unless explicitly stated otherwise all files in this repository are licensed under the MIT License.
+// XXX Copied from
+// https://github.com/bazelbuild/bazel-skylib/blob/main/gazelle/bzl/gazelle.go
+
+// Package bzl generates a `bzl_library` target for every `.bzl` file in
+// each package.
 //
-// This product includes software developed at Datadog (https://www.datadoghq.com/). Copyright 2021 Datadog, Inc.
+// The `bzl_library` rule is provided by
+// https://github.com/bazelbuild/bazel-skylib.
+//
+// This extension is experimental and subject to change. It is not included
+// in the default Gazelle binary.
 
 /* Copyright 2020 The Bazel Authors. All rights reserved.
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,17 +22,6 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-// XXX Copied from
-// https://github.com/bazelbuild/bazel-skylib/blob/main/gazelle/bzl/gazelle.go
-
-// Package bzl generates a `bzl_library` target for every `.bzl` file in
-// each package.
-//
-// The `bzl_library` rule is provided by
-// https://github.com/bazelbuild/bazel-skylib.
-//
-// This extension is experimental and subject to change. It is not included
-// in the default Gazelle binary.
 package bzl
 
 import (
