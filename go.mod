@@ -1,6 +1,6 @@
 module github.com/DataDog/rules_oci
 
-go 1.17
+go 1.18
 
 require (
 	github.com/bazelbuild/bazel-gazelle v0.24.0

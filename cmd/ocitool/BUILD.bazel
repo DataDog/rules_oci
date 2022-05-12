@@ -11,6 +11,7 @@ go_library(
         "index_cmd.go",
         "main.go",
         "manifest_cmd.go",
+        "publishrules_cmd.go",
         "pull_cmd.go",
         "push_cmd.go",
         "pushblob_cmd.go",

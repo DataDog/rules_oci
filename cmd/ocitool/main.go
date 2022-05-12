@@ -202,6 +202,19 @@ var app = &cli.App{
 				},
 			},
 		},
+		{
+			Name:   "push-rules",
+			Hidden: true,
+			Action: PublishRulesCmd,
+			Flags: []cli.Flag{
+				&cli.StringFlag{
+					Name: "ref",
+				},
+				&cli.StringFlag{
+					Name: "file",
+				},
+			},
+		},
 	},
 	Flags: []cli.Flag{
 		&cli.BoolFlag{
