@@ -27,7 +27,7 @@ specifications](https://github.com/opencontainers/image-spec/blob/v1.0.2/convers
 git_repository(
     name = "rules_oci_bootstrap",
     remote = "https://github.com/DataDog/rules_oci_bootstrap.git",
-    commit = "bab1f71790b74ee78c1d308854ca8e1f23265f94",
+    commit = "75330296a80c4a5bfa228dc585ca9a9c3e56d45d",
 )
 
 load("@rules_oci_bootstrap//:defs.bzl", "oci_blob_pull")
