@@ -142,6 +142,7 @@ def _oci_image_impl(ctx):
     layout = ctx.attr.base[OCILayout]
 
     base_desc = get_descriptor_file(ctx, ctx.attr.base[OCIDescriptor])
+    config_desc = get_descriptor_file(ctx, ctx.attr.config[OCIDescriptor])
 
     manifest_desc_file = ctx.actions.declare_file("{}.manifest.descriptor.json".format(ctx.label.name))
     manifest_file = ctx.actions.declare_file("{}.manifest.json".format(ctx.label.name))
@@ -155,6 +156,7 @@ def _oci_image_impl(ctx):
                         "append-layers",
                         "--bazel-version-file={}".format(ctx.version_file.path),
                         "--base={}".format(base_desc.path),
+                        "--config={}".format(config_desc.path),
                         "--os={}".format(ctx.attr.os),
                         "--arch={}".format(ctx.attr.arch),
                         "--out-manifest={}".format(manifest_file.path),
@@ -191,7 +193,6 @@ oci_image = rule(
         "base": attr.label(
             doc = """
             """,
-            mandatory = True,
             providers = [
                 OCIDescriptor,
                 OCILayout,
@@ -205,14 +206,29 @@ oci_image = rule(
             doc = """
             """,
         ),
+        "config": attr.label(
+            doc = """
+                Optional configuration to override oci_image configuration.
+            """,
+            providers = [
+                OCIDescriptor,
+            ],
+        ),
         "layers": attr.label_list(
             doc = """
+                Layers to append to the image.
             """,
+            providers = [
+                OCIDescriptor,
+            ],
         ),
         "annotations": attr.string_dict(
             doc = """
+                Key-value pairs to add to the annotations block on the image
+                manifest.
             """,
         ),
     },
+    provides = [OCIDescriptor, OCILayout],
     toolchains = ["@com_github_datadog_rules_oci//oci:toolchain"],
 )

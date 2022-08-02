@@ -9,14 +9,15 @@ OCIReferenceInfo = provider(
 )
 
 OCILayout = provider(
+    doc = "A datastore for multiple desciptors and their content",
     fields = {
-        "blob_index": "",
-        "files": "",
+        "blob_index": "an index mapping digest to blob",
+        "files": "list of Bazel File objects that represent blobs",
     },
 )
 
 OCIDescriptor = provider(
-    doc = "",
+    doc = "A pointer to a piece of content in an OCI store",
     fields = {
         "file": "A file object of the content this descriptor describes",
         "descriptor_file": "A file object with the information in this provider",
@@ -29,7 +30,7 @@ OCIDescriptor = provider(
 )
 
 OCIImageManifest = provider(
-    doc = "",
+    doc = "An OCI Manifest specialized for Container Images",
     fields = {
         "config": "Descriptor that points to a configuration object",
         "layers": "List of descriptors",
@@ -38,7 +39,7 @@ OCIImageManifest = provider(
 )
 
 OCIImageIndexManifest = provider(
-    doc = "",
+    doc = "An OCI Manifest specialized for Container Images with multiple Platforms (often called multi-arch)",
     fields = {
         "manifests": "List of desciptors",
         "annotations": "String map of arbitrary metadata",

@@ -9,7 +9,6 @@ def _oci_image_manifest_impl(ctx):
 
 oci_image_manifest = rule(
     implementation = _oci_image_manifest_impl,
-    provides = [OCIImageManifest],
     attrs = {
         "descriptor": attr.label(
             mandatory = True,
@@ -26,6 +25,7 @@ oci_image_manifest = rule(
         "annotations": attr.string_dict(),
         "layout": attr.label(),
     },
+    provides = [OCIImageManifest, OCILayout, OCIDescriptor],
 )
 
 def _oci_image_index_manifest_impl(ctx):
@@ -47,5 +47,5 @@ oci_image_index_manifest = rule(
         "annotations": attr.string_dict(),
         "layout": attr.label(),
     },
-    provides = [OCIImageIndexManifest],
+    provides = [OCIImageIndexManifest, OCILayout, OCIDescriptor],
 )
