@@ -4,6 +4,7 @@ go_library(
     name = "go_default_library",
     srcs = [
         "appendlayer_cmd.go",
+        "createblob_cmd.go",
         "createlayer_cmd.go",
         "desc_helpers.go",
         "digest_cmd.go",

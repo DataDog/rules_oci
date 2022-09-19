@@ -75,6 +75,12 @@ bzl_library(
 )
 
 bzl_library(
+    name = "ctx",
+    srcs = ["ctx.bzl"],
+    visibility = ["//visibility:public"],
+)
+
+bzl_library(
     name = "debug_flag",
     srcs = ["debug_flag.bzl"],
     visibility = ["//visibility:public"],
