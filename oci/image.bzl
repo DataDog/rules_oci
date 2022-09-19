@@ -1,4 +1,5 @@
 load("@com_github_datadog_rules_oci//oci:providers.bzl", "OCIDescriptor", "OCILayout")
+load("//oci:ctx.bzl", "oci_ctx")
 
 def get_descriptor_file(ctx, desc):
     if hasattr(desc, "descriptor_file"):
@@ -43,6 +44,7 @@ def _oci_image_layer_impl(ctx):
 
     return [
         OCIDescriptor(
+            file = ctx.outputs.layer,
             descriptor_file = descriptor_file,
         ),
     ]

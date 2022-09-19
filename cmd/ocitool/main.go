@@ -196,9 +196,28 @@ var app = &cli.App{
 				&cli.StringFlag{
 					Name: "file",
 				},
-			},
+				&cli.GenericFlag{
+					Name:  "annotations",
+					Value: &flagutil.KeyValueFlag{},
+				},
+                &cli.StringFlag{
+                    Name: "media-type",
+                },
+            },
 		},
-		{
+        {
+            Name: "create-blob",
+            Action: CreateBlobCmd,
+            Flags: []cli.Flag{
+                &cli.StringFlag{
+                    Name: "file",
+                },
+				&cli.StringFlag{
+					Name: "outd",
+				},
+            },
+        },
+        {
 			Name:   "push-rules",
 			Hidden: true,
 			Action: PublishRulesCmd,
