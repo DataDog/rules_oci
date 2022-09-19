@@ -1,4 +1,4 @@
-load("@com_github_datadog_rules_oci//oci:providers.bzl", "OCIDescriptor", "OCILayout")
+load("@com_github_datadog_rules_oci//oci:providers.bzl", "OCIDescriptor", "OCILayout", "OCIPlatform")
 load("//oci:ctx.bzl", "oci_ctx")
 
 def get_descriptor_file(octx, desc):
@@ -80,52 +80,20 @@ oci_image_layer = rule(
 )
 
 def _oci_image_index_impl(ctx):
-    toolchain = ctx.toolchains["@com_github_datadog_rules_oci//oci:toolchain"]
+    octx = oci_ctx(ctx)
 
-    layout_files = depset(None, transitive = [m[OCILayout].files for m in ctx.attr.manifests])
-
-    index_desc_file = ctx.actions.declare_file("{}.index.descriptor.json".format(ctx.label.name))
-    index_file = ctx.actions.declare_file("{}.index.json".format(ctx.label.name))
-    layout_file = ctx.actions.declare_file("{}.index.layout.json".format(ctx.label.name))
-
-    desc_files = []
-    for manifest in ctx.attr.manifests:
-        desc_files.append(get_descriptor_file(ctx, manifest[OCIDescriptor]))
-
-    ctx.actions.run(
-        executable = toolchain.sdk.ocitool,
-        arguments = ["--layout={}".format(m[OCILayout].blob_index.path) for m in ctx.attr.manifests] +
-        [
-            "--debug",
-                        "create-index",
-                        "--out-index={}".format(index_file.path),
-                        "--out-layout={}".format(layout_file.path),
-                        "--outd={}".format(index_desc_file.path),
-                    ] +
-                    ["--desc={}".format(d.path) for d in desc_files] +
-                    ["--annotations={}={}".format(k, v) for k, v in ctx.attr.annotations.items()],
-        inputs = desc_files + layout_files.to_list(),
-        outputs = [
-            index_file,
-            index_desc_file,
-            layout_file,
-        ],
-    )
+    index = create_oci_index_manifest(octx, manifests = ctx.attr.manifests, annotations = ctx.attr.annotations)
 
     return [
-        OCIDescriptor(
-            descriptor_file = index_desc_file,
-        ),
-        OCILayout(
-            blob_index = layout_file,
-            files = depset(direct = [index_file, layout_file], transitive = [layout_files]),
-        ),
+        index.index_desc,
+        index.layout,
     ]
 
 oci_image_index = rule(
     implementation = _oci_image_index_impl,
     doc = """
     """,
+    provides = [OCIDescriptor, OCILayout],
     attrs = {
         "manifests": attr.label_list(
             doc = """
@@ -140,18 +108,18 @@ oci_image_index = rule(
 )
 
 def create_oci_image_manifest(octx, layers, annotations={}, base=None, version_file=None, platform=None):
-    base_desc = get_descriptor_file(ctx, ctx.attr.base[OCIDescriptor])
+    base_desc = get_descriptor_file(octx, base[OCIDescriptor])
 
-    manifest_desc_file = ctx.actions.declare_file("{}.manifest.descriptor.json".format(octx.prefix))
-    manifest_file = ctx.actions.declare_file("{}.manifest.json".format(octx.prefix))
-    config_file = ctx.actions.declare_file("{}.config.json".format(octx.prefix))
-    layout_file = ctx.actions.declare_file("{}.layout.json".format(octx.prefix))
+    manifest_desc_file = octx.actions.declare_file("{}.manifest.descriptor.json".format(octx.prefix))
+    manifest_file = octx.actions.declare_file("{}.manifest.json".format(octx.prefix))
+    config_file = octx.actions.declare_file("{}.config.json".format(octx.prefix))
+    layout_file = octx.actions.declare_file("{}.layout.json".format(octx.prefix))
 
     args = []
     inputs = []
 
     if base != None:
-        layout = ctx.attr.base[OCILayout]
+        layout = base[OCILayout]
         args.append("--layout={}".format(layout.blob_index.path))
         inputs += layout.files.to_list()
         inputs.append(layout.blob_index)
@@ -160,14 +128,14 @@ def create_oci_image_manifest(octx, layers, annotations={}, base=None, version_f
 
     if version_file != None:
         args.append("--bazel-version-file={}".format(version_file.path))
-        args.append(ctx.version_file)
+        args.append(version_file)
 
     if platform != None:
-        args.append("--os={}".format(ctx.attr.os))
-        args.append("--arch={}".format(ctx.attr.arch))
+        args.append("--os={}".format(platform.os))
+        args.append("--arch={}".format(platform.arch))
 
     if base != None:
-        base_desc := base[OCIDescriptor]
+        base_desc = base[OCIDescriptor]
         args.append("--base={}".format(base_desc.path))
         inputs.append(base_desc.descriptor_file)
 
@@ -181,10 +149,10 @@ def create_oci_image_manifest(octx, layers, annotations={}, base=None, version_f
     args += ["--layer={}".format(f[OCIDescriptor].file.path) for f in layers]
     inputs += [f[OCIDescriptor].file for f in layers]
 
-    args += ["--annotations={}={}".format(k, v) for k, v in annotations.items()],
+    args += ["--annotations={}={}".format(k, v) for k, v in annotations.items()]
 
-    ctx.actions.run(
-        executable = toolchain.sdk.ocitool,
+    octx.actions.run(
+        executable = octx.toolchain.sdk.ocitool,
         arguments = args,
         inputs = inputs,
         outputs = [
@@ -206,16 +174,52 @@ def create_oci_image_manifest(octx, layers, annotations={}, base=None, version_f
         ),
     )
 
-def create_oci_index_manifest(octx, manifests = [], annotations = {}):
+def create_oci_index_manifest(octx, manifests, annotations = {}):
+    layout_files = depset(None, transitive = [m[OCILayout].files for m in manifests])
+
+    index_desc_file = octx.actions.declare_file("{}.index.descriptor.json".format(octx.prefix))
+    index_file = octx.actions.declare_file("{}.index.json".format(octx.prefix))
+    layout_file = octx.actions.declare_file("{}.index.layout.json".format(octx.prefix))
+
+    desc_files = []
+    for manifest in manifests:
+        desc_files.append(get_descriptor_file(octx, manifest[OCIDescriptor]))
+
+    octx.actions.run(
+        executable = octx.toolchain.sdk.ocitool,
+        arguments = ["--layout={}".format(m[OCILayout].blob_index.path) for m in manifests] +
+        [
+                        "create-index",
+                        "--out-index={}".format(index_file.path),
+                        "--out-layout={}".format(layout_file.path),
+                        "--outd={}".format(index_desc_file.path),
+                    ] +
+                    ["--desc={}".format(d.path) for d in desc_files] +
+                    ["--annotations={}={}".format(k, v) for k, v in annotations.items()],
+        inputs = desc_files + layout_files.to_list(),
+        outputs = [
+            index_file,
+            index_desc_file,
+            layout_file,
+        ],
+    )
+
+
     return struct(
-        index_desc = OCIDescriptor(),
-        layout = OCILayout(),
+        index_desc = OCIDescriptor(
+            file = index_file,
+            descriptor_file = index_desc_file,
+        ),
+        layout = OCILayout(
+            blob_index = layout_file,
+            files = depset(direct = [index_file, layout_file], transitive = [layout_files]),
+        ),
     )
 
 def _oci_image_impl(ctx):
-    octx := oci_ctx(ctx)
+    octx = oci_ctx(ctx)
 
-    rt = oci_image_manifest(
+    rt = create_oci_image_manifest(
         octx,
         base = ctx.attr.base,
         layers = ctx.attr.layers,
