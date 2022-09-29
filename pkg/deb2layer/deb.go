@@ -39,11 +39,11 @@ var (
 // track the package.
 //
 // This approach has a few limitations:
-// * We don't pay attention to the metadata in the control file, including
-//   the additional dependencies that may be decalared or checking that the
-//   architecture is correct.
-// * Any package mantainer scripts will not be run, which breaks some packages
-//   entirely.
+//   - We don't pay attention to the metadata in the control file, including
+//     the additional dependencies that may be decalared or checking that the
+//     architecture is correct.
+//   - Any package mantainer scripts will not be run, which breaks some packages
+//     entirely.
 func DebToLayer(debReader io.Reader, writer io.Writer) error {
 	var foundData, foundControl, foundDeb bool
 	arReader := ar.NewReader(debReader)

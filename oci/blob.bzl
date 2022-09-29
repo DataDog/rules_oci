@@ -39,13 +39,11 @@ MIME type of blob.
             doc = """
 Size of content in bytes.
             """,
-
         ),
         "urls": attr.string_list(
             doc = """
 A list of URLs from which this object MAY be downloaded.
             """,
-
         ),
         "annotations": attr.string_dict(
             doc = """
