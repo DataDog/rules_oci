@@ -76,7 +76,7 @@ def oci_local_toolchain(name, **kwargs):
     sdk_name = "{}.sdk".format(name)
     oci_sdk(
         name = sdk_name,
-        ocitool = "@com_github_datadog_rules_oci//cmd/ocitool"
+        ocitool = "@com_github_datadog_rules_oci//cmd/ocitool",
     )
 
     oci_toolchain(
@@ -87,13 +87,13 @@ def oci_local_toolchain(name, **kwargs):
 def create_compiled_oci_toolchains(name):
     for os, os_const in OS_CONSTRAINTS.items():
         for arch, arch_const in ARCH_CONSTRAINTS.items():
-            sdk_name = "{name}_sdk_{os}_{arch}".format(name=name, os=os, arch=arch)
+            sdk_name = "{name}_sdk_{os}_{arch}".format(name = name, os = os, arch = arch)
             oci_sdk(
                 name = sdk_name,
-                ocitool = "ocitool-{os}-{arch}".format(os=os, arch=arch),
+                ocitool = "ocitool-{os}-{arch}".format(os = os, arch = arch),
             )
 
-            toolchain_name = "{name}_toolchain_{os}_{arch}".format(name=name, os=os, arch=arch)
+            toolchain_name = "{name}_toolchain_{os}_{arch}".format(name = name, os = os, arch = arch)
             oci_toolchain(
                 name = toolchain_name,
                 sdk = sdk_name,
@@ -106,5 +106,5 @@ def create_compiled_oci_toolchains(name):
 def register_compiled_oci_toolchains(name):
     for os, os_const in OS_CONSTRAINTS.items():
         for arch, arch_const in ARCH_CONSTRAINTS.items():
-            toolchain_name = "{name}_toolchain_{os}_{arch}".format(name=name, os=os, arch=arch)
+            toolchain_name = "{name}_toolchain_{os}_{arch}".format(name = name, os = os, arch = arch)
             native.register_toolchains("@com_github_datadog_rules_oci//bin:{}".format(toolchain_name))

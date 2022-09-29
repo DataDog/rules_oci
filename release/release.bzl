@@ -31,11 +31,10 @@ def go_binary_multi(name, embed, gooss = DEFAULT_GOOSS, goarchs = DEFAULT_GOARCH
     all_bin_name = "{}.all".format(name)
     native.filegroup(
         name = all_bin_name,
-        srcs = all_binaries
+        srcs = all_binaries,
     )
 
 def release_rules_oci(name, rules, binaries, **kwargs):
-
     top_name = "{}.top".format(name)
     pkg_tar(
         name = top_name,
@@ -47,7 +46,7 @@ def release_rules_oci(name, rules, binaries, **kwargs):
     pkg_tar(
         name = rules_name,
         srcs = rules,
-        package_dir = "/oci"
+        package_dir = "/oci",
     )
 
     binaries_name = "{}.bin".format(name)
@@ -66,5 +65,5 @@ def release_rules_oci(name, rules, binaries, **kwargs):
             binaries_name,
             top_name,
         ],
-        **kwargs,
+        **kwargs
     )

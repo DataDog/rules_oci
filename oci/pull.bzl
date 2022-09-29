@@ -29,7 +29,7 @@ def pull(rctx, layout_root, repository, digest, registry = "", shallow = False):
     if res.return_code > 0:
         failout("failed to pull manifest", res)
 
-def generate_build_files(rctx, layout_root, digest=""):
+def generate_build_files(rctx, layout_root, digest = ""):
     cmd = [
         rctx.path(_repo_toolchain(rctx, "ocitool")),
         "--debug",
@@ -65,9 +65,8 @@ oci_pull = repository_rule(
     attrs = {
         "registry": attr.string(
             mandatory = True,
-        doc = """
+            doc = """
         """,
-
         ),
         "repository": attr.string(
             mandatory = True,
@@ -124,4 +123,4 @@ def _repo_toolchain(rctx, tool_name):
     else:
         fail("unknown arch: {}".format(rctx.os.arch))
 
-    return getattr(rctx.attr, "_{tool}_{os}_{arch}".format(tool=tool_name, os=goos, arch=goarch))
+    return getattr(rctx.attr, "_{tool}_{os}_{arch}".format(tool = tool_name, os = goos, arch = goarch))

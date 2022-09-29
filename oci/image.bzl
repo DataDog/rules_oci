@@ -67,7 +67,7 @@ oci_image_layer = rule(
             """,
         ),
         "file_map": attr.label_keyed_string_dict(
-            allow_files =  True,
+            allow_files = True,
         ),
     },
     toolchains = ["@com_github_datadog_rules_oci//oci:toolchain"],
@@ -92,8 +92,8 @@ def _oci_image_index_impl(ctx):
     ctx.actions.run(
         executable = toolchain.sdk.ocitool,
         arguments = ["--layout={}".format(m[OCILayout].blob_index.path) for m in ctx.attr.manifests] +
-        [
-            "--debug",
+                    [
+                        "--debug",
                         "create-index",
                         "--out-index={}".format(index_file.path),
                         "--out-layout={}".format(layout_file.path),
