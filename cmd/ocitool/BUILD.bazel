@@ -22,6 +22,7 @@ go_library(
         "//internal/flagutil:go_default_library",
         "//internal/tarutil:go_default_library",
         "//pkg/blob:go_default_library",
+        "//pkg/jsonutil:go_default_library",
         "//pkg/layer:go_default_library",
         "//pkg/ociutil:go_default_library",
         "@bazel_gazelle//rule:go_default_library",
