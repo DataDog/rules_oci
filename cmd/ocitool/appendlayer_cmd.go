@@ -11,6 +11,7 @@ import (
 
 	"github.com/DataDog/rules_oci/internal/flagutil"
 	"github.com/DataDog/rules_oci/pkg/blob"
+	"github.com/DataDog/rules_oci/pkg/jsonutil"
 	"github.com/DataDog/rules_oci/pkg/layer"
 	"github.com/DataDog/rules_oci/pkg/ociutil"
 
@@ -147,6 +148,20 @@ func AppendLayersCmd(c *cli.Context) error {
 		layerDescs = append(layerDescs, ld)
 	}
 
+	var entrypoint []string
+	if entrypoint_file := c.String("entrypoint"); entrypoint_file != "" {
+		var entrypointStruct struct {
+			Entrypoint []string `json:"entrypoint"`
+		}
+
+		err := jsonutil.DecodeFromFile(entrypoint_file, &entrypointStruct)
+		if err != nil {
+			return fmt.Errorf("failed to read entrypoint config file: %w", err)
+		}
+
+		entrypoint = entrypointStruct.Entrypoint
+	}
+
 	log.Debugf("created descriptors for layers(n=%v): %#v", len(layerPaths), layerDescs)
 
 	outIngestor := layer.NewAppendIngester(c.String("out-manifest"), c.String("out-config"))
@@ -158,6 +173,7 @@ func AppendLayersCmd(c *cli.Context) error {
 		layerDescs,
 		c.Generic("annotations").(*flagutil.KeyValueFlag).Map,
 		createdTimestamp,
+		entrypoint,
 	)
 	if err != nil {
 		return err

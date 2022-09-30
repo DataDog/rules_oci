@@ -102,6 +102,9 @@ var app = &cli.App{
 				&cli.StringFlag{
 					Name: "out-layout",
 				},
+				&cli.StringFlag{
+					Name: "entrypoint",
+				},
 			},
 		},
 		{

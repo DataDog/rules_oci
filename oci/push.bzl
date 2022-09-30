@@ -46,7 +46,7 @@ def _oci_push_impl(ctx):
         --layout-relative {root} \\
         --desc {desc} \\
         --target-ref {ref} \\
-        --parent-tag {tag} \\
+        --parent-tag \"{tag}\" \\
         {headers} \\
         {xheaders} \\
         """.format(

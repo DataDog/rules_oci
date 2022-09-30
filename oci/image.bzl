@@ -93,7 +93,6 @@ def _oci_image_index_impl(ctx):
         executable = toolchain.sdk.ocitool,
         arguments = ["--layout={}".format(m[OCILayout].blob_index.path) for m in ctx.attr.manifests] +
                     [
-                        "--debug",
                         "create-index",
                         "--out-index={}".format(index_file.path),
                         "--out-layout={}".format(layout_file.path),
@@ -148,6 +147,16 @@ def _oci_image_impl(ctx):
     config_file = ctx.actions.declare_file("{}.config.json".format(ctx.label.name))
     layout_file = ctx.actions.declare_file("{}.layout.json".format(ctx.label.name))
 
+    entrypoint_config_file = ctx.actions.declare_file("{}.entrypoint.config.json".format(ctx.label.name))
+    entrypoint_config = struct(
+        entrypoint = ctx.attr.entrypoint,
+    )
+
+    ctx.actions.write(
+        output = entrypoint_config_file,
+        content = json.encode(entrypoint_config),
+    )
+
     ctx.actions.run(
         executable = toolchain.sdk.ocitool,
         arguments = [
@@ -161,10 +170,11 @@ def _oci_image_impl(ctx):
                         "--out-config={}".format(config_file.path),
                         "--out-layout={}".format(layout_file.path),
                         "--outd={}".format(manifest_desc_file.path),
+                        "--entrypoint={}".format(entrypoint_config_file.path),
                     ] +
                     ["--layer={}".format(f.path) for f in ctx.files.layers] +
                     ["--annotations={}={}".format(k, v) for k, v in ctx.attr.annotations.items()],
-        inputs = [ctx.version_file, base_desc, layout.blob_index] + ctx.files.layers + layout.files.to_list(),
+        inputs = [ctx.version_file, base_desc, layout.blob_index, entrypoint_config_file] + ctx.files.layers + layout.files.to_list(),
         outputs = [
             manifest_file,
             config_file,
@@ -197,6 +207,7 @@ oci_image = rule(
                 OCILayout,
             ],
         ),
+        "entrypoint": attr.string_list(),
         "os": attr.string(
             doc = """
             """,
