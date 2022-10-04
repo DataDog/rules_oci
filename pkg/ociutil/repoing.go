@@ -10,6 +10,7 @@ import (
 	"github.com/containerd/containerd/content"
 	"github.com/containerd/containerd/errdefs"
 	"github.com/containerd/containerd/remotes"
+	"github.com/containerd/containerd/remotes/docker"
 	"github.com/opencontainers/go-digest"
 	ocispec "github.com/opencontainers/image-spec/specs-go/v1"
 )
@@ -25,12 +26,13 @@ type RepositoryIngester interface {
 	Mount(ctx context.Context, from string, dgst digest.Digest) error
 }
 
-func ExtendedResolver(resolver remotes.Resolver) remotes.Resolver {
-	return &extResolver{resolver}
+func ExtendedResolver(resolver remotes.Resolver, hosts docker.RegistryHosts) remotes.Resolver {
+	return &extResolver{resolver, hosts}
 }
 
 type extResolver struct {
 	resolver remotes.Resolver
+	hosts    docker.RegistryHosts
 }
 
 func (r *extResolver) Pusher(ctx context.Context, ref string) (remotes.Pusher, error) {
@@ -39,7 +41,7 @@ func (r *extResolver) Pusher(ctx context.Context, ref string) (remotes.Pusher, e
 		return nil, err
 	}
 
-	host, err := RefToHostname(ref)
+	regName, err := RefToRegistryName(ref)
 	if err != nil {
 		return nil, fmt.Errorf("unable to parse ref: %w", err)
 	}
@@ -48,10 +50,21 @@ func (r *extResolver) Pusher(ctx context.Context, ref string) (remotes.Pusher, e
 		return nil, fmt.Errorf("unable to parse ref: %w", err)
 	}
 
+	matchedRegistries, err := r.hosts(regName)
+	if err != nil {
+		return nil, fmt.Errorf("failed to find auth: %w", err)
+	}
+
+	var registry docker.RegistryHost
+	if len(matchedRegistries) > 0 {
+		registry = matchedRegistries[0]
+	}
+
 	return &dockerRegPusher{
-		Pusher: pusher,
-		host:   host,
-		repo:   repo,
+		Pusher:       pusher,
+		registryName: regName,
+		repo:         repo,
+		registry:     registry,
 	}, nil
 }
 
@@ -65,8 +78,9 @@ func (r *extResolver) Resolve(ctx context.Context, ref string) (string, ocispec.
 
 type dockerRegPusher struct {
 	remotes.Pusher
-	host string
-	repo string
+	registryName string
+	repo         string
+	registry     docker.RegistryHost
 }
 
 func (p *dockerRegPusher) Writer(ctx context.Context, opts ...content.WriterOpt) (content.Writer, error) {
@@ -85,10 +99,17 @@ func (d *dockerRegPusher) Mount(ctx context.Context, from string, dgst digest.Di
 	hc := &http.Client{Timeout: 60 * time.Second}
 
 	// https://github.com/opencontainers/distribution-spec/blob/main/spec.md#mounting-a-blob-from-another-repository
-	mountURL := fmt.Sprintf("%s/v2/%s/blobs/uploads/?mount=%s&from=%s", d.host, d.repo, dgst.String(), from)
+	mountURL := fmt.Sprintf("https://%s/v2/%s/blobs/uploads/?mount=%s&from=%s", d.registryName, d.repo, dgst.String(), from)
 	r, err := http.NewRequestWithContext(ctx, http.MethodPost, mountURL, nil)
 	if err != nil {
 		return fmt.Errorf("unable to create mount http request: %w", err)
+	}
+
+	if d.registry.Authorizer != nil {
+		err = d.registry.Authorizer.Authorize(ctx, r)
+		if err != nil {
+			return fmt.Errorf("couldn't authorize mount request: %w", err)
+		}
 	}
 
 	resp, err := hc.Do(r)
