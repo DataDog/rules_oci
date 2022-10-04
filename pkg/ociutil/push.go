@@ -38,15 +38,18 @@ func newResolver(headers map[string]string) Resolver {
 	for k, v := range headers {
 		hdrs.Add(k, v)
 	}
+
+	hosts := docker.Registries(
+		credhelper.RegistryHostsFromDockerConfig(),
+		// Support for Docker Hub
+		docker.ConfigureDefaultRegistries(),
+	)
+
 	return Resolver{
 		Resolver: ExtendedResolver(docker.NewResolver(docker.ResolverOptions{
-			Hosts: docker.Registries(
-				credhelper.RegistryHostsFromDockerConfig(),
-				// Support for Docker Hub
-				docker.ConfigureDefaultRegistries(),
-			),
+			Hosts:   hosts,
 			Headers: hdrs,
-		})),
+		}), hosts),
 	}
 }
 
@@ -79,14 +82,14 @@ func RefToPath(ref string) (string, error) {
 	return dref.Path(n), nil
 }
 
-// RefToHostname will return a hostname of a registry given a reference string.
-func RefToHostname(ref string) (string, error) {
+// RefToRegistryName will return a hostname of a registry given a reference string.
+func RefToRegistryName(ref string) (string, error) {
 	n, err := NamedRef(ref)
 	if err != nil {
 		return "", err
 	}
 
-	return fmt.Sprintf("https://%v", dref.Domain(n)), nil
+	return dref.Domain(n), nil
 }
 
 // PushBlob pushes a singluar blob to a registry.
