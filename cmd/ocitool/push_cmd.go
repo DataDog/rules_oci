@@ -7,7 +7,6 @@ import (
 	"github.com/DataDog/rules_oci/pkg/ociutil"
 
 	"github.com/containerd/containerd/content"
-	"github.com/containerd/containerd/images"
 	"github.com/urfave/cli/v2"
 )
 
@@ -35,7 +34,13 @@ func PushCmd(c *cli.Context) error {
 
 	resolver := ociutil.ResolverWithHeaders(headers)
 
-	ref := c.String("target-ref")
+    ref := c.String("target-ref")
+
+	// if a tag exists, use it for the parent
+	tag := c.String("parent-tag")
+	if tag != "" {
+		ref = ref + ":" + tag
+    }
 
 	pusher, err := resolver.Pusher(c.Context, ref)
 	if err != nil {
@@ -47,30 +52,7 @@ func PushCmd(c *cli.Context) error {
 		return fmt.Errorf("pusher not an ingester: %T", pusher)
 	}
 
-	// take care of copying any children first
-	imagesHandler := images.ChildrenHandler(allProviders)
-	err = ociutil.CopyChildrenFromHandler(c.Context, imagesHandler, allProviders, regIng, baseDesc)
-	if err != nil {
-		return fmt.Errorf("failed to push child content to registry: %w", err)
-	}
-
-	// if a tag exists, use it for the parent
-	tag := c.String("parent-tag")
-	if tag != "" {
-		ref = ref + ":" + tag
-		pusher, err = resolver.Pusher(c.Context, ref)
-		if err != nil {
-			return fmt.Errorf("failed to create parent pusher: %w", err)
-		}
-
-		regIng, ok = pusher.(content.Ingester)
-		if !ok {
-			return fmt.Errorf("parent pusher not an ingester: %T", pusher)
-		}
-	}
-
-	// push the parent last (in case of image index)
-	err = ociutil.CopyContent(c.Context, allProviders, regIng, baseDesc)
+	err = ociutil.CopyContentRecursive(c.Context, allProviders, regIng, baseDesc)
 	if err != nil {
 		return fmt.Errorf("failed to push parent content to registry: %w", err)
 	}

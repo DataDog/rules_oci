@@ -8,9 +8,12 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+    "sync"
+    "golang.org/x/sync/semaphore"
 
 	"github.com/DataDog/rules_oci/pkg/credhelper"
 
+	"github.com/containerd/containerd/images"
 	"github.com/containerd/containerd/content"
 	"github.com/containerd/containerd/errdefs"
 	dref "github.com/containerd/containerd/reference/docker"
@@ -236,6 +239,18 @@ func (resolver Resolver) MarshalAndPushContent(ctx context.Context, ref string, 
 	return desc, nil
 }
 
+
+func CopyContentHandler(from content.Provider, to content.Ingester) images.HandlerFunc {
+    return func(ctx context.Context, desc ocispec.Descriptor) ([]ocispec.Descriptor, error) {
+        err := CopyContent(ctx, from, to, desc)
+        if err != nil {
+            return nil, err
+        }
+
+        return nil, nil
+    }
+}
+
 // CopyContent copies a descriptor from a provider to an ingestor interfaces
 // provider by "containerd/content". Useful when you want to copy between
 // layouts or when pulling an image via oras.ProviderWrapper
@@ -296,4 +311,43 @@ func CopyContent(ctx context.Context, from content.Provider, to content.Ingester
 	}
 
 	return nil
+}
+
+
+
+// Based on https://github.com/containerd/containerd/blob/9cd3357b7fd7218e4aec3eae239db1f68a5a6ec6/remotes/handlers.go#L200
+func CopyContentRecursive(ctx context.Context, from content.Provider, to content.Ingester, desc ocispec.Descriptor) error {
+    var manifestStack []ocispec.Descriptor
+    var manifestStackMx sync.Mutex
+
+    filterHandler := images.HandlerFunc(func(ctx context.Context, desc ocispec.Descriptor) ([]ocispec.Descriptor, error) {
+		    if images.IsIndexType(desc.MediaType) || images.IsManifestType(desc.MediaType) {
+                manifestStackMx.Lock()
+			    manifestStack = append(manifestStack, desc)
+			    manifestStackMx.Unlock()
+            }
+			return nil, images.ErrStopHandler
+	})
+
+    pushHandler := CopyContentHandler(from, to)
+
+	var handler images.Handler = images.Handlers(
+        images.ChildrenHandler(from),
+        filterHandler,
+        pushHandler,
+	)
+
+    limiter := semaphore.NewWeighted(50)
+	if err := images.Dispatch(ctx, handler, limiter, desc); err != nil {
+		return err
+	}
+
+	for i := len(manifestStack) - 1; i >= 0; i-- {
+		_, err := pushHandler(ctx, manifestStack[i])
+		if err != nil {
+			return err
+		}
+	}
+
+    return nil
 }

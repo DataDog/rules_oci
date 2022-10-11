@@ -10,18 +10,6 @@ import (
 	ocispec "github.com/opencontainers/image-spec/specs-go/v1"
 )
 
-// CopyContentHandler copies the parent descriptor from the provider to the
-// ingestor
-func CopyContentHandler(handler images.HandlerFunc, from content.Provider, to content.Ingester) images.HandlerFunc {
-	return func(ctx context.Context, desc ocispec.Descriptor) ([]ocispec.Descriptor, error) {
-		err := CopyContent(ctx, from, to, desc)
-		if err != nil {
-			return nil, err
-		}
-
-		return handler(ctx, desc)
-	}
-}
 
 // CopyContentHandler copies the children of the parent descriptor from the provider to
 // the ingestor.

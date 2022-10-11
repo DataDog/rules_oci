@@ -60,7 +60,7 @@ func PullCmd(c *cli.Context) error {
 		)
 	}
 
-	err = images.Dispatch(c.Context, ociutil.CopyContentHandler(imagesHandler, provider, layout), sem, desc)
+	err = images.Dispatch(c.Context, images.Handlers(imagesHandler, ociutil.CopyContentHandler(provider, layout)), sem, desc)
 	if err != nil {
 		return err
 	}

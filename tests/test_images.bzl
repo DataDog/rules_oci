@@ -3,8 +3,8 @@ load("@com_github_datadog_rules_oci//oci:defs.bzl", "oci_pull")
 def pull_test_images():
     oci_pull(
         name = "ubuntu_focal",
-        registry = "ghcr.io",
-        repository = "datadog/rules_oci/ubuntu",
+        registry = "registry.ddbuild.io",
+        repository = "base",
         # Latest at "focal" tag
-        digest = "sha256:9d6a8699fb5c9c39cf08a0871bd6219f0400981c570894cd8cbea30d3424a31f",
+        digest = "sha256:d5f5235357976f0994dfd614b0836c73bb7644505aa7ae4919440324062ddd9c",
     )

@@ -30,8 +30,8 @@ go_multiarch_image(
 oci_push(
     name = "push",
     manifest = ":image",
-    registry = "ghcr.io",
-    repository = "datadog/rules_oci/hello-world",
+    registry = "registry.ddbuild.io",
+    repository = "rules-oci/hello-world",
 )
 
 bzl_library(
