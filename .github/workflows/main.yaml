@@ -16,7 +16,7 @@ jobs:
       - run: echo '{"credHelpers":{"ghcr.io":"ghcr"}}' > ~/.docker/config.json
       - run: echo "${HOME}/.local/bin" >> $GITHUB_PATH
       - run: mkdir -p ~/.local/bin
-      - run: echo 'echo "{"ServerURL":"ghcr.io","Username":"Bearer","Secret":"${{ secrets.GITHUB_TOKEN }}"}"' > ~/.local/bin/docker-credential-ghcr
+      - run: echo '#!/usr/bin/env bash\n echo "{"ServerURL":"ghcr.io","Username":"Bearer","Secret":"${{ secrets.GITHUB_TOKEN }}"}"' > ~/.local/bin/docker-credential-ghcr
       - run: chmod +x ~/.local/bin/docker-credential-ghcr
       - run: echo $PATH
       - run: bazel build //cmd/ocitool:ocitool && cp bazel-bin/cmd/ocitool/ocitool_/ocitool bin/ocitool-linux-amd64
