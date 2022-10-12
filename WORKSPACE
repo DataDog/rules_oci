@@ -96,6 +96,11 @@ load("@rules_pkg//:deps.bzl", "rules_pkg_dependencies")
 
 rules_pkg_dependencies()
 
+load("@com_github_datadog_rules_oci//oci:toolchain.bzl", "registry_post_push_hooks")
+registry_post_push_hooks(
+    name = "oci_push_hooks",
+)
+
 register_toolchains(
     "@com_github_datadog_rules_oci//:oci_local_toolchain",
 )
