@@ -4,7 +4,7 @@
 OCI_CACHE_DIR_ENV = "OCI_CACHE_DIR"
 
 # XXX(griffin): quick hack to get Bazel to spit out debug info for oci_pull
-DEBUG = True
+DEBUG = False
 
 def failout(msg, cmd_result):
     fail(
