@@ -12,10 +12,6 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - uses: bazelbuild/setup-bazelisk@v1
+      - run: echo '{"credHelpers":{"ghcr.io":"ghcr"}}' > ~/.docker/config.json
+      - run: echo "echo "{\"ServerURL\": \"ghcr.io\", \"Username\":\"Bearer\", \"Secret\":\"${{ secrets.GITHUB_TOKEN }}\"}" > /usr/bin/docker-credential-ghcr
       - run: bazel test //...
-    services:
-      registry:
-        image: registry:2.7.1
-        ports:
-          # Opens tcp port 6379 on the host and service container
-          - 8080:8080
