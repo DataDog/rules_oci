@@ -50,7 +50,7 @@ def _oci_push_impl(ctx):
         {headers} \\
         {xheaders} \\
 
-        export OCI_REFERENCE={ref}
+        export OCI_REFERENCE={ref}@$(cat {digest})
         {post_scripts}
         """.format(
             root = ctx.bin_dir.path,
@@ -63,6 +63,7 @@ def _oci_push_impl(ctx):
             headers = headers,
             xheaders = xheaders,
             post_scripts = "\n".join(["./" + hook.short_path for hook in toolchain.post_push_hooks]),
+            digest = digest_file.short_path,
         ),
         output = ctx.outputs.executable,
         is_executable = True,
@@ -72,7 +73,7 @@ def _oci_push_impl(ctx):
         DefaultInfo(
             runfiles = ctx.runfiles(
                 files = layout.files.to_list() +
-                        [toolchain.sdk.ocitool, ctx.attr.manifest[OCIDescriptor].descriptor_file, layout.blob_index] + toolchain.post_push_hooks,
+                        [toolchain.sdk.ocitool, ctx.attr.manifest[OCIDescriptor].descriptor_file, layout.blob_index, digest_file] + toolchain.post_push_hooks,
             ),
         ),
         OCIReferenceInfo(
