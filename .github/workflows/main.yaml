@@ -14,5 +14,7 @@ jobs:
       - uses: actions/checkout@v2
       - uses: bazelbuild/setup-bazelisk@v1
       - run: echo '{"credHelpers":{"ghcr.io":"ghcr"}}' > ~/.docker/config.json
-      - run: echo 'echo "{"Secret":"${{ secrets.GITHUB_TOKEN }}"}"' > /usr/bin/docker-credential-ghcr
-      - run: bazel test //...
+      - run: mkdir -p ~/bin
+      - run: echo 'echo "{"ServerURL": "ghcr.io", "Username": "Bearer", "Secret":"${{ secrets.GITHUB_TOKEN }}"}"' > ~/bin/docker-credential-ghcr
+      - run: chmod +x ~/bin/docker-credential-ghcr
+      - run: PATH="~/bin:$PATH" bazel test //...
