@@ -18,6 +18,7 @@ OCISDK = provider(
 def _oci_toolchain_impl(ctx):
     return [platform_common.ToolchainInfo(
         sdk = ctx.attr.sdk[OCISDK],
+        post_push_hooks = ctx.files.post_push_hooks,
     )]
 
 _oci_toolchain = rule(
@@ -28,20 +29,23 @@ _oci_toolchain = rule(
             providers = [OCISDK],
             cfg = "exec",
         ),
+        "post_push_hooks": attr.label_list(
+            cfg = "exec",
+            allow_files = True,
+        ),
     },
     provides = [platform_common.ToolchainInfo],
 )
 
 def oci_toolchain(
         name,
-        sdk,
         exec_compatible_with = [],
         target_compatible_with = [],
         **kwargs):
     oci_toolchain_name = "{name}.oci_toolchain".format(name = name)
     _oci_toolchain(
         name = oci_toolchain_name,
-        sdk = sdk,
+        **kwargs,
     )
 
     native.toolchain(
@@ -84,13 +88,13 @@ def oci_local_toolchain(name, **kwargs):
         sdk = sdk_name,
     )
 
-def create_compiled_oci_toolchains(name):
+def create_compiled_oci_toolchains(name, **kwargs):
     for os, os_const in OS_CONSTRAINTS.items():
         for arch, arch_const in ARCH_CONSTRAINTS.items():
             sdk_name = "{name}_sdk_{os}_{arch}".format(name = name, os = os, arch = arch)
             oci_sdk(
                 name = sdk_name,
-                ocitool = "ocitool-{os}-{arch}".format(os = os, arch = arch),
+                ocitool = "@com_github_datadog_rules_oci//bin:ocitool-{os}-{arch}".format(os = os, arch = arch),
             )
 
             toolchain_name = "{name}_toolchain_{os}_{arch}".format(name = name, os = os, arch = arch)
@@ -101,10 +105,33 @@ def create_compiled_oci_toolchains(name):
                     os_const,
                     arch_const,
                 ],
+                **kwargs
             )
 
-def register_compiled_oci_toolchains(name):
+def register_compiled_oci_toolchains(name, post_push_hooks=[]):
+    registry_post_push_hooks(
+        name = "oci_push_hooks",
+        post_push_hooks = post_push_hooks,
+    )
+
     for os, os_const in OS_CONSTRAINTS.items():
         for arch, arch_const in ARCH_CONSTRAINTS.items():
             toolchain_name = "{name}_toolchain_{os}_{arch}".format(name = name, os = os, arch = arch)
             native.register_toolchains("@com_github_datadog_rules_oci//bin:{}".format(toolchain_name))
+
+
+def _registry_post_push_hooks_impl(rctx):
+    rctx.file("defs.bzl", content = """
+POST_PUSH_HOOKS = {post_push_hooks}
+    """.format(
+        post_push_hooks = json.encode(rctx.attr.post_push_hooks),
+    ))
+
+    rctx.file("BUILD.bazel")
+
+registry_post_push_hooks = repository_rule(
+    implementation = _registry_post_push_hooks_impl,
+    attrs = {
+        "post_push_hooks": attr.string_list(),
+    },
+)

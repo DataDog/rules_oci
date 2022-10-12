@@ -1,4 +1,7 @@
 load("//oci:toolchain.bzl", "create_compiled_oci_toolchains")
+load("@oci_push_hooks//:defs.bzl", "POST_PUSH_HOOKS")
+
+exports_files(glob(["*"]))
 
 filegroup(
     name = "bin-files",
@@ -9,4 +12,7 @@ filegroup(
     visibility = ["//visibility:public"],
 )
 
-create_compiled_oci_toolchains(name = "oci_toolchain")
+create_compiled_oci_toolchains(
+    name = "oci_toolchain",
+    post_push_hooks = POST_PUSH_HOOKS,
+)
