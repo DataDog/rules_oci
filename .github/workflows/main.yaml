@@ -17,4 +17,5 @@ jobs:
       - run: mkdir -p ~/bin
       - run: echo 'echo "{"ServerURL":"ghcr.io","Username":"Bearer","Secret":"${{ secrets.GITHUB_TOKEN }}"}"' > ~/bin/docker-credential-ghcr
       - run: chmod +x ~/bin/docker-credential-ghcr
+      - run: PATH="~/bin:$PATH" bazel build //cmd/ocitool:ocitool && cp bazel-bin/cmd/ocitool/ocitool_/ocitool bin/ocitool-linux-amd64
       - run: PATH="~/bin:$PATH" bazel test //...
