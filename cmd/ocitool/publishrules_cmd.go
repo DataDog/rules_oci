@@ -26,6 +26,7 @@ func PublishRulesCmd(c *cli.Context) error {
 		Config:    desc,
 		Annotations: map[string]string{
 			"org.opencontainers.image.source": "github.com/DataDog/rules_oci",
+			"target":                          "prod",
 		},
 	}
 
