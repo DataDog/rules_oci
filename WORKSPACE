@@ -51,6 +51,8 @@ load("@bazel_gazelle//:deps.bzl", "gazelle_dependencies")
 
 gazelle_dependencies()
 
+# rules_proto + protobuf is needed because we transitively depend on them via
+# @com_github_containerd_containerd//errdefs in //pkg/blob
 http_archive(
     name = "com_google_protobuf",
     sha256 = "bc3dbf1f09dba1b2eb3f2f70352ee97b9049066c9040ce0c9b67fb3294e91e4b",
@@ -97,6 +99,7 @@ load("@rules_pkg//:deps.bzl", "rules_pkg_dependencies")
 rules_pkg_dependencies()
 
 load("@com_github_datadog_rules_oci//oci:toolchain.bzl", "registry_post_push_hooks")
+
 registry_post_push_hooks(
     name = "oci_push_hooks",
 )
