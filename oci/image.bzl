@@ -49,24 +49,20 @@ def _oci_image_layer_impl(ctx):
 
 oci_image_layer = rule(
     implementation = _oci_image_layer_impl,
-    doc = """
-    """,
+    doc = "Create a tarball and an OCI descriptor for it",
     attrs = {
         "files": attr.label_list(
-            doc = """
-
-            """,
+            doc = "List of files to include under `directory`",
             allow_files = True,
         ),
         "directory": attr.string(
-            doc = """
-            """,
+            doc = "Directory in the tarball to place the `files`",
         ),
         "symlinks": attr.string_dict(
-            doc = """
-            """,
+            doc = "Dictionary of symlink -> target entries to place in the tarball",
         ),
         "file_map": attr.label_keyed_string_dict(
+            doc = "Dictionary of file -> file location in tarball",
             allow_files = True,
         ),
     },
@@ -209,34 +205,34 @@ def _oci_image_impl(ctx):
 
 oci_image = rule(
     implementation = _oci_image_impl,
-    doc = """
-    """,
+    doc = """Creates a new image manifest and config by appending the `layers` to an existing image
+    manifest and config defined by `base`.  If `base` is an image index, then `os` and `arch` will
+    be used to extract the image manifest.""",
     attrs = {
         "base": attr.label(
-            doc = """
-            """,
+            doc = """A base image, as defined by oci_pull or oci_image""",
             mandatory = True,
             providers = [
                 OCIDescriptor,
                 OCILayout,
             ],
         ),
-        "entrypoint": attr.string_list(),
+        "entrypoint": attr.string_list(
+            doc = """A list of entrypoints for the image; these will be inserted into the generated
+            OCI image config""",
+        ),
         "os": attr.string(
-            doc = """
-            """,
+            doc = "Used to extract a manifest from base if base is an index",
         ),
         "arch": attr.string(
-            doc = """
-            """,
+            doc = "Used to extract a manifest from base if base is an index",
         ),
         "layers": attr.label_list(
-            doc = """
-            """,
+            doc = "A list of layers defined by oci_image_layer",
         ),
         "annotations": attr.string_dict(
-            doc = """
-            """,
+            doc = """[OCI Annotations](https://github.com/opencontainers/image-spec/blob/main/annotations.md)
+            to add to the manifest.""",
         ),
     },
     toolchains = ["@com_github_datadog_rules_oci//oci:toolchain"],
