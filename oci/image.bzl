@@ -89,6 +89,12 @@ def _oci_image_index_impl(ctx):
     for manifest in ctx.attr.manifests:
         desc_files.append(get_descriptor_file(ctx, manifest[OCIDescriptor]))
 
+    outputs = [
+        index_file,
+        index_desc_file,
+        layout_file,
+    ]
+
     ctx.actions.run(
         executable = toolchain.sdk.ocitool,
         arguments = ["--layout={}".format(m[OCILayout].blob_index.path) for m in ctx.attr.manifests] +
@@ -101,11 +107,7 @@ def _oci_image_index_impl(ctx):
                     ["--desc={}".format(d.path) for d in desc_files] +
                     ["--annotations={}={}".format(k, v) for k, v in ctx.attr.annotations.items()],
         inputs = desc_files + layout_files.to_list(),
-        outputs = [
-            index_file,
-            index_desc_file,
-            layout_file,
-        ],
+        outputs = outputs,
     )
 
     return [
@@ -115,6 +117,9 @@ def _oci_image_index_impl(ctx):
         OCILayout(
             blob_index = layout_file,
             files = depset(direct = [index_file, layout_file], transitive = [layout_files]),
+        ),
+        DefaultInfo(
+            files = depset(outputs),
         ),
     ]
 
@@ -190,6 +195,15 @@ def _oci_image_impl(ctx):
         OCILayout(
             blob_index = layout_file,
             files = depset(ctx.files.layers + [manifest_file, config_file, layout_file]),
+        ),
+        DefaultInfo(
+            files = depset([
+                entrypoint_config_file,
+                manifest_file,
+                config_file,
+                layout_file,
+                manifest_desc_file,
+            ]),
         ),
     ]
 
