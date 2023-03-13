@@ -3,9 +3,9 @@ package main
 import (
 	"fmt"
 
-	"github.com/DataDog/rules_oci/internal/flagutil"
-	"github.com/DataDog/rules_oci/pkg/blob"
-	"github.com/DataDog/rules_oci/pkg/ociutil"
+	"github.com/DataDog/rules_oci_go/internal/flagutil"
+	"github.com/DataDog/rules_oci_go/pkg/blob"
+	"github.com/DataDog/rules_oci_go/pkg/ociutil"
 
 	ocispecv "github.com/opencontainers/image-spec/specs-go"
 	ocispec "github.com/opencontainers/image-spec/specs-go/v1"

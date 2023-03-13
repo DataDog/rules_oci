@@ -6,7 +6,7 @@ go_library(
         "append.go",
         "appendlayeringester.go",
     ],
-    importpath = "github.com/DataDog/rules_oci/pkg/layer",
+    importpath = "github.com/DataDog/rules_oci_go/pkg/layer",
     visibility = ["//visibility:public"],
     deps = [
         "//pkg/ociutil:go_default_library",

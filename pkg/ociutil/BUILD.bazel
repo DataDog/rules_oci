@@ -22,7 +22,7 @@ go_library(
         "tar.go",
         "writer.go",
     ],
-    importpath = "github.com/DataDog/rules_oci/pkg/ociutil",
+    importpath = "github.com/DataDog/rules_oci_go/pkg/ociutil",
     visibility = ["//visibility:public"],
     deps = [
         "//internal/set:go_default_library",

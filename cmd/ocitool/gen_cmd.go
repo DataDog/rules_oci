@@ -6,7 +6,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/DataDog/rules_oci/pkg/ociutil"
+	"github.com/DataDog/rules_oci_go/pkg/ociutil"
 
 	"github.com/bazelbuild/bazel-gazelle/rule"
 	"github.com/containerd/containerd/images"

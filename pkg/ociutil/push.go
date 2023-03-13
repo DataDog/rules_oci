@@ -9,7 +9,7 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/DataDog/rules_oci/pkg/credhelper"
+	"github.com/DataDog/rules_oci_go/pkg/credhelper"
 
 	"github.com/containerd/containerd/content"
 	"github.com/containerd/containerd/errdefs"

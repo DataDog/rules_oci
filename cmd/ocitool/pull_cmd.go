@@ -3,7 +3,7 @@ package main
 import (
 	"golang.org/x/sync/semaphore"
 
-	"github.com/DataDog/rules_oci/pkg/ociutil"
+	"github.com/DataDog/rules_oci_go/pkg/ociutil"
 
 	"github.com/containerd/containerd/images"
 	ocispec "github.com/opencontainers/image-spec/specs-go/v1"

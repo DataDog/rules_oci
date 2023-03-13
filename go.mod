@@ -1,4 +1,4 @@
-module github.com/DataDog/rules_oci
+module github.com/DataDog/rules_oci_go
 
 go 1.18
 

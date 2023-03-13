@@ -3,6 +3,6 @@ load("@io_bazel_rules_go//go:def.bzl", "go_library")
 go_library(
     name = "go_default_library",
     srcs = ["json.go"],
-    importpath = "github.com/DataDog/rules_oci/pkg/jsonutil",
+    importpath = "github.com/DataDog/rules_oci_go/pkg/jsonutil",
     visibility = ["//visibility:public"],
 )

@@ -3,7 +3,7 @@ load("@io_bazel_rules_go//go:def.bzl", "go_library")
 go_library(
     name = "go_default_library",
     srcs = ["docker.go"],
-    importpath = "github.com/DataDog/rules_oci/pkg/credhelper",
+    importpath = "github.com/DataDog/rules_oci_go/pkg/credhelper",
     visibility = ["//visibility:public"],
     deps = [
         "@com_github_containerd_containerd//errdefs:go_default_library",

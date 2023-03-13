@@ -16,7 +16,7 @@ go_library(
         "push_cmd.go",
         "pushblob_cmd.go",
     ],
-    importpath = "github.com/DataDog/rules_oci/cmd/ocitool",
+    importpath = "github.com/DataDog/rules_oci_go/cmd/ocitool",
     visibility = ["//visibility:public"],
     deps = [
         "//internal/flagutil:go_default_library",

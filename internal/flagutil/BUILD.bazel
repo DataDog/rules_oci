@@ -3,6 +3,6 @@ load("@io_bazel_rules_go//go:def.bzl", "go_library")
 go_library(
     name = "go_default_library",
     srcs = ["kv.go"],
-    importpath = "github.com/DataDog/rules_oci/internal/flagutil",
+    importpath = "github.com/DataDog/rules_oci_go/internal/flagutil",
     visibility = ["//:__subpackages__"],
 )

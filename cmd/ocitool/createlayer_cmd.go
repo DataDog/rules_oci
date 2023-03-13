@@ -9,9 +9,9 @@ import (
 	"path"
 	"path/filepath"
 
-	"github.com/DataDog/rules_oci/internal/flagutil"
-	"github.com/DataDog/rules_oci/internal/tarutil"
-	"github.com/DataDog/rules_oci/pkg/ociutil"
+	"github.com/DataDog/rules_oci_go/internal/flagutil"
+	"github.com/DataDog/rules_oci_go/internal/tarutil"
+	"github.com/DataDog/rules_oci_go/pkg/ociutil"
 
 	"github.com/opencontainers/go-digest"
 	ocispec "github.com/opencontainers/image-spec/specs-go/v1"

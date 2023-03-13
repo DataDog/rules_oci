@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/DataDog/rules_oci/pkg/blob"
-	"github.com/DataDog/rules_oci/pkg/ociutil"
+	"github.com/DataDog/rules_oci_go/pkg/blob"
+	"github.com/DataDog/rules_oci_go/pkg/ociutil"
 
 	"github.com/containerd/containerd/content"
 	ocispec "github.com/opencontainers/image-spec/specs-go/v1"

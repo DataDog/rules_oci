@@ -3,7 +3,7 @@ package ociutil
 import (
 	"context"
 
-	"github.com/DataDog/rules_oci/internal/set"
+	"github.com/DataDog/rules_oci_go/internal/set"
 
 	"github.com/containerd/containerd/content"
 	"github.com/containerd/containerd/images"

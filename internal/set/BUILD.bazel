@@ -3,6 +3,6 @@ load("@io_bazel_rules_go//go:def.bzl", "go_library")
 go_library(
     name = "go_default_library",
     srcs = ["string.go"],
-    importpath = "github.com/DataDog/rules_oci/internal/set",
+    importpath = "github.com/DataDog/rules_oci_go/internal/set",
     visibility = ["//:__subpackages__"],
 )

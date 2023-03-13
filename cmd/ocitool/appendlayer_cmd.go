@@ -9,11 +9,11 @@ import (
 	"strings"
 	"time"
 
-	"github.com/DataDog/rules_oci/internal/flagutil"
-	"github.com/DataDog/rules_oci/pkg/blob"
-	"github.com/DataDog/rules_oci/pkg/jsonutil"
-	"github.com/DataDog/rules_oci/pkg/layer"
-	"github.com/DataDog/rules_oci/pkg/ociutil"
+	"github.com/DataDog/rules_oci_go/internal/flagutil"
+	"github.com/DataDog/rules_oci_go/pkg/blob"
+	"github.com/DataDog/rules_oci_go/pkg/jsonutil"
+	"github.com/DataDog/rules_oci_go/pkg/layer"
+	"github.com/DataDog/rules_oci_go/pkg/ociutil"
 
 	"github.com/containerd/containerd/images"
 	"github.com/containerd/containerd/platforms"

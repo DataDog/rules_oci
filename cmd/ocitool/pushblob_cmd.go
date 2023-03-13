@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 
-	"github.com/DataDog/rules_oci/pkg/ociutil"
+	"github.com/DataDog/rules_oci_go/pkg/ociutil"
 
 	"github.com/urfave/cli/v2"
 )

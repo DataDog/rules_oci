@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/DataDog/rules_oci/internal/flagutil"
+	"github.com/DataDog/rules_oci_go/internal/flagutil"
 	log "github.com/sirupsen/logrus"
 	"github.com/urfave/cli/v2"
 )
