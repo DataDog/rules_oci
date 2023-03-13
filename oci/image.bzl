@@ -72,7 +72,7 @@ oci_image_layer = rule(
     },
     toolchains = ["@com_github_datadog_rules_oci//oci:toolchain"],
     outputs = {
-        "layer": "%{name}-layer.tar",
+        "layer": "%{name}-layer.tar.gz",
     },
 )
 
