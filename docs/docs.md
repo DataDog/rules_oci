@@ -7,7 +7,7 @@
 ## oci_image
 
 <pre>
-oci_image(<a href="#oci_image-name">name</a>, <a href="#oci_image-annotations">annotations</a>, <a href="#oci_image-arch">arch</a>, <a href="#oci_image-base">base</a>, <a href="#oci_image-entrypoint">entrypoint</a>, <a href="#oci_image-layers">layers</a>, <a href="#oci_image-os">os</a>)
+oci_image(<a href="#oci_image-name">name</a>, <a href="#oci_image-annotations">annotations</a>, <a href="#oci_image-arch">arch</a>, <a href="#oci_image-base">base</a>, <a href="#oci_image-entrypoint">entrypoint</a>, <a href="#oci_image-labels">labels</a>, <a href="#oci_image-layers">layers</a>, <a href="#oci_image-os">os</a>)
 </pre>
 
 Creates a new image manifest and config by appending the `layers` to an existing image
@@ -20,10 +20,11 @@ Creates a new image manifest and config by appending the `layers` to an existing
 | Name  | Description | Type | Mandatory | Default |
 | :------------- | :------------- | :------------- | :------------- | :------------- |
 | <a id="oci_image-name"></a>name |  A unique name for this target.   | <a href="https://bazel.build/docs/build-ref.html#name">Name</a> | required |  |
-| <a id="oci_image-annotations"></a>annotations |  [OCI Annotations](https://github.com/opencontainers/image-spec/blob/main/annotations.md) to add to the manifest   | <a href="https://bazel.build/docs/skylark/lib/dict.html">Dictionary: String -> String</a> | optional | {} |
+| <a id="oci_image-annotations"></a>annotations |  [OCI Annotations](https://github.com/opencontainers/image-spec/blob/main/annotations.md)             to add to the manifest.   | <a href="https://bazel.build/docs/skylark/lib/dict.html">Dictionary: String -> String</a> | optional | {} |
 | <a id="oci_image-arch"></a>arch |  Used to extract a manifest from base if base is an index   | String | optional | "" |
 | <a id="oci_image-base"></a>base |  A base image, as defined by oci_pull or oci_image   | <a href="https://bazel.build/docs/build-ref.html#labels">Label</a> | required |  |
 | <a id="oci_image-entrypoint"></a>entrypoint |  A list of entrypoints for the image; these will be inserted into the generated             OCI image config   | List of strings | optional | [] |
+| <a id="oci_image-labels"></a>labels |  labels that will be applied to the image configuration, as defined in             [the OCI config](https://github.com/opencontainers/image-spec/blob/main/config.md#properties).             These behave the same way as             [docker LABEL](https://docs.docker.com/engine/reference/builder/#label);             in particular, labels from the base image are inherited.  An empty value for a label             will cause that label to be deleted.  For backwards compatibility, if this is not set,             then the value of annotations will be used instead.   | <a href="https://bazel.build/docs/skylark/lib/dict.html">Dictionary: String -> String</a> | optional | {} |
 | <a id="oci_image-layers"></a>layers |  A list of layers defined by oci_image_layer   | <a href="https://bazel.build/docs/build-ref.html#labels">List of labels</a> | optional | [] |
 | <a id="oci_image-os"></a>os |  Used to extract a manifest from base if base is an index   | String | optional | "" |
 

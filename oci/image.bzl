@@ -158,6 +158,12 @@ def _oci_image_impl(ctx):
         content = json.encode(entrypoint_config),
     )
 
+    annotations = ctx.attr.annotations
+
+    # Backwards compatibility: code that doesn't use the labels attr will expect annotations to be
+    # used as labels
+    labels = ctx.attr.labels or ctx.attr.annotations
+
     ctx.actions.run(
         executable = toolchain.sdk.ocitool,
         arguments = [
@@ -174,7 +180,8 @@ def _oci_image_impl(ctx):
                         "--entrypoint={}".format(entrypoint_config_file.path),
                     ] +
                     ["--layer={}".format(f.path) for f in ctx.files.layers] +
-                    ["--annotations={}={}".format(k, v) for k, v in ctx.attr.annotations.items()],
+                    ["--annotations={}={}".format(k, v) for k, v in annotations.items()] +
+                    ["--labels={}={}".format(k, v) for k, v in labels.items()],
         inputs = [ctx.version_file, base_desc, layout.blob_index, entrypoint_config_file] + ctx.files.layers + layout.files.to_list(),
         outputs = [
             manifest_file,
@@ -233,6 +240,15 @@ oci_image = rule(
         "annotations": attr.string_dict(
             doc = """[OCI Annotations](https://github.com/opencontainers/image-spec/blob/main/annotations.md)
             to add to the manifest.""",
+        ),
+        "labels": attr.string_dict(
+            doc = """labels that will be applied to the image configuration, as defined in
+            [the OCI config](https://github.com/opencontainers/image-spec/blob/main/config.md#properties).
+            These behave the same way as
+            [docker LABEL](https://docs.docker.com/engine/reference/builder/#label);
+            in particular, labels from the base image are inherited.  An empty value for a label
+            will cause that label to be deleted.  For backwards compatibility, if this is not set,
+            then the value of annotations will be used instead.""",
         ),
     },
     toolchains = ["@com_github_datadog_rules_oci//oci:toolchain"],

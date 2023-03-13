@@ -14,7 +14,7 @@ import (
 	ocispec "github.com/opencontainers/image-spec/specs-go/v1"
 )
 
-func AppendLayers(ctx context.Context, store content.Store, baseManifestDesc ocispec.Descriptor, layers []ocispec.Descriptor, annotations map[string]string, created time.Time, entrypoint []string) (ocispec.Descriptor, ocispec.Descriptor, error) {
+func AppendLayers(ctx context.Context, store content.Store, baseManifestDesc ocispec.Descriptor, layers []ocispec.Descriptor, annotations map[string]string, labels map[string]string, created time.Time, entrypoint []string) (ocispec.Descriptor, ocispec.Descriptor, error) {
 	if annotations == nil {
 		annotations = make(map[string]string)
 	}
@@ -34,8 +34,17 @@ func AppendLayers(ctx context.Context, store content.Store, baseManifestDesc oci
 	createdAnnotation := created.Format(time.RFC3339)
 	annotations[ocispec.AnnotationCreated] = createdAnnotation
 
-	// FIXME: add labels attribute to set this separately
-	imageConfig.Config.Labels = annotations
+	if imageConfig.Config.Labels == nil {
+		imageConfig.Config.Labels = make(map[string]string)
+	}
+	for label, value := range labels {
+		if value == "" {
+			delete(imageConfig.Config.Labels, label)
+		} else {
+			imageConfig.Config.Labels[label] = value
+		}
+	}
+
 	baseManifestDesc.Annotations = annotations
 	manifest.Annotations = annotations
 	imageConfig.Created = &created
