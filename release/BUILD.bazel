@@ -1,5 +1,4 @@
 load("@bazel_gazelle//:def.bzl", "DEFAULT_LANGUAGES", "gazelle", "gazelle_binary")
-load("@io_bazel_rules_go//docs:doc_helpers.bzl", "stardoc_with_diff_test", "update_docs")
 load(":release.bzl", "go_binary_multi", "release_rules_oci")
 
 go_binary_multi(
@@ -14,18 +13,6 @@ release_rules_oci(
         "//bin:bin-files",
     ],
     rules = ["//oci:oci-files"],
-)
-
-# Sourced from https://github.com/bazelbuild/rules_go/pull/3000
-# For each doc file, generate MD from bzl_library, then perform diff test
-stardoc_with_diff_test(
-    bzl_library_target = "//oci:defs",
-    out_label = "//docs:docs.md",
-)
-
-update_docs(
-    name = "update",
-    docs_folder = "release",
 )
 
 gazelle(

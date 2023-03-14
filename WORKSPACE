@@ -71,6 +71,13 @@ http_archive(
 )
 
 http_archive(
+    name = "aspect_bazel_lib",
+    sha256 = "ee95bbc80f9ca219b93a8cc49fa19a2d4aa8649ddc9024f46abcdd33935753ca",
+    strip_prefix = "bazel-lib-1.29.2",
+    url = "https://github.com/aspect-build/bazel-lib/releases/download/v1.29.2/bazel-lib-v1.29.2.tar.gz",
+)
+
+http_archive(
     name = "rules_pkg",
     sha256 = "62eeb544ff1ef41d786e329e1536c1d541bb9bcad27ae984d57f18f314018e66",
     urls = [
@@ -127,6 +134,10 @@ bazel_skylib_gazelle_plugin_workspace()
 load("@bazel_skylib_gazelle_plugin//:setup.bzl", "bazel_skylib_gazelle_plugin_setup")
 
 bazel_skylib_gazelle_plugin_setup(register_go_toolchains = False)
+
+load("@aspect_bazel_lib//lib:repositories.bzl", "aspect_bazel_lib_dependencies")
+
+aspect_bazel_lib_dependencies()
 
 load("@com_github_datadog_rules_oci//oci:toolchain.bzl", "registry_post_push_hooks")
 
