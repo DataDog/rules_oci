@@ -74,6 +74,18 @@ func AppendLayers(ctx context.Context, store content.Store, baseManifestDesc oci
 				layer.Annotations = make(map[string]string)
 			}
 
+			// It's arguably incorrect to label the layers with the base image name/digest, since
+			// that annotation is intended to indicate the image which an image builds on, not the
+			// image origin of the layer it comes from; see
+			// https://github.com/opencontainers/image-spec/issues/821.  This code only annotates
+			// layers with no annotations, but unannotated layers are the default with
+			// docker-created images, and we cannot know whether _all_ the layers in those images
+			// _really_ came FROM the specified base layer.  Only if all images are built with
+			// rules_oci can we guarantee this.
+			//
+			// SIDE EFFECT: The presence of this label is used in ociutil.CopyContent to determine
+			// whether to copy the layer into the target repo via an OCI mount request i.e. we use
+			// the label to tag layers that should already exist in the target registry.
 			if _, ok := layer.Annotations[ociutil.AnnotationBaseImageName]; !ok {
 				layer.Annotations[ociutil.AnnotationBaseImageName] = ref
 			}
