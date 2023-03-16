@@ -91,6 +91,12 @@ dependencies.
 
 ### Developing
 
+#### Updating dependencies
+
+Run `bazel run :go -- get -u DEPENDENCY && bazel run :gazelle-update-repos`
+
+#### Tests
+
 Run the tests using
 
 ```
