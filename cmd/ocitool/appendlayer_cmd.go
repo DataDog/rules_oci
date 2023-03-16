@@ -131,20 +131,20 @@ func AppendLayersCmd(c *cli.Context) error {
 
 	log.WithField("base_desc", baseManifestDesc).Debugf("using as base")
 
-	layerPaths := c.Generic("layer").(*flagutil.KeyValueFlag).Map
+	layerAndDescriptorPaths := c.Generic("layer").(*flagutil.KeyValueFlag).List
 
 	layerProvider := &blob.Index{
 		Blobs: make(map[digest.Digest]string),
 	}
 
-	layerDescs := make([]ocispec.Descriptor, 0, len(layerPaths))
-	for layerPath, layerDescriptorPath := range layerPaths {
-		layerDesc, err := ociutil.ReadDescriptorFromFile(layerDescriptorPath)
+	layerDescs := make([]ocispec.Descriptor, 0, len(layerAndDescriptorPaths))
+	for _, layerAndDescriptorPath := range layerAndDescriptorPaths {
+		layerDesc, err := ociutil.ReadDescriptorFromFile(layerAndDescriptorPath.Value)
 		if err != nil {
 			return err
 		}
 
-		layerProvider.Blobs[layerDesc.Digest] = layerPath
+		layerProvider.Blobs[layerDesc.Digest] = layerAndDescriptorPath.Key
 		layerDescs = append(layerDescs, layerDesc)
 	}
 
@@ -162,7 +162,7 @@ func AppendLayersCmd(c *cli.Context) error {
 		entrypoint = entrypointStruct.Entrypoint
 	}
 
-	log.Debugf("created descriptors for layers(n=%v): %#v", len(layerPaths), layerDescs)
+	log.Debugf("created descriptors for layers(n=%v): %#v", len(layerAndDescriptorPaths), layerDescs)
 
 	outIngestor := layer.NewAppendIngester(c.String("out-manifest"), c.String("out-config"))
 
