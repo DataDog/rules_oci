@@ -50,6 +50,7 @@ func AppendLayers(ctx context.Context, store content.Store, baseManifestDesc oci
 	imageConfig.Created = &created
 
 	diffIDs := make([]digest.Digest, 0, len(layers))
+	history := make([]ocispec.History, 0, len(layers))
 	for _, layer := range layers {
 		diffID, err := ociutil.GetLayerDiffID(ctx, store, layer)
 		if err != nil {
@@ -58,6 +59,16 @@ func AppendLayers(ctx context.Context, store content.Store, baseManifestDesc oci
 		}
 		diffIDs = append(diffIDs, diffID)
 
+		// Using Comment as the thing-that-created-the-layer and CreatedBy as the
+		// source-of-the-layer apes what docker does.
+		layerHistory := ocispec.History{
+			Created: &created,
+			Comment: "rules_oci",
+		}
+		if description, ok := layer.Annotations[ocispec.AnnotationArtifactDescription]; ok {
+			layerHistory.CreatedBy = description
+		}
+		history = append(history, layerHistory)
 	}
 
 	// Update image with base image reference
@@ -106,6 +117,7 @@ func AppendLayers(ctx context.Context, store content.Store, baseManifestDesc oci
 	// Append after we add the base image labels
 	manifest.Layers = append(manifest.Layers, layers...)
 	imageConfig.RootFS.DiffIDs = append(imageConfig.RootFS.DiffIDs, diffIDs...)
+	imageConfig.History = append(imageConfig.History, history...)
 
 	imageConfig.Author = "rules_oci"
 	imageConfig.Config.Entrypoint = entrypoint

@@ -56,6 +56,9 @@ var app = &cli.App{
 				&cli.StringFlag{
 					Name: "outd",
 				},
+				&cli.StringFlag{
+					Name: "bazel-label",
+				},
 				&cli.GenericFlag{
 					Name:  "symlink",
 					Value: &flagutil.KeyValueFlag{},
@@ -77,8 +80,9 @@ var app = &cli.App{
 				&cli.StringFlag{
 					Name: "bazel-version-file",
 				},
-				&cli.StringSliceFlag{
-					Name: "layer",
+				&cli.GenericFlag{
+					Name:  "layer",
+					Value: &flagutil.KeyValueFlag{},
 				},
 				&cli.StringFlag{
 					Name: "outd",

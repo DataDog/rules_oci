@@ -131,23 +131,21 @@ func AppendLayersCmd(c *cli.Context) error {
 
 	log.WithField("base_desc", baseManifestDesc).Debugf("using as base")
 
-	layerPaths := c.StringSlice("layer")
+	layerPaths := c.Generic("layer").(*flagutil.KeyValueFlag).Map
 
 	layerProvider := &blob.Index{
 		Blobs: make(map[digest.Digest]string),
 	}
 
 	layerDescs := make([]ocispec.Descriptor, 0, len(layerPaths))
-	for _, lp := range layerPaths {
-		ld, reader, err := ociutil.CreateDescriptorFromFile(lp)
+	for layerPath, layerDescriptorPath := range layerPaths {
+		layerDesc, err := ociutil.ReadDescriptorFromFile(layerDescriptorPath)
 		if err != nil {
 			return err
 		}
-		reader.Close()
-		ld.MediaType = ocispec.MediaTypeImageLayerGzip
 
-		layerProvider.Blobs[ld.Digest] = lp
-		layerDescs = append(layerDescs, ld)
+		layerProvider.Blobs[layerDesc.Digest] = layerPath
+		layerDescs = append(layerDescs, layerDesc)
 	}
 
 	var entrypoint []string

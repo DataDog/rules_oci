@@ -12,37 +12,6 @@ import (
 	ocispec "github.com/opencontainers/image-spec/specs-go/v1"
 )
 
-// CreateDescriptorFromFile creates a new descriptor from an arbitrary file,
-// along with a stream to read the file from.
-func CreateDescriptorFromFile(filePath string) (ocispec.Descriptor, io.ReadCloser, error) {
-	file, err := os.Open(filePath)
-	if err != nil {
-		return ocispec.Descriptor{}, nil, fmt.Errorf("failed to open filePath: %w", err)
-	}
-	defer file.Close()
-
-	hash, err := digest.SHA256.FromReader(file)
-	if err != nil {
-		return ocispec.Descriptor{}, nil, err
-	}
-
-	// Go back to the start of the file for the caller of this function to read.
-	_, err = file.Seek(0, 0)
-	if err != nil {
-		return ocispec.Descriptor{}, nil, err
-	}
-
-	fi, err := file.Stat()
-	if err != nil {
-		return ocispec.Descriptor{}, nil, err
-	}
-
-	return ocispec.Descriptor{
-		Digest: hash,
-		Size:   fi.Size(),
-	}, file, nil
-}
-
 // CopyJSONToFileAndCreateDescriptor encodes inf to json and then writes it to a
 // file, returning the descriptor.
 func CopyJSONToFileAndCreateDescriptor(inf interface{}, outFile string) (ocispec.Descriptor, error) {
