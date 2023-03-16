@@ -23,8 +23,8 @@ func CopyContentHandler(handler images.HandlerFunc, from content.Provider, to co
 	}
 }
 
-// CopyContentHandler copies the children of the parent descriptor from the provider to
-// the ingestor.
+// CopyChildrenFromHandler performs a recursive depth-first copy of the parent descriptors children
+// (as returned by calling handler on the parent) from the provider to the ingester
 func CopyChildrenFromHandler(ctx context.Context, handler images.HandlerFunc, from content.Provider, to content.Ingester, parent ocispec.Descriptor) error {
 	children, err := handler.Handle(ctx, parent)
 	if err != nil {
@@ -32,7 +32,7 @@ func CopyChildrenFromHandler(ctx context.Context, handler images.HandlerFunc, fr
 	}
 
 	for _, child := range children {
-		err = CopyContentFromHandler(ctx, handler, from, to, child)
+		err = copyContentFromHandler(ctx, handler, from, to, child)
 		if err != nil {
 			return err
 		}
@@ -40,9 +40,7 @@ func CopyChildrenFromHandler(ctx context.Context, handler images.HandlerFunc, fr
 	return nil
 }
 
-// CopyContentHandler copies the parent descriptor from the provider to the
-// ingestor
-func CopyContentFromHandler(ctx context.Context, handler images.HandlerFunc, from content.Provider, to content.Ingester, desc ocispec.Descriptor) error {
+func copyContentFromHandler(ctx context.Context, handler images.HandlerFunc, from content.Provider, to content.Ingester, desc ocispec.Descriptor) error {
 	err := CopyChildrenFromHandler(ctx, handler, from, to, desc)
 	if err != nil {
 		return err

@@ -246,7 +246,9 @@ func CopyContent(ctx context.Context, from content.Provider, to content.Ingester
 	// checking for the existence of the blob.
 	if reg, ok := to.(RepositoryIngester); ok {
 
-		// First check if it exists in the repository we're pushing to
+		// First check if it exists in the repository we're pushing to (always fails, because the
+		// only implementation of RepositoryIngester (ociutil.dockerRegPusher) doesn't implement
+		// Contains).
 		err := reg.Contains(ctx, desc.Digest)
 		if err == nil {
 			logCtx.Debugf("skipped copy, already exist")
@@ -254,7 +256,13 @@ func CopyContent(ctx context.Context, from content.Provider, to content.Ingester
 		}
 		logCtx.WithError(err).Debug("blob doesn't exist")
 
-		// If we know where the blob is from, then lets try to mount it
+		// If we know which repo the blob is from (see layers.AppendLayers for how
+		// AnnotationBaseImageName is set in layer descriptors; otherwise, the presence of this
+		// annotation may not mean that that a descriptor is _from_ an image, rather it means it
+		// _has_ that image as a base), then lets try to mount it into the new repo. This code
+		// should probably check that RefToDomain(ref) matches the registry represented by `to`
+		// before attempting the Mount call, or the Mount call should do this.
+		//
 		// TODO: should also allow ocispec.AnnotationRefName
 		if ref, ok := desc.Annotations[AnnotationBaseImageName]; ok {
 			repo, err := RefToPath(ref)

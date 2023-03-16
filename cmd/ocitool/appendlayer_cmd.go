@@ -116,9 +116,11 @@ func AppendLayersCmd(c *cli.Context) error {
 		return fmt.Errorf("Unknown base image type %q", baseUnknownDesc.MediaType)
 	}
 
-	// Copy the annotation with the original reference of the base image
+	// Original comment: Copy the annotation with the original reference of the base image
 	// so that we know when we push the image where those layers come from
 	// for mount calls.
+	//
+	// This isn't true; we don't look at AnnotationRefName in ociutil.CopyContent
 	if baseManifestDesc.Annotations == nil {
 		baseManifestDesc.Annotations = make(map[string]string)
 	}
