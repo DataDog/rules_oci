@@ -1579,8 +1579,8 @@ def go_repositories():
         name = "com_github_opencontainers_image_spec",
         build_file_proto_mode = "disable",
         importpath = "github.com/opencontainers/image-spec",
-        sum = "h1:rc3tiVYb5z54aKaDfakKn0dDjIyPpTtszkjuMzyt7ec=",
-        version = "v1.0.3-0.20211202183452-c5a74bcca799",
+        sum = "h1:2zx/Stx4Wc5pIPDvIxHXvXtQFW/7XWJGmnM7r3wg034=",
+        version = "v1.1.0-rc2",
     )
     go_repository(
         name = "com_github_opencontainers_runc",
@@ -1715,6 +1715,14 @@ def go_repositories():
         sum = "h1:RR9dF3JtopPvtkroDZuVD7qquD0bnHlKSqaQhgwt8yk=",
         version = "v1.3.0",
     )
+    go_repository(
+        name = "com_github_russross_blackfriday",
+        build_file_proto_mode = "disable",
+        importpath = "github.com/russross/blackfriday",
+        sum = "h1:KqfZb0pUVN2lYqZUYRddxF4OR8ZMURnJIG5Y3VRLtww=",
+        version = "v1.6.0",
+    )
+
     go_repository(
         name = "com_github_russross_blackfriday_v2",
         build_file_proto_mode = "disable",
@@ -1952,8 +1960,8 @@ def go_repositories():
         name = "com_github_xeipuuv_gojsonschema",
         build_file_proto_mode = "disable",
         importpath = "github.com/xeipuuv/gojsonschema",
-        sum = "h1:mvXjJIHRZyhNuGassLTcXTwjiWq7NmjdavZsUnmFybQ=",
-        version = "v0.0.0-20180618132009-1d523034197f",
+        sum = "h1:LhYJRs+L4fBtjZUfuSZIKGeVu0QRy8e5Xi7D17UxZ74=",
+        version = "v1.2.0",
     )
     go_repository(
         name = "com_github_xiang90_probing",

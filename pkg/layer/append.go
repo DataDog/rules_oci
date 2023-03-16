@@ -86,12 +86,12 @@ func AppendLayers(ctx context.Context, store content.Store, baseManifestDesc oci
 			// SIDE EFFECT: The presence of this label is used in ociutil.CopyContent to determine
 			// whether to copy the layer into the target repo via an OCI mount request i.e. we use
 			// the label to tag layers that should already exist in the target registry.
-			if _, ok := layer.Annotations[ociutil.AnnotationBaseImageName]; !ok {
-				layer.Annotations[ociutil.AnnotationBaseImageName] = ref
+			if _, ok := layer.Annotations[ocispec.AnnotationBaseImageName]; !ok {
+				layer.Annotations[ocispec.AnnotationBaseImageName] = ref
 			}
 
-			if _, ok := layer.Annotations[ociutil.AnnotationBaseImageDigest]; !ok {
-				layer.Annotations[ociutil.AnnotationBaseImageDigest] = baseManifestDesc.Digest.String()
+			if _, ok := layer.Annotations[ocispec.AnnotationBaseImageDigest]; !ok {
+				layer.Annotations[ocispec.AnnotationBaseImageDigest] = baseManifestDesc.Digest.String()
 			}
 
 			layer.MediaType = converter.ConvertDockerMediaTypeToOCI(layer.MediaType)

@@ -264,7 +264,7 @@ func CopyContent(ctx context.Context, from content.Provider, to content.Ingester
 		// before attempting the Mount call, or the Mount call should do this.
 		//
 		// TODO: should also allow ocispec.AnnotationRefName
-		if ref, ok := desc.Annotations[AnnotationBaseImageName]; ok {
+		if ref, ok := desc.Annotations[ocispec.AnnotationBaseImageName]; ok {
 			repo, err := RefToPath(ref)
 			if err != nil {
 				return fmt.Errorf("failed to mount blob: %w", err)
