@@ -1,3 +1,4 @@
+load("@bazel_gazelle//:def.bzl", "DEFAULT_LANGUAGES", "gazelle", "gazelle_binary")
 load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
 load("//oci:toolchain.bzl", "oci_local_toolchain")
 
@@ -14,4 +15,27 @@ bzl_library(
 
 oci_local_toolchain(
     name = "oci_local_toolchain",
+)
+
+gazelle(
+    name = "gazelle",
+    gazelle = ":default_gazelle_binary",
+)
+
+gazelle_binary(
+    name = "default_gazelle_binary",
+    languages = DEFAULT_LANGUAGES + [
+        "@bazel_skylib_gazelle_plugin//bzl",
+    ],
+)
+
+gazelle(
+    name = "gazelle-update-repos",
+    args = [
+        "-from_file=go.mod",
+        "-to_macro=repositories.bzl%go_repositories",
+        "-prune=true",
+        "-build_file_proto_mode=disable",
+    ],
+    command = "update-repos",
 )

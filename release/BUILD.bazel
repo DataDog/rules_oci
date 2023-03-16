@@ -1,6 +1,3 @@
-load("@io_bazel_rules_go//go:def.bzl", "go_library")
-load("@bazel_gazelle//:def.bzl", "DEFAULT_LANGUAGES", "gazelle", "gazelle_binary")
-load("@io_bazel_rules_go//docs:doc_helpers.bzl", "stardoc_with_diff_test", "update_docs")
 load(":release.bzl", "go_binary_multi", "release_rules_oci")
 
 go_binary_multi(
@@ -15,56 +12,4 @@ release_rules_oci(
         "//bin:bin-files",
     ],
     rules = ["//oci:oci-files"],
-)
-
-# Sourced from https://github.com/bazelbuild/rules_go/pull/3000
-# For each doc file, generate MD from bzl_library, then perform diff test
-stardoc_with_diff_test(
-    bzl_library_target = "//oci:defs",
-    out_label = "//docs:docs.md",
-)
-
-update_docs(
-    name = "update",
-    docs_folder = "release",
-)
-
-gazelle(
-    name = "gazelle",
-    gazelle = ":default_gazelle_binary",
-)
-
-gazelle_binary(
-    name = "default_gazelle_binary",
-    languages = DEFAULT_LANGUAGES + [
-        ":go_default_library",
-    ],
-)
-
-gazelle(
-    name = "gazelle-update-repos",
-    args = [
-        "-from_file=go.mod",
-        "-to_macro=repositories.bzl%go_repositories",
-        "-prune=true",
-        "-build_file_proto_mode=disable",
-    ],
-    command = "update-repos",
-)
-
-go_library(
-    name = "go_default_library",
-    srcs = ["doc_gen.go"],
-    importpath = "github.com/DataDog/rules_oci/release",
-    visibility = ["//visibility:public"],
-    deps = [
-        "@bazel_gazelle//config:go_default_library",
-        "@bazel_gazelle//label:go_default_library",
-        "@bazel_gazelle//language:go_default_library",
-        "@bazel_gazelle//pathtools:go_default_library",
-        "@bazel_gazelle//repo:go_default_library",
-        "@bazel_gazelle//resolve:go_default_library",
-        "@bazel_gazelle//rule:go_default_library",
-        "@com_github_bazelbuild_buildtools//build:go_default_library",
-    ],
 )
