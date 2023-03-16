@@ -88,3 +88,21 @@ dependencies.
 * `rules_oci` doesn't have language specific rules, instead a higher-level
   package can build on `rules_oci` to create rules like `go_image`
 * `rules_docker` doesn't have support for multi-arch images [#1599](https://github.com/bazelbuild/rules_docker/issues/1599)
+
+### Developing
+
+Run the tests using
+
+```
+bazel build //cmd/ocitool:ocitool 
+ln -s ../bazel-bin/cmd/ocitool/ocitool_/ocitool bin/ocitool-OS-ARCH
+bazel test //...
+```
+
+...where `OS` is one of `linux`, `darwin`, and `ARCH` is one of `amd64`, `arm64`: whichever is
+appropriate for the machine you're running the tests on.
+
+You will also need to make it possible for docker to access `ghcr.io` (see the code in
+[.github/workflows/main.yaml](.github/workflows/main.yaml) for what we do in CI; an equivalent
+method for local build using the [gh CLI](https://github.com/cli/cli) can be found
+[here](https://gist.github.com/mislav/e154d707db230dc882d7194ec85d79f6)).

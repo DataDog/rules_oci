@@ -93,6 +93,10 @@ var app = &cli.App{
 					Name:  "annotations",
 					Value: &flagutil.KeyValueFlag{},
 				},
+				&cli.GenericFlag{
+					Name:  "labels",
+					Value: &flagutil.KeyValueFlag{},
+				},
 				&cli.StringFlag{
 					Name: "out-manifest",
 				},

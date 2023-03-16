@@ -7,11 +7,12 @@
 ## oci_image
 
 <pre>
-oci_image(<a href="#oci_image-name">name</a>, <a href="#oci_image-annotations">annotations</a>, <a href="#oci_image-arch">arch</a>, <a href="#oci_image-base">base</a>, <a href="#oci_image-entrypoint">entrypoint</a>, <a href="#oci_image-layers">layers</a>, <a href="#oci_image-os">os</a>)
+oci_image(<a href="#oci_image-name">name</a>, <a href="#oci_image-annotations">annotations</a>, <a href="#oci_image-arch">arch</a>, <a href="#oci_image-base">base</a>, <a href="#oci_image-entrypoint">entrypoint</a>, <a href="#oci_image-labels">labels</a>, <a href="#oci_image-layers">layers</a>, <a href="#oci_image-os">os</a>)
 </pre>
 
-
-    
+Creates a new image manifest and config by appending the `layers` to an existing image
+    manifest and config defined by `base`.  If `base` is an image index, then `os` and `arch` will
+    be used to extract the image manifest.
 
 **ATTRIBUTES**
 
@@ -19,12 +20,13 @@ oci_image(<a href="#oci_image-name">name</a>, <a href="#oci_image-annotations">a
 | Name  | Description | Type | Mandatory | Default |
 | :------------- | :------------- | :------------- | :------------- | :------------- |
 | <a id="oci_image-name"></a>name |  A unique name for this target.   | <a href="https://bazel.build/docs/build-ref.html#name">Name</a> | required |  |
-| <a id="oci_image-annotations"></a>annotations |     | <a href="https://bazel.build/docs/skylark/lib/dict.html">Dictionary: String -> String</a> | optional | {} |
-| <a id="oci_image-arch"></a>arch |     | String | optional | "" |
-| <a id="oci_image-base"></a>base |     | <a href="https://bazel.build/docs/build-ref.html#labels">Label</a> | required |  |
-| <a id="oci_image-entrypoint"></a>entrypoint |  -   | List of strings | optional | [] |
-| <a id="oci_image-layers"></a>layers |     | <a href="https://bazel.build/docs/build-ref.html#labels">List of labels</a> | optional | [] |
-| <a id="oci_image-os"></a>os |     | String | optional | "" |
+| <a id="oci_image-annotations"></a>annotations |  [OCI Annotations](https://github.com/opencontainers/image-spec/blob/main/annotations.md)             to add to the manifest.   | <a href="https://bazel.build/docs/skylark/lib/dict.html">Dictionary: String -> String</a> | optional | {} |
+| <a id="oci_image-arch"></a>arch |  Used to extract a manifest from base if base is an index   | String | optional | "" |
+| <a id="oci_image-base"></a>base |  A base image, as defined by oci_pull or oci_image   | <a href="https://bazel.build/docs/build-ref.html#labels">Label</a> | required |  |
+| <a id="oci_image-entrypoint"></a>entrypoint |  A list of entrypoints for the image; these will be inserted into the generated             OCI image config   | List of strings | optional | [] |
+| <a id="oci_image-labels"></a>labels |  labels that will be applied to the image configuration, as defined in             [the OCI config](https://github.com/opencontainers/image-spec/blob/main/config.md#properties).             These behave the same way as             [docker LABEL](https://docs.docker.com/engine/reference/builder/#label);             in particular, labels from the base image are inherited.  An empty value for a label             will cause that label to be deleted.  For backwards compatibility, if this is not set,             then the value of annotations will be used instead.   | <a href="https://bazel.build/docs/skylark/lib/dict.html">Dictionary: String -> String</a> | optional | {} |
+| <a id="oci_image-layers"></a>layers |  A list of layers defined by oci_image_layer   | <a href="https://bazel.build/docs/build-ref.html#labels">List of labels</a> | optional | [] |
+| <a id="oci_image-os"></a>os |  Used to extract a manifest from base if base is an index   | String | optional | "" |
 
 
 <a id="#oci_image_index"></a>
@@ -56,8 +58,7 @@ oci_image_index(<a href="#oci_image_index-name">name</a>, <a href="#oci_image_in
 oci_image_layer(<a href="#oci_image_layer-name">name</a>, <a href="#oci_image_layer-directory">directory</a>, <a href="#oci_image_layer-file_map">file_map</a>, <a href="#oci_image_layer-files">files</a>, <a href="#oci_image_layer-symlinks">symlinks</a>)
 </pre>
 
-
-    
+Create a tarball and an OCI descriptor for it
 
 **ATTRIBUTES**
 
@@ -65,10 +66,10 @@ oci_image_layer(<a href="#oci_image_layer-name">name</a>, <a href="#oci_image_la
 | Name  | Description | Type | Mandatory | Default |
 | :------------- | :------------- | :------------- | :------------- | :------------- |
 | <a id="oci_image_layer-name"></a>name |  A unique name for this target.   | <a href="https://bazel.build/docs/build-ref.html#name">Name</a> | required |  |
-| <a id="oci_image_layer-directory"></a>directory |     | String | optional | "" |
-| <a id="oci_image_layer-file_map"></a>file_map |  -   | <a href="https://bazel.build/docs/skylark/lib/dict.html">Dictionary: Label -> String</a> | optional | {} |
-| <a id="oci_image_layer-files"></a>files |     | <a href="https://bazel.build/docs/build-ref.html#labels">List of labels</a> | optional | [] |
-| <a id="oci_image_layer-symlinks"></a>symlinks |     | <a href="https://bazel.build/docs/skylark/lib/dict.html">Dictionary: String -> String</a> | optional | {} |
+| <a id="oci_image_layer-directory"></a>directory |  Directory in the tarball to place the <code>files</code>   | String | optional | "" |
+| <a id="oci_image_layer-file_map"></a>file_map |  Dictionary of file -&gt; file location in tarball   | <a href="https://bazel.build/docs/skylark/lib/dict.html">Dictionary: Label -> String</a> | optional | {} |
+| <a id="oci_image_layer-files"></a>files |  List of files to include under <code>directory</code>   | <a href="https://bazel.build/docs/build-ref.html#labels">List of labels</a> | optional | [] |
+| <a id="oci_image_layer-symlinks"></a>symlinks |  Dictionary of symlink -&gt; target entries to place in the tarball   | <a href="https://bazel.build/docs/skylark/lib/dict.html">Dictionary: String -> String</a> | optional | {} |
 
 
 <a id="#oci_pull"></a>

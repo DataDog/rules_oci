@@ -26,6 +26,7 @@ stardoc_with_diff_test(
 
 update_docs(
     name = "update",
+    docs_folder = "release",
 )
 
 gazelle(

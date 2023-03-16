@@ -49,24 +49,20 @@ def _oci_image_layer_impl(ctx):
 
 oci_image_layer = rule(
     implementation = _oci_image_layer_impl,
-    doc = """
-    """,
+    doc = "Create a tarball and an OCI descriptor for it",
     attrs = {
         "files": attr.label_list(
-            doc = """
-
-            """,
+            doc = "List of files to include under `directory`",
             allow_files = True,
         ),
         "directory": attr.string(
-            doc = """
-            """,
+            doc = "Directory in the tarball to place the `files`",
         ),
         "symlinks": attr.string_dict(
-            doc = """
-            """,
+            doc = "Dictionary of symlink -> target entries to place in the tarball",
         ),
         "file_map": attr.label_keyed_string_dict(
+            doc = "Dictionary of file -> file location in tarball",
             allow_files = True,
         ),
     },
@@ -89,6 +85,12 @@ def _oci_image_index_impl(ctx):
     for manifest in ctx.attr.manifests:
         desc_files.append(get_descriptor_file(ctx, manifest[OCIDescriptor]))
 
+    outputs = [
+        index_file,
+        index_desc_file,
+        layout_file,
+    ]
+
     ctx.actions.run(
         executable = toolchain.sdk.ocitool,
         arguments = ["--layout={}".format(m[OCILayout].blob_index.path) for m in ctx.attr.manifests] +
@@ -101,11 +103,7 @@ def _oci_image_index_impl(ctx):
                     ["--desc={}".format(d.path) for d in desc_files] +
                     ["--annotations={}={}".format(k, v) for k, v in ctx.attr.annotations.items()],
         inputs = desc_files + layout_files.to_list(),
-        outputs = [
-            index_file,
-            index_desc_file,
-            layout_file,
-        ],
+        outputs = outputs,
     )
 
     return [
@@ -115,6 +113,9 @@ def _oci_image_index_impl(ctx):
         OCILayout(
             blob_index = layout_file,
             files = depset(direct = [index_file, layout_file], transitive = [layout_files]),
+        ),
+        DefaultInfo(
+            files = depset(outputs),
         ),
     ]
 
@@ -157,6 +158,12 @@ def _oci_image_impl(ctx):
         content = json.encode(entrypoint_config),
     )
 
+    annotations = ctx.attr.annotations
+
+    # Backwards compatibility: code that doesn't use the labels attr will expect annotations to be
+    # used as labels
+    labels = ctx.attr.labels or ctx.attr.annotations
+
     ctx.actions.run(
         executable = toolchain.sdk.ocitool,
         arguments = [
@@ -173,7 +180,8 @@ def _oci_image_impl(ctx):
                         "--entrypoint={}".format(entrypoint_config_file.path),
                     ] +
                     ["--layer={}".format(f.path) for f in ctx.files.layers] +
-                    ["--annotations={}={}".format(k, v) for k, v in ctx.attr.annotations.items()],
+                    ["--annotations={}={}".format(k, v) for k, v in annotations.items()] +
+                    ["--labels={}={}".format(k, v) for k, v in labels.items()],
         inputs = [ctx.version_file, base_desc, layout.blob_index, entrypoint_config_file] + ctx.files.layers + layout.files.to_list(),
         outputs = [
             manifest_file,
@@ -191,38 +199,56 @@ def _oci_image_impl(ctx):
             blob_index = layout_file,
             files = depset(ctx.files.layers + [manifest_file, config_file, layout_file]),
         ),
+        DefaultInfo(
+            files = depset([
+                entrypoint_config_file,
+                manifest_file,
+                config_file,
+                layout_file,
+                manifest_desc_file,
+            ]),
+        ),
     ]
 
 oci_image = rule(
     implementation = _oci_image_impl,
-    doc = """
-    """,
+    doc = """Creates a new image manifest and config by appending the `layers` to an existing image
+    manifest and config defined by `base`.  If `base` is an image index, then `os` and `arch` will
+    be used to extract the image manifest.""",
     attrs = {
         "base": attr.label(
-            doc = """
-            """,
+            doc = """A base image, as defined by oci_pull or oci_image""",
             mandatory = True,
             providers = [
                 OCIDescriptor,
                 OCILayout,
             ],
         ),
-        "entrypoint": attr.string_list(),
+        "entrypoint": attr.string_list(
+            doc = """A list of entrypoints for the image; these will be inserted into the generated
+            OCI image config""",
+        ),
         "os": attr.string(
-            doc = """
-            """,
+            doc = "Used to extract a manifest from base if base is an index",
         ),
         "arch": attr.string(
-            doc = """
-            """,
+            doc = "Used to extract a manifest from base if base is an index",
         ),
         "layers": attr.label_list(
-            doc = """
-            """,
+            doc = "A list of layers defined by oci_image_layer",
         ),
         "annotations": attr.string_dict(
-            doc = """
-            """,
+            doc = """[OCI Annotations](https://github.com/opencontainers/image-spec/blob/main/annotations.md)
+            to add to the manifest.""",
+        ),
+        "labels": attr.string_dict(
+            doc = """labels that will be applied to the image configuration, as defined in
+            [the OCI config](https://github.com/opencontainers/image-spec/blob/main/config.md#properties).
+            These behave the same way as
+            [docker LABEL](https://docs.docker.com/engine/reference/builder/#label);
+            in particular, labels from the base image are inherited.  An empty value for a label
+            will cause that label to be deleted.  For backwards compatibility, if this is not set,
+            then the value of annotations will be used instead.""",
         ),
     },
     toolchains = ["@com_github_datadog_rules_oci//oci:toolchain"],
