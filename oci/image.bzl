@@ -165,9 +165,10 @@ def _oci_image_impl(ctx):
     # used as labels
     labels = ctx.attr.labels or ctx.attr.annotations
 
-    layers_and_descriptors = zip(
+    layer_descriptor_files = [get_descriptor_file(ctx, f[OCIDescriptor]) for f in ctx.attr.layers]
+    layer_and_descriptor_paths = zip(
         [f.path for f in ctx.files.layers],
-        [get_descriptor_file(ctx, f[OCIDescriptor]).path for f in ctx.attr.layers],
+        [f.path for f in layer_descriptor_files],
     )
 
     ctx.actions.run(
@@ -187,11 +188,14 @@ def _oci_image_impl(ctx):
                     ] +
                     [
                         "--layer={}={}".format(layer, descriptor)
-                        for layer, descriptor in layers_and_descriptors
+                        for layer, descriptor in layer_and_descriptor_paths
                     ] +
                     ["--annotations={}={}".format(k, v) for k, v in annotations.items()] +
                     ["--labels={}={}".format(k, v) for k, v in labels.items()],
-        inputs = [ctx.version_file, base_desc, layout.blob_index, entrypoint_config_file] + ctx.files.layers + layout.files.to_list(),
+        inputs = [ctx.version_file, base_desc, layout.blob_index, entrypoint_config_file] +
+                 ctx.files.layers +
+                 layer_descriptor_files +
+                 layout.files.to_list(),
         outputs = [
             manifest_file,
             config_file,
