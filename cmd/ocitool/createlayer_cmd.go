@@ -4,14 +4,13 @@ import (
 	"archive/tar"
 	"compress/gzip"
 	"fmt"
+	"github.com/DataDog/rules_oci/internal/flagutil"
+	"github.com/DataDog/rules_oci/internal/tarutil"
+	"github.com/DataDog/rules_oci/pkg/ociutil"
 	"io"
 	"os"
 	"path"
 	"path/filepath"
-
-	"github.com/DataDog/rules_oci/internal/flagutil"
-	"github.com/DataDog/rules_oci/internal/tarutil"
-	"github.com/DataDog/rules_oci/pkg/ociutil"
 
 	"github.com/opencontainers/go-digest"
 	ocispec "github.com/opencontainers/image-spec/specs-go/v1"
@@ -70,6 +69,14 @@ func CreateLayerCmd(c *cli.Context) error {
 		MediaType: ocispec.MediaTypeImageLayerGzip,
 		Size:      int64(wc.Count()),
 		Digest:    digester.Digest(),
+	}
+
+	bazelLabel := c.String("bazel-label")
+	if bazelLabel != "" {
+		desc.Annotations = map[string]string{
+			// This will also be added to the image config layer history by append-layers
+			ocispec.AnnotationArtifactDescription: bazelLabel,
+		}
 	}
 
 	err = ociutil.WriteDescriptorToFile(c.String("outd"), desc)

@@ -30,6 +30,7 @@ def _oci_image_layer_impl(ctx):
                         "--out={}".format(ctx.outputs.layer.path),
                         "--outd={}".format(descriptor_file.path),
                         "--dir={}".format(ctx.attr.directory),
+                        "--bazel-label={}".format(ctx.label),
                     ] +
                     ["--file={}".format(f.path) for f in ctx.files.files] +
                     ["--symlink={}={}".format(k, v) for k, v in ctx.attr.symlinks.items()] +
@@ -68,7 +69,7 @@ oci_image_layer = rule(
     },
     toolchains = ["@com_github_datadog_rules_oci//oci:toolchain"],
     outputs = {
-        "layer": "%{name}-layer.tar",
+        "layer": "%{name}-layer.tar.gz",
     },
 )
 
@@ -164,6 +165,12 @@ def _oci_image_impl(ctx):
     # used as labels
     labels = ctx.attr.labels or ctx.attr.annotations
 
+    layer_descriptor_files = [get_descriptor_file(ctx, f[OCIDescriptor]) for f in ctx.attr.layers]
+    layer_and_descriptor_paths = zip(
+        [f.path for f in ctx.files.layers],
+        [f.path for f in layer_descriptor_files],
+    )
+
     ctx.actions.run(
         executable = toolchain.sdk.ocitool,
         arguments = [
@@ -179,10 +186,16 @@ def _oci_image_impl(ctx):
                         "--outd={}".format(manifest_desc_file.path),
                         "--entrypoint={}".format(entrypoint_config_file.path),
                     ] +
-                    ["--layer={}".format(f.path) for f in ctx.files.layers] +
+                    [
+                        "--layer={}={}".format(layer, descriptor)
+                        for layer, descriptor in layer_and_descriptor_paths
+                    ] +
                     ["--annotations={}={}".format(k, v) for k, v in annotations.items()] +
                     ["--labels={}={}".format(k, v) for k, v in labels.items()],
-        inputs = [ctx.version_file, base_desc, layout.blob_index, entrypoint_config_file] + ctx.files.layers + layout.files.to_list(),
+        inputs = [ctx.version_file, base_desc, layout.blob_index, entrypoint_config_file] +
+                 ctx.files.layers +
+                 layer_descriptor_files +
+                 layout.files.to_list(),
         outputs = [
             manifest_file,
             config_file,
@@ -236,6 +249,9 @@ oci_image = rule(
         ),
         "layers": attr.label_list(
             doc = "A list of layers defined by oci_image_layer",
+            providers = [
+                OCIDescriptor,
+            ],
         ),
         "annotations": attr.string_dict(
             doc = """[OCI Annotations](https://github.com/opencontainers/image-spec/blob/main/annotations.md)

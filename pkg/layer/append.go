@@ -50,6 +50,7 @@ func AppendLayers(ctx context.Context, store content.Store, baseManifestDesc oci
 	imageConfig.Created = &created
 
 	diffIDs := make([]digest.Digest, 0, len(layers))
+	history := make([]ocispec.History, 0, len(layers))
 	for _, layer := range layers {
 		diffID, err := ociutil.GetLayerDiffID(ctx, store, layer)
 		if err != nil {
@@ -58,6 +59,16 @@ func AppendLayers(ctx context.Context, store content.Store, baseManifestDesc oci
 		}
 		diffIDs = append(diffIDs, diffID)
 
+		// Using Comment as the thing-that-created-the-layer and CreatedBy as the
+		// source-of-the-layer apes what docker does.
+		layerHistory := ocispec.History{
+			Created: &created,
+			Comment: "rules_oci",
+		}
+		if description, ok := layer.Annotations[ocispec.AnnotationArtifactDescription]; ok {
+			layerHistory.CreatedBy = description
+		}
+		history = append(history, layerHistory)
 	}
 
 	// Update image with base image reference
@@ -86,12 +97,12 @@ func AppendLayers(ctx context.Context, store content.Store, baseManifestDesc oci
 			// SIDE EFFECT: The presence of this label is used in ociutil.CopyContent to determine
 			// whether to copy the layer into the target repo via an OCI mount request i.e. we use
 			// the label to tag layers that should already exist in the target registry.
-			if _, ok := layer.Annotations[ociutil.AnnotationBaseImageName]; !ok {
-				layer.Annotations[ociutil.AnnotationBaseImageName] = ref
+			if _, ok := layer.Annotations[ocispec.AnnotationBaseImageName]; !ok {
+				layer.Annotations[ocispec.AnnotationBaseImageName] = ref
 			}
 
-			if _, ok := layer.Annotations[ociutil.AnnotationBaseImageDigest]; !ok {
-				layer.Annotations[ociutil.AnnotationBaseImageDigest] = baseManifestDesc.Digest.String()
+			if _, ok := layer.Annotations[ocispec.AnnotationBaseImageDigest]; !ok {
+				layer.Annotations[ocispec.AnnotationBaseImageDigest] = baseManifestDesc.Digest.String()
 			}
 
 			layer.MediaType = converter.ConvertDockerMediaTypeToOCI(layer.MediaType)
@@ -106,6 +117,7 @@ func AppendLayers(ctx context.Context, store content.Store, baseManifestDesc oci
 	// Append after we add the base image labels
 	manifest.Layers = append(manifest.Layers, layers...)
 	imageConfig.RootFS.DiffIDs = append(imageConfig.RootFS.DiffIDs, diffIDs...)
+	imageConfig.History = append(imageConfig.History, history...)
 
 	imageConfig.Author = "rules_oci"
 	imageConfig.Config.Entrypoint = entrypoint
