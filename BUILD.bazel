@@ -32,7 +32,7 @@ gazelle_binary(
 gazelle(
     name = "gazelle-update-repos",
     args = [
-        "-from_file=go.mod",
+        "-from_file=go.work",
         "-to_macro=repositories.bzl%go_repositories",
         "-prune=true",
         "-build_file_proto_mode=disable",
