@@ -22,7 +22,7 @@ jobs:
       - run: chmod +x ~/.local/bin/docker-credential-ghcr
 
       # Setup local toolchain
-      - run: bazel build --config=ci //cmd/ocitool:ocitool && cp bazel-bin/cmd/ocitool/ocitool_/ocitool bin/ocitool-linux-amd64
+      - run: bazel build --config=ci //go/cmd/ocitool:ocitool && cp bazel-bin/go/cmd/ocitool/ocitool_/ocitool bin/ocitool-linux-amd64
 
       # Run all tests
       - run: bazel test --config=ci //...

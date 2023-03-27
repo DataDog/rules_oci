@@ -2,7 +2,7 @@ load(":release.bzl", "go_binary_multi", "release_rules_oci")
 
 go_binary_multi(
     name = "ocitool",
-    embed = ["//cmd/ocitool:go_default_library"],
+    embed = ["//go/cmd/ocitool:go_default_library"],
 )
 
 release_rules_oci(

@@ -12,8 +12,8 @@ manifests, image indexes (multi-arch images) and custom artifacts
 * **Multi-arch images**, compiling and building multi-arch images with a single Bazel invocation
 
 In addition to Bazel rules, we offer many helpers for interacting with OCI
-artifacts under the `pkg` directory and a CLI tool for creating new OCI
-artifacts.
+artifacts under the `go/pkg` directory and a CLI tool for creating new OCI
+artifacts. You can add the Go library as a dependency by running `go get github.com/DataDog/rules_oci/go@latest`.
 
 `rules_oci` makes an effort to support Docker media types, but there is no
 guarantee of long-term support. Most CRI support the OCI types or there are

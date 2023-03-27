@@ -45,7 +45,7 @@ def oci_toolchain(
     oci_toolchain_name = "{name}.oci_toolchain".format(name = name)
     _oci_toolchain(
         name = oci_toolchain_name,
-        **kwargs,
+        **kwargs
     )
 
     native.toolchain(
@@ -80,7 +80,7 @@ def oci_local_toolchain(name, **kwargs):
     sdk_name = "{}.sdk".format(name)
     oci_sdk(
         name = sdk_name,
-        ocitool = "@com_github_datadog_rules_oci//cmd/ocitool",
+        ocitool = "@com_github_datadog_rules_oci//go/cmd/ocitool",
     )
 
     oci_toolchain(
@@ -108,7 +108,7 @@ def create_compiled_oci_toolchains(name, **kwargs):
                 **kwargs
             )
 
-def register_compiled_oci_toolchains(name, post_push_hooks=[]):
+def register_compiled_oci_toolchains(name, post_push_hooks = []):
     registry_post_push_hooks(
         name = "oci_push_hooks",
         post_push_hooks = post_push_hooks,
@@ -118,7 +118,6 @@ def register_compiled_oci_toolchains(name, post_push_hooks=[]):
         for arch, arch_const in ARCH_CONSTRAINTS.items():
             toolchain_name = "{name}_toolchain_{os}_{arch}".format(name = name, os = os, arch = arch)
             native.register_toolchains("@com_github_datadog_rules_oci//bin:{}".format(toolchain_name))
-
 
 def _registry_post_push_hooks_impl(rctx):
     rctx.file("defs.bzl", content = """
