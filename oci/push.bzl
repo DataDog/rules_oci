@@ -38,7 +38,8 @@ def _oci_push_impl(ctx):
         xheaders = xheaders + " --x_meta_headers={}={}".format(k, v)
 
     ctx.actions.write(
-        content = """
+        content = """#!/usr/bin/env bash
+        set -euo pipefail
         {tool}  \\
         --layout {layout} \\
         --debug={debug} \\
