@@ -9,11 +9,25 @@ def pull_test_images():
         digest = "sha256:9d6a8699fb5c9c39cf08a0871bd6219f0400981c570894cd8cbea30d3424a31f",
     )
 
-    # TODO(abayer): Temporarily using a public image I pushed to my own gcr.io repo.
     oci_pull(
-        name = "ubuntu_jammy",
+        name = "tekton-45",
         registry = "gcr.io",
-        repository = "abayer-jclouds-test1/rules_oci/ubuntu",
-        # Latest at "jammy" tag
-        digest = "sha256:99f98de8a0a27a7e1b3979238d17422ae3359573bda3beed0906da7e2d42e8c3",
+        repository = "tekton-releases/github.com/tektoncd/pipeline/cmd/controller",
+        # Latest at "v0.45.0" tag
+        digest = "sha256:8a302dab54484bbb83d46ff9455b077ea51c1c189641dcda12575f8301bfb257",
+        shallow = False,
+    )
+
+    oci_pull(
+        name = "old-base-for-rebase",
+        registry = "cgr.dev",
+        repository = "chainguard/static",
+        digest = "sha256:d9dd790fb308621ac4a5d648a852fbc455cda12f487eb30fb775a479c4f90703",
+    )
+
+    oci_pull(
+        name = "new-base-for-rebase",
+        registry = "cgr.dev",
+        repository = "chainguard/static",
+        digest = "sha256:76bde0b3719bbb65c1b39cd6c0f75fbbe0e24c115a40040ac50361cd8774d913",
     )

@@ -24,6 +24,9 @@ func GenerateBuildFilesHandler(handler images.HandlerFunc, layoutRoot string, pr
 	// TODO Currently only supporting SHA256
 	blobBuildFiles[digest.SHA256] = rule.EmptyFile(algoBUILDPath(layoutRoot, digest.SHA256), "")
 
+	insertedBlobRules := make(map[digest.Algorithm]map[string]bool)
+	insertedBlobRules[digest.SHA256] = make(map[string]bool)
+
 	// Add load statements for all of the oci_* rules
 	ldBlob := rule.NewLoad("@com_github_datadog_rules_oci//oci:blob.bzl")
 	ldBlob.Add("oci_blob")
@@ -65,7 +68,16 @@ func GenerateBuildFilesHandler(handler images.HandlerFunc, layoutRoot string, pr
 			return nil, fmt.Errorf("no build file for algo '%v'", algo)
 		}
 
-		// Insert a rule for each blob
+		if _, ok := insertedBlobRules[algo]; !ok {
+			return nil, fmt.Errorf("no inserted blob rules map for algo '%v'", algo)
+		}
+		// If we've already inserted this descriptor's blob rule, skip it and its children.
+		if _, ok := insertedBlobRules[algo][dgstToLabelName(desc.Digest)]; ok {
+			return nil, nil
+		}
+		insertedBlobRules[algo][dgstToLabelName(desc.Digest)] = true
+
+		// Insert a rule for each blob.
 		blobRuleFromDescriptor(desc).Insert(f)
 
 		// if the manifest is an manifest or index, add an additional rule to

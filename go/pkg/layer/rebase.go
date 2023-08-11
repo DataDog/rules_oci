@@ -7,6 +7,7 @@ import (
 
 	"github.com/DataDog/rules_oci/go/pkg/ociutil"
 	"github.com/containerd/containerd/content"
+	"github.com/containerd/containerd/images/converter"
 	ocispec "github.com/opencontainers/image-spec/specs-go/v1"
 )
 
@@ -38,9 +39,30 @@ func RebaseImage(ctx context.Context, store content.Store, originalImageDesc oci
 		}
 	}
 
-	// Get the original image's layers after the old base image to append to the new base image.
+	// Get the original image's layers after the old base image to append to the new base image and add the original image
+	// as the OCI base image annotations to that layer, as is done for the layers from the base image in AppendLayers.
 	var layersToAppend []ocispec.Descriptor
-	layersToAppend = append(layersToAppend, originalManifest.Layers[len(oldBaseManifest.Layers):]...)
+	origRef := originalImageDesc.Annotations[ocispec.AnnotationRefName]
+
+	for _, origImgLayer := range originalManifest.Layers[len(oldBaseManifest.Layers):] {
+		// If we have an original image ref, set the OCI base image annotations on the original image layers. This allows
+		// ociutil.CopyContent to determine whether to copy the layer into the target repo via an OCI mount request.
+		if origRef != "" {
+			if origImgLayer.Annotations == nil {
+				origImgLayer.Annotations = make(map[string]string)
+			}
+			if _, ok := origImgLayer.Annotations[ocispec.AnnotationBaseImageName]; !ok {
+				origImgLayer.Annotations[ocispec.AnnotationBaseImageName] = origRef
+			}
+
+			if _, ok := origImgLayer.Annotations[ocispec.AnnotationBaseImageDigest]; !ok {
+				origImgLayer.Annotations[ocispec.AnnotationBaseImageDigest] = originalImageDesc.Digest.String()
+			}
+		}
+
+		origImgLayer.MediaType = converter.ConvertDockerMediaTypeToOCI(origImgLayer.MediaType)
+		layersToAppend = append(layersToAppend, origImgLayer)
+	}
 
 	rebasedManifest, rebasedConfig, err := AppendLayers(ctx, store, newBaseImageDesc, layersToAppend, nil, originalImageConfig.Config.Labels, createdTimestamp, originalImageConfig.Config.Entrypoint)
 	if err != nil {
