@@ -36,10 +36,10 @@ oci_push(
 
 oci_rebase_image(
     name = "rebase",
-    arch = "arm64",
-    new_base = "@ubuntu_jammy//image",
-    old_base = "@ubuntu_focal//image",
-    original = ":image",
+    arch = "amd64",
+    new_base = "@new-base-for-rebase//image",
+    old_base = "@old-base-for-rebase//image",
+    original = "@tekton-45//image",
     os = "linux",
     visibility = ["//visibility:public"],
 )
@@ -48,7 +48,7 @@ oci_push(
     name = "push-rebase",
     manifest = ":rebase",
     registry = "ghcr.io",
-    repository = "datadog/rules_oci/hello-world-rebase",
+    repository = "datadog/rules_oci/tekton-rebase",
 )
 
 bzl_library(

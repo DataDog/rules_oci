@@ -78,7 +78,7 @@ func loadManifestForImage(ctx context.Context, allLocalProviders content.Provide
 		OS:           os,
 		Architecture: arch,
 	}
-	targetPlatformMatch := platforms.Only(targetPlatform)
+	targetPlatformMatch := platforms.OnlyStrict(targetPlatform)
 
 	// Resolve the unknown descriptor into an image manifest, if an index
 	// match the requested platform.
