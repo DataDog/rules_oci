@@ -49,6 +49,16 @@ func AppendLayers(ctx context.Context, store content.Store, baseManifestDesc oci
 	manifest.Annotations = annotations
 	imageConfig.Created = &created
 
+	// If we have a base ref, use it to construct and add the OCI base image annotations for the image we're building.
+	if baseRef != "" {
+		baseRefParsed, err := ociutil.NamedRef(baseRef)
+		if err != nil {
+			return ocispec.Descriptor{}, ocispec.Descriptor{}, fmt.Errorf("could not parse base ref as named reference: %w", err)
+		}
+		annotations[ocispec.AnnotationBaseImageName] = baseRefParsed.Name()
+		annotations[ocispec.AnnotationBaseImageDigest] = baseManifestDesc.Digest.String()
+	}
+
 	diffIDs := make([]digest.Digest, 0, len(layers))
 	history := make([]ocispec.History, 0, len(layers))
 	for _, layer := range layers {
