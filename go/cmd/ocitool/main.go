@@ -116,6 +116,45 @@ var app = &cli.App{
 			},
 		},
 		{
+			Name:   "rebase-image",
+			Action: RebaseImageCmd,
+			Flags: []cli.Flag{
+				&cli.StringFlag{
+					Name:     "original",
+					Required: true,
+				},
+				&cli.StringFlag{
+					Name:     "old-base",
+					Required: true,
+				},
+				&cli.StringFlag{
+					Name:     "new-base",
+					Required: true,
+				},
+				&cli.StringFlag{
+					Name: "bazel-version-file",
+				},
+				&cli.StringFlag{
+					Name: "outd",
+				},
+				&cli.StringFlag{
+					Name: "os",
+				},
+				&cli.StringFlag{
+					Name: "arch",
+				},
+				&cli.StringFlag{
+					Name: "out-manifest",
+				},
+				&cli.StringFlag{
+					Name: "out-config",
+				},
+				&cli.StringFlag{
+					Name: "out-layout",
+				},
+			},
+		},
+		{
 			Name:   "push",
 			Action: PushCmd,
 			Flags: []cli.Flag{

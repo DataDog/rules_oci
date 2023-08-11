@@ -15,8 +15,6 @@ import (
 	"github.com/DataDog/rules_oci/go/pkg/layer"
 	"github.com/DataDog/rules_oci/go/pkg/ociutil"
 
-	"github.com/containerd/containerd/images"
-	"github.com/containerd/containerd/platforms"
 	"github.com/opencontainers/go-digest"
 	ocispec "github.com/opencontainers/image-spec/specs-go/v1"
 	log "github.com/sirupsen/logrus"
@@ -69,64 +67,9 @@ func AppendLayersCmd(c *cli.Context) error {
 
 	allLocalProviders := ociutil.MultiProvider(localProviders...)
 
-	// Read the base descriptor, at this point we don't know if it's a image
-	// manifest or index, so it's an unknown media type.
-	baseUnknownDesc, err := ociutil.ReadDescriptorFromFile(c.String("base"))
+	baseManifestDesc, err := loadManifestForImage(c.Context, allLocalProviders, c.String("base"), c.String("os"), c.String("arch"))
 	if err != nil {
-		return err
-	}
-
-	targetPlatform := ocispec.Platform{
-		OS:           c.String("os"),
-		Architecture: c.String("arch"),
-	}
-	targetPlatformMatch := platforms.Only(targetPlatform)
-
-	// Resolve the unknown descriptor into an image manifest, if an index
-	// match the requested platform.
-	var baseManifestDesc ocispec.Descriptor
-	if images.IsIndexType(baseUnknownDesc.MediaType) {
-		index, err := ociutil.ImageIndexFromProvider(c.Context, allLocalProviders, baseUnknownDesc)
-		if err != nil {
-			return err
-		}
-
-		baseManifestDesc, err = ociutil.ManifestFromIndex(index, targetPlatformMatch)
-		if err != nil {
-			return err
-		}
-
-		if !targetPlatformMatch.Match(*baseManifestDesc.Platform) {
-			return fmt.Errorf("invalid platform, expected %v, recieved %v", targetPlatform, *baseManifestDesc.Platform)
-		}
-
-	} else if images.IsManifestType(baseUnknownDesc.MediaType) {
-		baseManifestDesc = baseUnknownDesc
-
-		if ociutil.IsEmptyPlatform(baseManifestDesc.Platform) {
-			platform, err := ociutil.ResolvePlatformFromDescriptor(c.Context, allLocalProviders, baseManifestDesc)
-			if err != nil {
-				return fmt.Errorf("no platform for base: %w", err)
-			}
-
-			baseManifestDesc.Platform = &platform
-		}
-
-	} else {
-		return fmt.Errorf("Unknown base image type %q", baseUnknownDesc.MediaType)
-	}
-
-	// Original comment: Copy the annotation with the original reference of the base image
-	// so that we know when we push the image where those layers come from
-	// for mount calls.
-	//
-	// This isn't true; we don't look at AnnotationRefName in ociutil.CopyContent
-	if baseManifestDesc.Annotations == nil {
-		baseManifestDesc.Annotations = make(map[string]string)
-	}
-	baseRef, ok := baseUnknownDesc.Annotations[ocispec.AnnotationRefName]
-	if ok {
-		baseManifestDesc.Annotations[ocispec.AnnotationRefName] = baseRef
+		return fmt.Errorf("loading descriptor for base image: %w", err)
 	}
 
 	log.WithField("base_desc", baseManifestDesc).Debugf("using as base")

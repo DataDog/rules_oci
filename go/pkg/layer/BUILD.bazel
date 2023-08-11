@@ -5,6 +5,7 @@ go_library(
     srcs = [
         "append.go",
         "appendlayeringester.go",
+        "rebase.go",
     ],
     importpath = "github.com/DataDog/rules_oci/go/pkg/layer",
     visibility = ["//visibility:public"],

@@ -15,6 +15,7 @@ go_library(
         "pull_cmd.go",
         "push_cmd.go",
         "pushblob_cmd.go",
+        "rebaseimage_cmd.go",
     ],
     importpath = "github.com/DataDog/rules_oci/go/cmd/ocitool",
     visibility = ["//visibility:public"],
