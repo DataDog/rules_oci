@@ -112,16 +112,18 @@ func RegistryHostsFromDockerConfig() docker.RegistryHosts {
 			return nil, nil
 		}
 
-		helperName, ok := cfg.CredentialHelpers[host]
-		if !ok {
-			return nil, nil
-		}
-
 		registryHost := docker.RegistryHost{
 			Host:         host,
 			Scheme:       "https",
 			Path:         "/v2",
 			Capabilities: docker.HostCapabilityPull | docker.HostCapabilityResolve | docker.HostCapabilityPush,
+		}
+
+		helperName, ok := cfg.CredentialHelpers[host]
+		if !ok {
+			// If no credential helper is specified, fall back on the default behavior.
+			registryHost.Authorizer = docker.NewDockerAuthorizer()
+			return []docker.RegistryHost{registryHost}, nil
 		}
 
 		registryHost.Authorizer = docker.NewDockerAuthorizer(docker.WithAuthCreds(func(host string) (string, string, error) {
