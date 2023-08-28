@@ -32,9 +32,12 @@ var (
 	// ErrDuplicateSection is returned when there is a duplicate deb package
 	// sections
 	ErrDuplicateSection = fmt.Errorf("duplicate section")
+
+	// ErrSectionNotFound is returned when an expected section is not found
+	ErrSectionNotFound = fmt.Errorf("section not found")
 )
 
-// DebToLayer convernts a deb package into a tarffile that can be used as a
+// DebToLayer convernts a deb package into a tar file that can be used as a
 // layer in an OCI image. Including adding the appropriate files for dpkg to
 // track the package.
 //
@@ -121,6 +124,54 @@ func DebToLayer(debReader io.Reader, writer io.Writer) error {
 	}
 
 	return nil
+}
+
+// CopyFileFromDeb copies a file from the debian file to a writer.
+func CopyFileFromDeb(name string, debReader io.Reader, writer io.Writer) error {
+	arReader := ar.NewReader(debReader)
+	for {
+		header, err := arReader.Next()
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			return err
+		}
+
+		// > System V ar uses a '/' character (0x2F) to mark the end of the filename;
+		// https://en.wikipedia.org/wiki/Ar_(Unix)
+		name := header.Name
+		if strings.HasSuffix(name, "/") {
+			name = name[:len(name)-1]
+		}
+
+		if strings.HasPrefix(name, debDataFilePrefix) {
+
+			reader, err := extToReader(getFullExt(name), arReader)
+			if err != nil {
+				return err
+			}
+
+			tarReader, ok := reader.(*tar.Reader)
+			if !ok {
+				return fmt.Errorf("%q section is not a tar file: %q (%T)", debDataFilePrefix, name, reader)
+			}
+
+			_, err = seekToTarFile(tarReader, name)
+			if err != nil {
+				return err
+			}
+
+			_, err = io.Copy(writer, tarReader)
+			if err != nil {
+				return err
+			}
+
+			return nil
+		}
+	}
+
+	return ErrSectionNotFound
 }
 
 // seekToTarFile seeks forward to the tar entry whose header's name is
