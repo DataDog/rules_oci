@@ -191,7 +191,8 @@ def _oci_image_impl(ctx):
                         for layer, descriptor in layer_and_descriptor_paths
                     ] +
                     ["--annotations={}={}".format(k, v) for k, v in annotations.items()] +
-                    ["--labels={}={}".format(k, v) for k, v in labels.items()],
+                    ["--labels={}={}".format(k, v) for k, v in labels.items()] +
+                    ["--env={}".format(env) for env in ctx.attr.env],
         inputs = [ctx.version_file, base_desc, layout.blob_index, entrypoint_config_file] +
                  ctx.files.layers +
                  layer_descriptor_files +
@@ -246,6 +247,10 @@ oci_image = rule(
         ),
         "arch": attr.string(
             doc = "Used to extract a manifest from base if base is an index",
+        ),
+        "env": attr.string_list(
+            doc = """Entries are in the format of `VARNAME=VARVALUE`. These values act as defaults and 
+            are merged with any specified when creating a container.""",
         ),
         "layers": attr.label_list(
             doc = "A list of layers defined by oci_image_layer",

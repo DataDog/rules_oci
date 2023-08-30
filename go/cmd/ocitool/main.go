@@ -101,6 +101,9 @@ var app = &cli.App{
 					Name:  "labels",
 					Value: &flagutil.KeyValueFlag{},
 				},
+				&cli.StringSliceFlag{
+					Name: "env",
+				},
 				&cli.StringFlag{
 					Name: "out-manifest",
 				},

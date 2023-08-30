@@ -100,13 +100,9 @@ Run `bazel run :go -- get DEPENDENCY && bazel run :gazelle-update-repos`
 Run the tests using
 
 ```
-bazel build //cmd/ocitool:ocitool 
-ln -s ../bazel-bin/cmd/ocitool/ocitool_/ocitool bin/ocitool-OS-ARCH
+bazel run //:bootstrap
 bazel test //...
 ```
-
-...where `OS` is one of `linux`, `darwin`, and `ARCH` is one of `amd64`, `arm64`: whichever is
-appropriate for the machine you're running the tests on.
 
 You will also need to make it possible for docker to access `ghcr.io` (see the code in
 [.github/workflows/main.yaml](.github/workflows/main.yaml) for what we do in CI; an equivalent

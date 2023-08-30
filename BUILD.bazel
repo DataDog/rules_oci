@@ -1,6 +1,7 @@
 load("@bazel_gazelle//:def.bzl", "DEFAULT_LANGUAGES", "gazelle", "gazelle_binary")
 load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
 load("//oci:toolchain.bzl", "oci_local_toolchain")
+load("@aspect_bazel_lib//lib:write_source_files.bzl", "write_source_files")
 
 # gazelle:prefix github.com/DataDog/rules_oci
 # gazelle:go_naming_convention go_default_library
@@ -43,4 +44,16 @@ gazelle(
 alias(
     name = "go",
     actual = "@go_sdk//:bin/go",
+)
+
+write_source_files(
+    name = "bootstrap",
+    diff_test = False,
+    executable = True,
+    files = {
+        "bin/ocitool-darwin-amd64": "//go/cmd/ocitool",
+        "bin/ocitool-darwin-arm64": "//go/cmd/ocitool",
+        "bin/ocitool-linux-amd64": "//go/cmd/ocitool",
+        "bin/ocitool-linux-arm64": "//go/cmd/ocitool",
+    },
 )

@@ -14,7 +14,7 @@ import (
 	ocispec "github.com/opencontainers/image-spec/specs-go/v1"
 )
 
-func AppendLayers(ctx context.Context, store content.Store, baseManifestDesc ocispec.Descriptor, layers []ocispec.Descriptor, annotations map[string]string, labels map[string]string, created time.Time, entrypoint []string) (ocispec.Descriptor, ocispec.Descriptor, error) {
+func AppendLayers(ctx context.Context, store content.Store, baseManifestDesc ocispec.Descriptor, layers []ocispec.Descriptor, annotations map[string]string, labels map[string]string, env []string, created time.Time, entrypoint []string) (ocispec.Descriptor, ocispec.Descriptor, error) {
 	if annotations == nil {
 		annotations = make(map[string]string)
 	}
@@ -121,6 +121,7 @@ func AppendLayers(ctx context.Context, store content.Store, baseManifestDesc oci
 
 	imageConfig.Author = "rules_oci"
 	imageConfig.Config.Entrypoint = entrypoint
+	imageConfig.Config.Env = append(imageConfig.Config.Env, env...)
 
 	newConfig, err := ociutil.IngestorJSONEncode(ctx, store, ocispec.MediaTypeImageConfig, imageConfig)
 	if err != nil {
