@@ -173,6 +173,7 @@ func AppendLayersCmd(c *cli.Context) error {
 		layerDescs,
 		c.Generic("annotations").(*flagutil.KeyValueFlag).Map,
 		c.Generic("labels").(*flagutil.KeyValueFlag).Map,
+		c.StringSlice("env"),
 		createdTimestamp,
 		entrypoint,
 	)
