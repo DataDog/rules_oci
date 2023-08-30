@@ -122,28 +122,3 @@ oci_push(<a href="#oci_push-name">name</a>, <a href="#oci_push-headers">headers<
 | <a id="oci_push-x_meta_headers"></a>x_meta_headers |  (optional) A list of key/values to to be sent to the registry as headers with an X-Meta- prefix.   | <a href="https://bazel.build/docs/skylark/lib/dict.html">Dictionary: String -> String</a> | optional | {} |
 
 
-<a id="#oci_rebase_image"></a>
-
-## oci_rebase_image
-
-<pre>
-oci_rebase_image(<a href="#oci_rebase_image-name">name</a>, <a href="#oci_rebase_image-arch">arch</a>, <a href="#oci_rebase_image-new_base">new_base</a>, <a href="#oci_rebase_image-old_base">old_base</a>, <a href="#oci_rebase_image-original">original</a>, <a href="#oci_rebase_image-os">os</a>)
-</pre>
-
-Creates a new image manifest and config by taking the layers of an `original` image, an `old_base` image,
-    and a `new_base`, and appending the layers of the `original` image, after the layers shared with the `old_base` image,
-    onto the existing manifest, config, and layers of the `new_base` image.
-
-**ATTRIBUTES**
-
-
-| Name  | Description | Type | Mandatory | Default |
-| :------------- | :------------- | :------------- | :------------- | :------------- |
-| <a id="oci_rebase_image-name"></a>name |  A unique name for this target.   | <a href="https://bazel.build/docs/build-ref.html#name">Name</a> | required |  |
-| <a id="oci_rebase_image-arch"></a>arch |  Used to extract a manifest from original, old_base, or new_base if they are indexes   | String | optional | "" |
-| <a id="oci_rebase_image-new_base"></a>new_base |  An OCI image the original image's non-base layers will be appended to, as defined by oci_pull or oci_image   | <a href="https://bazel.build/docs/build-ref.html#labels">Label</a> | required |  |
-| <a id="oci_rebase_image-old_base"></a>old_base |  An OCI image the original image is built on top of, as defined by oci_pull or oci_image   | <a href="https://bazel.build/docs/build-ref.html#labels">Label</a> | required |  |
-| <a id="oci_rebase_image-original"></a>original |  An OCI image, as defined by oci_pull or oci_image   | <a href="https://bazel.build/docs/build-ref.html#labels">Label</a> | required |  |
-| <a id="oci_rebase_image-os"></a>os |  Used to extract a manifest from original, old_base, or new_base if they are indexes   | String | optional | "" |
-
-
