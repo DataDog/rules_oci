@@ -43,9 +43,12 @@ var app = &cli.App{
 			Name:   "create-layer",
 			Action: CreateLayerCmd,
 			Flags: []cli.Flag{
+				&cli.PathFlag{
+					Name:  "configuration-file",
+					Usage: "Path to a configuration file. Useful when there are too many flags to pass at once.",
+				},
 				&cli.StringFlag{
-					Name:     "dir",
-					Required: true,
+					Name: "dir",
 				},
 				&cli.StringSliceFlag{
 					Name: "file",
