@@ -3,6 +3,7 @@ package main
 import (
 	"archive/tar"
 	"compress/gzip"
+	"encoding/json"
 	"fmt"
 	"io"
 	"os"
@@ -18,10 +19,15 @@ import (
 )
 
 func CreateLayerCmd(c *cli.Context) error {
-	dir := c.String("dir")
-	files := c.StringSlice("file")
+	config, err := parseConfig(c)
+	if err != nil {
+		return fmt.Errorf("problem parsing config: %w", err)
+	}
 
-	out, err := os.Create(c.String("out"))
+	dir := config.Directory
+	files := config.Files
+
+	out, err := os.Create(config.OutputLayer)
 	if err != nil {
 		return err
 	}
@@ -42,14 +48,14 @@ func CreateLayerCmd(c *cli.Context) error {
 		}
 	}
 
-	for filePath, storePath := range c.Generic("file-map").(*flagutil.KeyValueFlag).Map {
+	for filePath, storePath := range config.FileMapping {
 		err = tarutil.AppendFileToTarWriter(filePath, storePath, tw)
 		if err != nil {
 			return err
 		}
 	}
 
-	for k, v := range c.Generic("symlink").(*flagutil.KeyValueFlag).Map {
+	for k, v := range config.SymlinkMapping {
 		err = tw.WriteHeader(&tar.Header{
 			Typeflag: tar.TypeSymlink,
 			Name:     k,
@@ -71,7 +77,7 @@ func CreateLayerCmd(c *cli.Context) error {
 		Digest:    digester.Digest(),
 	}
 
-	bazelLabel := c.String("bazel-label")
+	bazelLabel := config.BazelLabel
 	if bazelLabel != "" {
 		desc.Annotations = map[string]string{
 			// This will also be added to the image config layer history by append-layers
@@ -79,10 +85,52 @@ func CreateLayerCmd(c *cli.Context) error {
 		}
 	}
 
-	err = ociutil.WriteDescriptorToFile(c.String("outd"), desc)
+	err = ociutil.WriteDescriptorToFile(config.Descriptor, desc)
 	if err != nil {
 		return err
 	}
 
 	return nil
+}
+
+type createLayerConfig struct {
+	BazelLabel     string            `json:"bazel-label" toml:"bazel-label" yaml:"bazel-label"`
+	Descriptor     string            `json:"outd" toml:"outd" yaml:"outd"`
+	Directory      string            `json:"dir" toml:"dir" yaml:"dir"`
+	Files          []string          `json:"file" toml:"file" yaml:"file"`
+	FileMapping    map[string]string `json:"file-map" toml:"file-map" yaml:"file-map"`
+	OutputLayer    string            `json:"out" toml:"out" yaml:"out"`
+	SymlinkMapping map[string]string `json:"symlink" toml:"symlink" yaml:"symlink"`
+}
+
+func newCreateLayerConfig(c *cli.Context) *createLayerConfig {
+	return &createLayerConfig{
+		BazelLabel:     c.String("bazel-label"),
+		Directory:      c.String("dir"),
+		Files:          c.StringSlice("file"),
+		FileMapping:    c.Generic("file-map").(*flagutil.KeyValueFlag).Map,
+		OutputLayer:    c.String("out"),
+		Descriptor:     c.String("outd"),
+		SymlinkMapping: c.Generic("symlink").(*flagutil.KeyValueFlag).Map,
+	}
+}
+
+func parseConfig(c *cli.Context) (*createLayerConfig, error) {
+	configFile := c.Path("configuration-file")
+	if configFile == "" {
+		return newCreateLayerConfig(c), nil
+	}
+
+	file, err := os.ReadFile(configFile)
+	if err != nil {
+		return nil, fmt.Errorf("problem reading config file: %w", err)
+	}
+
+	var config createLayerConfig
+	err = json.Unmarshal(file, &config)
+	if err != nil {
+		return nil, fmt.Errorf("problem parsing config file as JSON: %w", err)
+	}
+
+	return &config, nil
 }
