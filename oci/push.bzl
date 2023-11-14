@@ -48,6 +48,7 @@ def _oci_push_impl(ctx):
         --desc {desc} \\
         --target-ref {ref} \\
         --parent-tag \"{tag}\" \\
+        --plain-http-host \"{plain_http_host}\" \\
         {headers} \\
         {xheaders} \\
 
@@ -60,6 +61,7 @@ def _oci_push_impl(ctx):
             desc = ctx.attr.manifest[OCIDescriptor].descriptor_file.short_path,
             ref = ref,
             tag = tag,
+            plain_http_host = ctx.attr.plain_http_host,
             debug = str(ctx.attr._debug[DebugInfo].debug),
             headers = headers,
             xheaders = xheaders,
@@ -112,6 +114,11 @@ oci_push = rule(
         "tag": attr.string(
             doc = """
                 (optional) A tag to include in the target reference. This will not be included on child images."
+            """,
+        ),
+        "plain_http_host": attr.string(
+            doc = """
+                (optional) A hostname which should be pushed to using http, rather than https."
             """,
         ),
         "headers": attr.string_dict(

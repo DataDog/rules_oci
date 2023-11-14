@@ -99,7 +99,7 @@ func seedAuthHeaders(host docker.RegistryHost) error {
 	return nil
 }
 
-func RegistryHostsFromDockerConfig() docker.RegistryHosts {
+func RegistryHostsFromDockerConfig(plainHTTPHost string) docker.RegistryHosts {
 	return func(host string) ([]docker.RegistryHost, error) {
 		// FIXME This should be cached somewhere
 		cfg, err := ReadHostDockerConfig()
@@ -117,6 +117,10 @@ func RegistryHostsFromDockerConfig() docker.RegistryHosts {
 			Scheme:       "https",
 			Path:         "/v2",
 			Capabilities: docker.HostCapabilityPull | docker.HostCapabilityResolve | docker.HostCapabilityPush,
+		}
+
+		if plainHTTPHost != "" && host == plainHTTPHost {
+			registryHost.Scheme = "http"
 		}
 
 		helperName, ok := cfg.CredentialHelpers[host]

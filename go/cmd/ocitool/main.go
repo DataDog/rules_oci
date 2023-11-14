@@ -137,6 +137,9 @@ var app = &cli.App{
 				&cli.StringFlag{
 					Name: "parent-tag",
 				},
+				&cli.StringFlag{
+					Name: "plain-http-host",
+				},
 				&cli.GenericFlag{
 					Name:  "headers",
 					Value: &flagutil.KeyValueFlag{},

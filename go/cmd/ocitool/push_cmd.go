@@ -33,7 +33,9 @@ func PushCmd(c *cli.Context) error {
 		headers["X-Meta-"+k] = v
 	}
 
-	resolver := ociutil.ResolverWithHeaders(headers)
+	plainHTTPHost := c.String("plain-http-host")
+
+	resolver := ociutil.ResolverWithHeaders(headers, plainHTTPHost)
 
 	ref := c.String("target-ref")
 
