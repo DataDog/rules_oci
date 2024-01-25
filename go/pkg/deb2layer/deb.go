@@ -127,7 +127,7 @@ func DebToLayer(debReader io.Reader, writer io.Writer) error {
 }
 
 // CopyFileFromDeb copies a file from the debian file to a writer.
-func CopyFileFromDeb(name string, debReader io.Reader, writer io.Writer) error {
+func CopyFileFromDeb(filename string, debReader io.Reader, writer io.Writer) error {
 	arReader := ar.NewReader(debReader)
 	for {
 		header, err := arReader.Next()
@@ -146,7 +146,6 @@ func CopyFileFromDeb(name string, debReader io.Reader, writer io.Writer) error {
 		}
 
 		if strings.HasPrefix(name, debDataFilePrefix) {
-
 			reader, err := extToReader(getFullExt(name), arReader)
 			if err != nil {
 				return err
@@ -157,7 +156,7 @@ func CopyFileFromDeb(name string, debReader io.Reader, writer io.Writer) error {
 				return fmt.Errorf("%q section is not a tar file: %q (%T)", debDataFilePrefix, name, reader)
 			}
 
-			_, err = seekToTarFile(tarReader, name)
+			_, err = seekToTarFile(tarReader, filename)
 			if err != nil {
 				return err
 			}
