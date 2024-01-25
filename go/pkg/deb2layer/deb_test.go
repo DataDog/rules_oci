@@ -11,16 +11,17 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+// Rebuild deb with `dpkg-deb -Zgzip --build testdeb`
+
 var (
-	expectedFiles = []string{"/var/lib/dpkg/status.d/test", "./", "./deb_text.txt"}
+	expectedFiles = []string{"/var/lib/dpkg/status.d/testdeb", "./", "./deb_text.txt"}
 )
 
 // TestDebToLayer checks that the expected files are in the resulting layer
 // based on a deb file created by Bazel's rules_pkg
 func TestDebToLayer(t *testing.T) {
     // XXX Fix generating deb package
-    t.Skip()
-	f, err := os.Open("test-tar-deb.deb")
+	f, err := os.Open("testdeb.deb")
 	if err != nil {
 		t.Fatalf("%v", err)
 	}
@@ -51,4 +52,20 @@ func TestDebToLayer(t *testing.T) {
 	f.Close()
 
 	assert.Equal(t, expectedFiles, actualFiles)
+}
+
+func TestCopyFileFromDeb(t *testing.T) {
+	f, err := os.Open("testdeb.deb")
+	if err != nil {
+		t.Fatalf("%v", err)
+	}
+	defer f.Close()
+
+	var buf bytes.Buffer
+	err = CopyFileFromDeb("deb_text.txt", f, &buf)
+	if err != nil {
+		t.Fatalf("%v", err)
+	}
+
+	assert.Equal(t, "my-deb\n", buf.String())
 }

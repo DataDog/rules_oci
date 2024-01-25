@@ -13,4 +13,5 @@ go_test(
     srcs = ["deb_test.go"],
     embed = [":go_default_library"],
     deps = ["@com_github_stretchr_testify//assert:go_default_library"],
+    data = ["testdeb.deb"],
 )
