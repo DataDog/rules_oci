@@ -93,7 +93,7 @@ dependencies.
 
 #### Updating dependencies
 
-Run `bazel run :go -- get DEPENDENCY && bazel run :gazelle-update-repos`
+Run `bzl run //:go -- get DEPENDENCY`
 
 #### Tests
 
