@@ -1,18 +1,10 @@
-load("@bazel_gazelle//:def.bzl", "DEFAULT_LANGUAGES", "gazelle", "gazelle_binary")
-load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
-load("//oci:toolchain.bzl", "oci_local_toolchain")
 load("@aspect_bazel_lib//lib:write_source_files.bzl", "write_source_files")
+load("@bazel_gazelle//:def.bzl", "DEFAULT_LANGUAGES", "gazelle", "gazelle_binary")
+load("//oci:toolchain.bzl", "oci_local_toolchain")
 
 # gazelle:prefix github.com/DataDog/rules_oci
 # gazelle:go_naming_convention go_default_library
 # gazelle:lang go
-
-bzl_library(
-    name = "repositories",
-    srcs = ["repositories.bzl"],
-    visibility = ["//visibility:public"],
-    deps = ["@bazel_gazelle//:deps"],
-)
 
 oci_local_toolchain(
     name = "oci_local_toolchain",
@@ -30,20 +22,9 @@ gazelle_binary(
     ],
 )
 
-gazelle(
-    name = "gazelle-update-repos",
-    args = [
-        "-from_file=go.work",
-        "-to_macro=repositories.bzl%go_repositories",
-        "-prune=true",
-        "-build_file_proto_mode=disable",
-    ],
-    command = "update-repos",
-)
-
 alias(
     name = "go",
-    actual = "@go_sdk//:bin/go",
+    actual = "@io_bazel_rules_go//go",
 )
 
 write_source_files(
