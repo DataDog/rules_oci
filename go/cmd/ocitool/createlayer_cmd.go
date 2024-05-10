@@ -13,6 +13,7 @@ import (
 	"github.com/DataDog/rules_oci/go/internal/flagutil"
 	"github.com/DataDog/rules_oci/go/internal/tarutil"
 	"github.com/DataDog/rules_oci/go/pkg/ociutil"
+	"github.com/DataDog/rules_oci/go/pkg/layer"
 	"github.com/opencontainers/go-digest"
 	ocispec "github.com/opencontainers/image-spec/specs-go/v1"
 	"github.com/urfave/cli/v2"
@@ -81,7 +82,7 @@ func CreateLayerCmd(c *cli.Context) error {
 	if bazelLabel != "" {
 		desc.Annotations = map[string]string{
 			// This will also be added to the image config layer history by append-layers
-			ocispec.AnnotationArtifactDescription: bazelLabel,
+			layer.AnnotationArtifactDescription: bazelLabel,
 		}
 	}
 
