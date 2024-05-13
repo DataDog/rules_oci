@@ -1,5 +1,5 @@
 load("@aspect_bazel_lib//lib:write_source_files.bzl", "write_source_files")
-load("@bazel_gazelle//:def.bzl", "DEFAULT_LANGUAGES", "gazelle", "gazelle_binary")
+load("@gazelle//:def.bzl", "DEFAULT_LANGUAGES", "gazelle", "gazelle_binary")
 load("//oci:toolchain.bzl", "oci_local_toolchain")
 
 # gazelle:prefix github.com/DataDog/rules_oci
@@ -24,7 +24,7 @@ gazelle_binary(
 
 alias(
     name = "go",
-    actual = "@io_bazel_rules_go//go",
+    actual = "@rules_go//go",
 )
 
 write_source_files(

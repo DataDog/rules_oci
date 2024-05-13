@@ -1,5 +1,5 @@
 load("@com_github_datadog_rules_oci//oci:defs.bzl", "oci_image", "oci_image_index", "oci_image_layer")
-load("@io_bazel_rules_go//go:def.bzl", "go_binary")
+load("@rules_go//go:def.bzl", "go_binary")
 
 def go_multiarch_image(name, base, archs, binary_name = "", binary_dir = "/app", **kwargs):
     """

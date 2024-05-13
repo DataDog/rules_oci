@@ -1,6 +1,6 @@
 {
   "lockFileVersion": 6,
-  "moduleFileHash": "4380b65acbd93479e3eca580eff9c2ae16204f02d6449d3bf26c995ef9134f30",
+  "moduleFileHash": "1be15e173daa640ed3b7f905c8deb6d1c99c4c1eda05ab4dd759d484d1ae4706",
   "flags": {
     "cmdRegistries": [
       "https://bcr.bazel.build/"
@@ -27,7 +27,7 @@
       ],
       "extensionUsages": [
         {
-          "extensionBzlFile": "@io_bazel_rules_go//go:extensions.bzl",
+          "extensionBzlFile": "@rules_go//go:extensions.bzl",
           "extensionName": "go_sdk",
           "usingModule": "<root>",
           "location": {
@@ -65,7 +65,7 @@
           "hasNonDevUseExtension": true
         },
         {
-          "extensionBzlFile": "@bazel_gazelle//:extensions.bzl",
+          "extensionBzlFile": "@gazelle//:extensions.bzl",
           "extensionName": "go_deps",
           "usingModule": "<root>",
           "location": {
@@ -142,10 +142,10 @@
         "aspect_bazel_lib": "aspect_bazel_lib@2.7.3",
         "bazel_skylib": "bazel_skylib@1.6.1",
         "bazel_skylib_gazelle_plugin": "bazel_skylib_gazelle_plugin@1.6.1",
-        "bazel_gazelle": "gazelle@0.36.0",
-        "io_bazel_rules_go": "rules_go@0.47.1",
+        "gazelle": "gazelle@0.36.0",
+        "rules_go": "rules_go@0.47.1",
         "rules_pkg": "rules_pkg@0.10.1",
-        "io_bazel_stardoc": "stardoc@0.6.2",
+        "stardoc": "stardoc@0.6.2",
         "bazel_tools": "bazel_tools@_",
         "local_config_platform": "local_config_platform@_"
       }

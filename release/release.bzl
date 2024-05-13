@@ -1,5 +1,5 @@
 load("@rules_pkg//pkg:pkg.bzl", "pkg_tar")
-load("@io_bazel_rules_go//go:def.bzl", "go_binary")
+load("@rules_go//go:def.bzl", "go_binary")
 
 DEFAULT_GOOSS = ["linux", "darwin"]
 DEFAULT_GOARCHS = ["amd64", "arm64"]
