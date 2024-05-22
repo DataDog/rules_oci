@@ -41,7 +41,7 @@ OCIImageManifest = provider(
 OCIImageIndexManifest = provider(
     doc = "",
     fields = {
-        "manifests": "List of desciptors",
+        "manifests": "List of descriptors",
         "annotations": "String map of arbitrary metadata",
     },
 )
