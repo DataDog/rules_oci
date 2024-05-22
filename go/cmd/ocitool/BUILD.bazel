@@ -5,6 +5,7 @@ go_library(
     srcs = [
         "appendlayer_cmd.go",
         "createlayer_cmd.go",
+        "imagelayout_cmd.go",
         "desc_helpers.go",
         "digest_cmd.go",
         "gen_cmd.go",
