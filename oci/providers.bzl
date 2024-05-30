@@ -4,6 +4,7 @@ OCIReferenceInfo = provider(
         "registry": "the URI where the artifact is stored",
         "repository": "a namespace for an artifact",
         "tag": "a organizational reference within a repository",
+        "tag_file": "a file containing the organizational reference within a repository",
         "digest": "a file containing the digest of the artifact",
     },
 )

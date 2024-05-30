@@ -69,6 +69,7 @@ bzl_library(
     srcs = ["push.bzl"],
     visibility = ["//visibility:public"],
     deps = [
+        "@aspect_bazel_lib//lib:stamping",
         "@com_github_datadog_rules_oci//oci:debug_flag",
         "@com_github_datadog_rules_oci//oci:providers",
     ],
