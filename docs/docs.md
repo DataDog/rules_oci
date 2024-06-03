@@ -73,6 +73,52 @@ Create a tarball and an OCI descriptor for it
 | <a id="oci_image_layer-symlinks"></a>symlinks |  Dictionary of symlink -&gt; target entries to place in the tarball   | <a href="https://bazel.build/docs/skylark/lib/dict.html">Dictionary: String -> String</a> | optional | {} |
 
 
+<a id="#oci_image_layout"></a>
+
+## oci_image_layout
+
+<pre>
+oci_image_layout(<a href="#oci_image_layout-name">name</a>, <a href="#oci_image_layout-manifest">manifest</a>, <a href="#oci_image_layout-registry">registry</a>, <a href="#oci_image_layout-repository">repository</a>)
+</pre>
+
+
+        Writes an OCI Image Index and related blobs to an OCI Image Format
+        directory. See https://github.com/opencontainers/image-spec/blob/main/image-layout.md
+        for the specification of the OCI Image Format directory. Local blobs are
+        used where available, and if a referenced blob is not present, it is
+        fetched from the provided OCI repository and placed in the output.
+
+        In order for this rule to work correctly in its current state, the
+        following flags must be provided to bazel:
+        --incompatible_strict_action_env=false
+        --spawn_strategy=local
+
+        The incompatible_strict_action_env flag is required because in order to
+        access the registry, a credential helper executable (named
+        docker-credential-<SOMETHING>) must be available so that ocitool can
+        execute it. The incompatible_strict_action_env flag makes the system
+        PATH available to bazel rules.
+
+        The spawn_strategy flag must be set to local because currently,
+        oci_image_index is only declaring the new JSON files it creates as
+        outputs; it's not declaring any manifests or layers from the images as
+        outputs. By default, Bazel only permits rules to access specifically
+        declared outputs of the rule's direct dependencies. In order for this
+        rule to access the transitive set of outputs of all dependencies, we
+        must disable bazel's sandboxing by setting spawn_strategy=local.
+    
+
+**ATTRIBUTES**
+
+
+| Name  | Description | Type | Mandatory | Default |
+| :------------- | :------------- | :------------- | :------------- | :------------- |
+| <a id="oci_image_layout-name"></a>name |  A unique name for this target.   | <a href="https://bazel.build/docs/build-ref.html#name">Name</a> | required |  |
+| <a id="oci_image_layout-manifest"></a>manifest |  An OCILayout index to be written to the OCI Image Format directory.   | <a href="https://bazel.build/docs/build-ref.html#labels">Label</a> | optional | None |
+| <a id="oci_image_layout-registry"></a>registry |  A registry host that contains images referenced by the OCILayout index,                 if not present consult the toolchain.   | String | optional | "" |
+| <a id="oci_image_layout-repository"></a>repository |  A repository that contains images referenced by the OCILayout index,                 if not present consult the toolchain.   | String | optional | "" |
+
+
 <a id="#oci_pull"></a>
 
 ## oci_pull

@@ -203,6 +203,32 @@ var app = &cli.App{
 			},
 		},
 		{
+			Name: "create-oci-image-layout",
+			Description: `Creates a directory containing an OCI Image Layout based on the input layout,
+as described in https://github.com/opencontainers/image-spec/blob/main/image-layout.md.`,
+			Action: CreateOciImageLayoutCmd,
+			Flags: []cli.Flag{
+				&cli.StringFlag{
+					Name: "layout-relative",
+				},
+				&cli.StringFlag{
+					Name: "desc",
+				},
+				&cli.StringFlag{
+					Name:  "registry",
+					Usage: "An OCI image registry that will be used to pull missing images referenced by the index.",
+				},
+				&cli.StringFlag{
+					Name:  "repository",
+					Usage: "An OCI image repository that will be used to pull missing images referenced by the index.",
+				},
+				&cli.StringFlag{
+					Name:  "out-dir",
+					Usage: "The directory that the OCI Image Layout will be written to.",
+				},
+			},
+		},
+		{
 			Name:   "push-blob",
 			Hidden: true,
 			Action: PushBlobCmd,
