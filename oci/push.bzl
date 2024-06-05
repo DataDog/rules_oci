@@ -130,6 +130,7 @@ done
             repository = ctx.attr.repository,
             digest = digest_file,
             tag_file = tag_file,
+            tag = ctx.attr.tag,
         ),
     ]
 
