@@ -14,6 +14,11 @@ import (
 	ocispec "github.com/opencontainers/image-spec/specs-go/v1"
 )
 
+// FIXME: this was removed from ocispec in https://github.com/opencontainers/image-spec/pull/1078 as
+// being a redundant duplicate of "org.opencontainers.image.created"; the code should be updated to
+// use that.
+const AnnotationArtifactDescription = "org.opencontainers.artifact.created"
+
 func AppendLayers(ctx context.Context, store content.Store, baseManifestDesc ocispec.Descriptor, layers []ocispec.Descriptor, annotations map[string]string, labels map[string]string, env []string, created time.Time, entrypoint []string) (ocispec.Descriptor, ocispec.Descriptor, error) {
 	if annotations == nil {
 		annotations = make(map[string]string)
@@ -65,7 +70,7 @@ func AppendLayers(ctx context.Context, store content.Store, baseManifestDesc oci
 			Created: &created,
 			Comment: "rules_oci",
 		}
-		if description, ok := layer.Annotations[ocispec.AnnotationArtifactDescription]; ok {
+		if description, ok := layer.Annotations[AnnotationArtifactDescription]; ok {
 			layerHistory.CreatedBy = description
 		}
 		history = append(history, layerHistory)

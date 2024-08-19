@@ -1,0 +1,52 @@
+module(
+    name = "rules_oci",
+    repo_name = "com_github_datadog_rules_oci",
+)
+
+bazel_dep(name = "aspect_bazel_lib", version = "2.7.3")
+bazel_dep(name = "bazel_skylib", version = "1.6.1")
+bazel_dep(name = "bazel_skylib_gazelle_plugin", dev_dependency = True, version = "1.6.1")
+bazel_dep(name = "gazelle", version = "0.36.0")
+bazel_dep(name = "rules_go", version = "0.47.1")
+bazel_dep(name = "rules_pkg", version = "0.10.1")
+bazel_dep(name = "stardoc", version = "0.6.2")
+
+go_sdk = use_extension("@rules_go//go:extensions.bzl", "go_sdk")
+
+go_sdk.download(version = "1.22.5")
+
+go_sdk.host()
+
+go_deps = use_extension("@gazelle//:extensions.bzl", "go_deps")
+
+go_deps.from_file(go_mod = "//:go.mod")
+
+use_repo(
+    go_deps,
+    #"com_github_bazelbuild_bazel_gazelle",
+    "com_github_blakesmith_ar",
+    "com_github_containerd_containerd",
+    "com_github_docker_docker_credential_helpers",
+    "com_github_mitchellh_go_homedir",
+    "com_github_opencontainers_go_digest",
+    "com_github_opencontainers_image_spec",
+    "com_github_sirupsen_logrus",
+    "com_github_stretchr_testify",
+    "com_github_urfave_cli_v2",
+    "land_oras_oras_go",
+    "org_golang_x_sync",
+)
+
+oci_pull = use_repo_rule("//oci:defs.bzl", "oci_pull")
+
+oci_pull(
+    name = "ubuntu_focal",
+    # Latest at "focal" tag
+    digest = "sha256:9d6a8699fb5c9c39cf08a0871bd6219f0400981c570894cd8cbea30d3424a31f",
+    registry = "ghcr.io",
+    repository = "datadog/rules_oci/ubuntu",
+)
+
+register_toolchains(
+    "@com_github_datadog_rules_oci//:oci_local_toolchain",
+)

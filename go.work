@@ -1,8 +1,0 @@
-go 1.18
-
-// We are solely using go.work to provide a from_file for gazelle-update-repos that pulls in both the root go.mod and
-// the go/go.mod.
-use (
-	.
-	./go
-)

@@ -1,7 +1,7 @@
 load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
-load("@io_bazel_rules_go//go:def.bzl", "go_binary", "go_library")
-load(":go.bzl", "go_multiarch_image")
 load("@com_github_datadog_rules_oci//oci:defs.bzl", "oci_push")
+load("@rules_go//go:def.bzl", "go_binary", "go_library")
+load(":go.bzl", "go_multiarch_image")
 
 go_library(
     name = "go_default_library",
@@ -40,6 +40,6 @@ bzl_library(
     visibility = ["//visibility:public"],
     deps = [
         "@com_github_datadog_rules_oci//oci:defs",
-        "@io_bazel_rules_go//go:def",
+        "@rules_go//go:def",
     ],
 )
