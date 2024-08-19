@@ -26,6 +26,7 @@ use_repo(
     #"com_github_bazelbuild_bazel_gazelle",
     "com_github_blakesmith_ar",
     "com_github_containerd_containerd",
+    "com_github_containerd_log",
     "com_github_docker_docker_credential_helpers",
     "com_github_mitchellh_go_homedir",
     "com_github_opencontainers_go_digest",

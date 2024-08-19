@@ -6,18 +6,20 @@ import (
 	"github.com/DataDog/rules_oci/go/pkg/ociutil"
 
 	"github.com/containerd/containerd/images"
+	"github.com/containerd/log"
 	ocispec "github.com/opencontainers/image-spec/specs-go/v1"
-	log "github.com/sirupsen/logrus"
 	"github.com/urfave/cli/v2"
 	orascontent "oras.land/oras-go/pkg/content"
 )
 
 func PullCmd(c *cli.Context) error {
-	resolver := ociutil.DefaultResolver()
-
 	ref := c.Args().First()
 
-	name, desc, err := resolver.Resolve(c.Context, ref)
+	ctx := log.WithLogger(c.Context, log.G(c.Context).WithField("pull-ref", ref))
+
+	resolver := ociutil.DefaultResolver()
+
+	name, desc, err := resolver.Resolve(ctx, ref)
 	if err != nil {
 		return err
 	}
@@ -28,7 +30,10 @@ func PullCmd(c *cli.Context) error {
 
 	desc.Annotations[ocispec.AnnotationRefName] = name
 
-	log.Debugf("Resolved descriptor for %v: %#v", name, desc)
+	log.G(ctx).
+		WithField("name", name).
+		WithField("desc", desc).
+		Debug("resolved")
 
 	layoutPath := c.StringSlice("layout")[0]
 
@@ -37,9 +42,7 @@ func PullCmd(c *cli.Context) error {
 		return err
 	}
 
-	log.Debugf("found layout at '%v'", layoutPath)
-
-	remoteFetcher, err := resolver.Fetcher(c.Context, name)
+	remoteFetcher, err := resolver.Fetcher(ctx, name)
 	if err != nil {
 		return err
 	}
@@ -60,7 +63,7 @@ func PullCmd(c *cli.Context) error {
 		)
 	}
 
-	err = images.Dispatch(c.Context, ociutil.CopyContentHandler(imagesHandler, provider, layout), sem, desc)
+	err = images.Dispatch(ctx, ociutil.CopyContentHandler(imagesHandler, provider, layout), sem, desc)
 	if err != nil {
 		return err
 	}
