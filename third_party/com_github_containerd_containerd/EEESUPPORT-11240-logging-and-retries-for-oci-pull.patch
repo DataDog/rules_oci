@@ -1,0 +1,187 @@
+diff --git c/images/image.go w/images/image.go
+index a13710e74..62dd6b0fa 100644
+--- c/images/image.go
++++ w/images/image.go
+@@ -154,7 +154,7 @@ func Manifest(ctx context.Context, provider content.Provider, image ocispec.Desc
+ 				return nil, err
+ 			}
+ 
+-			if err := validateMediaType(p, desc.MediaType); err != nil {
++			if err := validateMediaType(ctx, p, desc.MediaType); err != nil {
+ 				return nil, fmt.Errorf("manifest: invalid desc %s: %w", desc.Digest, err)
+ 			}
+ 
+@@ -198,7 +198,7 @@ func Manifest(ctx context.Context, provider content.Provider, image ocispec.Desc
+ 				return nil, err
+ 			}
+ 
+-			if err := validateMediaType(p, desc.MediaType); err != nil {
++			if err := validateMediaType(ctx, p, desc.MediaType); err != nil {
+ 				return nil, fmt.Errorf("manifest: invalid desc %s: %w", desc.Digest, err)
+ 			}
+ 
+@@ -340,17 +340,16 @@ func Check(ctx context.Context, provider content.Provider, image ocispec.Descrip
+ // Children returns the immediate children of content described by the descriptor.
+ func Children(ctx context.Context, provider content.Provider, desc ocispec.Descriptor) ([]ocispec.Descriptor, error) {
+ 	var descs []ocispec.Descriptor
++
++	ctx = log.WithLogger(ctx, log.G(ctx).WithField("desc", desc))
++
+ 	switch desc.MediaType {
+ 	case MediaTypeDockerSchema2Manifest, ocispec.MediaTypeImageManifest:
+-		p, err := content.ReadBlob(ctx, provider, desc)
++		p, err := readValidatedManifestBlobWithRetry(ctx, provider, desc)
+ 		if err != nil {
+ 			return nil, err
+ 		}
+ 
+-		if err := validateMediaType(p, desc.MediaType); err != nil {
+-			return nil, fmt.Errorf("children: invalid desc %s: %w", desc.Digest, err)
+-		}
+-
+ 		// TODO(stevvooe): We just assume oci manifest, for now. There may be
+ 		// subtle differences from the docker version.
+ 		var manifest ocispec.Manifest
+@@ -361,15 +360,11 @@ func Children(ctx context.Context, provider content.Provider, desc ocispec.Descr
+ 		descs = append(descs, manifest.Config)
+ 		descs = append(descs, manifest.Layers...)
+ 	case MediaTypeDockerSchema2ManifestList, ocispec.MediaTypeImageIndex:
+-		p, err := content.ReadBlob(ctx, provider, desc)
++		p, err := readValidatedManifestBlobWithRetry(ctx, provider, desc)
+ 		if err != nil {
+ 			return nil, err
+ 		}
+ 
+-		if err := validateMediaType(p, desc.MediaType); err != nil {
+-			return nil, fmt.Errorf("children: invalid desc %s: %w", desc.Digest, err)
+-		}
+-
+ 		var index ocispec.Index
+ 		if err := json.Unmarshal(p, &index); err != nil {
+ 			return nil, err
+@@ -387,6 +382,49 @@ func Children(ctx context.Context, provider content.Provider, desc ocispec.Descr
+ 	return descs, nil
+ }
+ 
++const readValidatedManifestBlobRetries = 3
++const readValidatedManifestBlobDelaySeconds = 5
++
++func readValidatedManifestBlobWithRetry(ctx context.Context, provider content.Provider, desc ocispec.Descriptor) ([]byte, error) {
++
++	retriesRemaining := readValidatedManifestBlobRetries
++
++	for {
++
++		blob, err := readValidatedManifestBlob(ctx, provider, desc)
++		if err == nil {
++			return blob, nil
++		}
++
++		if retriesRemaining > 0 {
++			log.G(ctx).
++				WithField("retries-remaining", retriesRemaining).
++				WithField("retry-delay-seconds", readValidatedManifestBlobDelaySeconds).
++				WithError(err).
++				Warn("readValidatedManifestBlob failed; retrying")
++
++			retriesRemaining -= 1
++
++			time.Sleep(time.Duration(readValidatedManifestBlobDelaySeconds) * time.Second)
++		} else {
++			return nil, err
++		}
++
++	}
++}
++
++func readValidatedManifestBlob(ctx context.Context, provider content.Provider, desc ocispec.Descriptor) ([]byte, error) {
++	p, err := content.ReadBlob(ctx, provider, desc)
++	if err != nil {
++		return nil, err
++	}
++
++	if err := validateMediaType(ctx, p, desc.MediaType); err != nil {
++		return nil, fmt.Errorf("children: invalid desc %s: %w", desc.Digest, err)
++	}
++	return p, nil
++}
++
+ // unknownDocument represents a manifest, manifest list, or index that has not
+ // yet been validated.
+ type unknownDocument struct {
+@@ -400,11 +438,25 @@ type unknownDocument struct {
+ // validateMediaType returns an error if the byte slice is invalid JSON or if
+ // the media type identifies the blob as one format but it contains elements of
+ // another format.
+-func validateMediaType(b []byte, mt string) error {
++func validateMediaType(ctx context.Context, b []byte, mt string) error {
+ 	var doc unknownDocument
++
+ 	if err := json.Unmarshal(b, &doc); err != nil {
++
++		logger := log.L
++		if ctx != nil {
++			logger = log.G(ctx)
++		}
++
++		logger.
++			WithField("manifest", string(b)).
++			WithField("manifest-length", len(b)).
++			WithError(err).
++			Error("validateMediaType")
++
+ 		return err
+ 	}
++
+ 	if len(doc.FSLayers) != 0 {
+ 		return fmt.Errorf("media-type: schema 1 not supported")
+ 	}
+diff --git c/images/image_test.go w/images/image_test.go
+index 87c84ab05..d6fd7b7d2 100644
+--- c/images/image_test.go
++++ w/images/image_test.go
+@@ -44,7 +44,7 @@ func TestValidateMediaType(t *testing.T) {
+ 			b, err := json.Marshal(manifest)
+ 			require.NoError(t, err, "failed to marshal manifest")
+ 
+-			err = validateMediaType(b, tc.mt)
++			err = validateMediaType(t.Context, b, tc.mt)
+ 			if tc.index {
+ 				assert.Error(t, err, "manifest should not be a valid index")
+ 			} else {
+@@ -58,7 +58,7 @@ func TestValidateMediaType(t *testing.T) {
+ 			b, err := json.Marshal(index)
+ 			require.NoError(t, err, "failed to marshal index")
+ 
+-			err = validateMediaType(b, tc.mt)
++			err = validateMediaType(ctx, b, tc.mt)
+ 			if tc.index {
+ 				assert.NoError(t, err, "index should be valid")
+ 			} else {
+@@ -97,7 +97,7 @@ func TestValidateMediaType(t *testing.T) {
+ 				b, err := json.Marshal(doc)
+ 				require.NoError(t, err, "failed to marshal document")
+ 
+-				err = validateMediaType(b, tc.mt)
++				err = validateMediaType(ctx, b, tc.mt)
+ 				assert.NoError(t, err, "document should be valid")
+ 			})
+ 		}
+@@ -109,7 +109,7 @@ func TestValidateMediaType(t *testing.T) {
+ 				b, err := json.Marshal(doc)
+ 				require.NoError(t, err, "failed to marshal document")
+ 
+-				err = validateMediaType(b, tc.mt)
++				err = validateMediaType(ctx, b, tc.mt)
+ 				assert.Error(t, err, "document should not be valid")
+ 			})
+ 		}
+@@ -121,7 +121,7 @@ func TestValidateMediaType(t *testing.T) {
+ 		b, err := json.Marshal(doc)
+ 		require.NoError(t, err, "failed to marshal document")
+ 
+-		err = validateMediaType(b, "")
++		err = validateMediaType(ctx, b, "")
+ 		assert.Error(t, err, "document should not be valid")
+ 	})
+ }

@@ -1,0 +1,1 @@
+exports_files(["EEESUPPORT-11240-logging-and-retries-for-oci-pull.patch"])

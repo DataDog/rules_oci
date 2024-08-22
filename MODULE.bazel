@@ -50,6 +50,14 @@ use_repo(
     "org_golang_x_sys",
 )
 
+go_deps.module_override(
+    patch_strip = 1,
+    patches = [
+        "//third_party/com_github_containerd_containerd:EEESUPPORT-11240-logging-and-retries-for-oci-pull.patch",
+    ],
+    path = "github.com/containerd/containerd",
+)
+
 oci_pull = use_repo_rule("//oci:defs.bzl", "oci_pull")
 
 oci_pull(
