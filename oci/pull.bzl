@@ -12,9 +12,15 @@ def failout(msg, cmd_result):
             .format(msg = msg, stdout = cmd_result.stdout, stderr = cmd_result.stderr),
     )
 
-def pull(rctx, layout_root, repository, digest, registry = "", shallow = False):
+def pull(rctx, layout_root, repository, digest, registry = "", shallow = False, debug = False):
     cmd = [
         rctx.path(_repo_toolchain(rctx, "ocitool")),
+    ]
+
+    if debug:
+        cmd.append("--debug")
+
+    cmd.extend([
         "--layout={layout_root}".format(layout_root = layout_root),
         "pull",
         "--shallow={shallow}".format(shallow = shallow),
@@ -23,7 +29,7 @@ def pull(rctx, layout_root, repository, digest, registry = "", shallow = False):
             repository = repository,
             digest = digest,
         ),
-    ]
+    ])
 
     res = rctx.execute(cmd, quiet = not DEBUG)
     if res.return_code > 0:
@@ -79,6 +85,10 @@ oci_pull = repository_rule(
             mandatory = True,
             doc = """
             """,
+        ),
+        "debug": attr.bool(
+            default = False,
+            doc = "Enable ocitool debug output",
         ),
         "shallow": attr.bool(
             default = True,

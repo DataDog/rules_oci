@@ -9,10 +9,11 @@ import (
 
 func FetchertoProvider(fetcher remotes.Fetcher) content.Provider {
 	if prov, ok := fetcher.(content.Provider); ok {
-		log.Debugf("fetcher %T is a provider", fetcher)
+		log.Debugf("Fetcher %T is a Provider", fetcher)
 		return prov
 	}
 
+	log.Debugf("Wrapping fetcher %T", fetcher)
 	return &oras.ProviderWrapper{
 		Fetcher: fetcher,
 	}
