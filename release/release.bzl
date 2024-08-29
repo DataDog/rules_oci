@@ -1,9 +1,12 @@
-load("@rules_pkg//pkg:pkg.bzl", "pkg_tar")
+""" release """
+
 load("@rules_go//go:def.bzl", "go_binary")
+load("@rules_pkg//pkg:pkg.bzl", "pkg_tar")
 
 DEFAULT_GOOSS = ["linux", "darwin"]
 DEFAULT_GOARCHS = ["amd64", "arm64"]
 
+# buildifier: disable=function-docstring
 def go_binary_multi(name, embed, gooss = DEFAULT_GOOSS, goarchs = DEFAULT_GOARCHS, **kwargs):
     if "goos" in kwargs or "goarch" in kwargs:
         fail("go_binary_multi does not allow goos or goarch in kwargs")
@@ -34,6 +37,7 @@ def go_binary_multi(name, embed, gooss = DEFAULT_GOOSS, goarchs = DEFAULT_GOARCH
         srcs = all_binaries,
     )
 
+# buildifier: disable=function-docstring
 def release_rules_oci(name, rules, binaries, **kwargs):
     top_name = "{}.top".format(name)
     pkg_tar(

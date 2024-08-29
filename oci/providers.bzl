@@ -1,3 +1,5 @@
+""" providers """
+
 OCIReferenceInfo = provider(
     doc = "Refers to any artifact represented by an OCI-like reference URI",
     fields = {
@@ -9,13 +11,16 @@ OCIReferenceInfo = provider(
     },
 )
 
+# buildifier: disable=name-conventions
 OCILayout = provider(
+    "OCI Layout",
     fields = {
         "blob_index": "",
         "files": "",
     },
 )
 
+# buildifier: disable=name-conventions
 OCIDescriptor = provider(
     doc = "",
     fields = {
@@ -29,6 +34,7 @@ OCIDescriptor = provider(
     },
 )
 
+# buildifier: disable=name-conventions
 OCIImageManifest = provider(
     doc = "",
     fields = {
@@ -38,6 +44,7 @@ OCIImageManifest = provider(
     },
 )
 
+# buildifier: disable=name-conventions
 OCIImageIndexManifest = provider(
     doc = "",
     fields = {
@@ -46,6 +53,7 @@ OCIImageIndexManifest = provider(
     },
 )
 
+# buildifier: disable=name-conventions
 OCIPlatform = provider(
     doc = "Platform describes the platform which the image in the manifest runs on",
     fields = {

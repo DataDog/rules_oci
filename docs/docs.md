@@ -1,6 +1,6 @@
 <!-- Generated with Stardoc: http://skydoc.bazel.build -->
 
-
+public API
 
 <a id="oci_image"></a>
 

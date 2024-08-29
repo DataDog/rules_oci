@@ -1,3 +1,5 @@
+""" pull """
+
 # A directory to store cached OCI artifacts
 # TODO(griffin) currently not used, but going to start depending on this for
 # integration into the bzl wrapper.
@@ -12,6 +14,7 @@ def failout(msg, cmd_result):
             .format(msg = msg, stdout = cmd_result.stdout, stderr = cmd_result.stderr),
     )
 
+# buildifier: disable=function-docstring
 def pull(rctx, layout_root, repository, digest, registry = "", shallow = False, debug = False):
     cmd = [
         rctx.path(_repo_toolchain(rctx, "ocitool")),

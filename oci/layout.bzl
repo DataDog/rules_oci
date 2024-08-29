@@ -1,4 +1,6 @@
-load("@com_github_datadog_rules_oci//oci:providers.bzl", "OCIDescriptor", "OCIImageIndexManifest", "OCILayout")
+""" layout """
+
+load("@com_github_datadog_rules_oci//oci:providers.bzl", "OCIDescriptor", "OCILayout")
 
 def _oci_layout_index_impl(ctx):
     blobs_map = {}
