@@ -214,7 +214,10 @@ def _oci_image_impl(ctx):
         ),
         OCILayout(
             blob_index = layout_file,
-            files = depset(ctx.files.layers + [manifest_file, config_file, layout_file]),
+            files = depset(
+                ctx.files.layers + [manifest_file, config_file, layout_file],
+                transitive = [layout.files],
+            ),
         ),
         DefaultInfo(
             files = depset([
