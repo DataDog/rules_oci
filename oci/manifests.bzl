@@ -1,9 +1,11 @@
+""" manifests """
+
 load("@com_github_datadog_rules_oci//oci:providers.bzl", "OCIDescriptor", "OCIImageIndexManifest", "OCIImageManifest", "OCILayout")
 
 def _oci_image_manifest_impl(ctx):
     return [OCIImageManifest(
         config = ctx.attr.config[OCIDescriptor],
-        layers = [l[OCIDescriptor] for l in ctx.attr.layers],
+        layers = [layer[OCIDescriptor] for layer in ctx.attr.layers],
         annotations = ctx.attr.annotations,
     ), ctx.attr.layout[OCILayout], ctx.attr.descriptor[OCIDescriptor]]
 

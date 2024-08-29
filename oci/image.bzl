@@ -1,5 +1,8 @@
+""" image """
+
 load("@com_github_datadog_rules_oci//oci:providers.bzl", "OCIDescriptor", "OCILayout")
 
+# buildifier: disable=function-docstring
 def get_descriptor_file(ctx, desc):
     if hasattr(desc, "descriptor_file"):
         return desc.descriptor_file
@@ -249,7 +252,7 @@ oci_image = rule(
             doc = "Used to extract a manifest from base if base is an index",
         ),
         "env": attr.string_list(
-            doc = """Entries are in the format of `VARNAME=VARVALUE`. These values act as defaults and 
+            doc = """Entries are in the format of `VARNAME=VARVALUE`. These values act as defaults and
             are merged with any specified when creating a container.""",
         ),
         "layers": attr.label_list(

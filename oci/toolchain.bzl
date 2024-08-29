@@ -1,3 +1,5 @@
+""" toolchain """
+
 # Follow golang's conventions for naming os and arch
 OS_CONSTRAINTS = {
     "darwin": "@platforms//os:osx",
@@ -10,6 +12,7 @@ ARCH_CONSTRAINTS = {
 }
 
 OCISDK = provider(
+    "The OCI SDK",
     fields = {
         "ocitool": "",
     },
@@ -65,7 +68,7 @@ oci_sdk = rule(
             mandatory = True,
             allow_single_file = True,
             executable = True,
-            cfg = "host",
+            cfg = "exec",
         ),
     },
     provides = [OCISDK],
@@ -81,8 +84,10 @@ def oci_local_toolchain(name, **kwargs):
     oci_toolchain(
         name = name,
         sdk = sdk_name,
+        **kwargs
     )
 
+# buildifier: disable=function-docstring
 def create_compiled_oci_toolchains(name, **kwargs):
     for os, os_const in OS_CONSTRAINTS.items():
         for arch, arch_const in ARCH_CONSTRAINTS.items():
@@ -104,7 +109,7 @@ def create_compiled_oci_toolchains(name, **kwargs):
             )
 
 def register_compiled_oci_toolchains(name):
-    for os, os_const in OS_CONSTRAINTS.items():
-        for arch, arch_const in ARCH_CONSTRAINTS.items():
+    for os, _ in OS_CONSTRAINTS.items():
+        for arch, _ in ARCH_CONSTRAINTS.items():
             toolchain_name = "{name}_toolchain_{os}_{arch}".format(name = name, os = os, arch = arch)
             native.register_toolchains("@com_github_datadog_rules_oci//bin:{}".format(toolchain_name))

@@ -1,4 +1,9 @@
-DebugInfo = provider(fields = ["debug"])
+""" debug_flag """
+
+DebugInfo = provider(
+    "DebugInfo",
+    fields = ["debug"],
+)
 
 def _debug_flag_impl(ctx):
     return [DebugInfo(debug = ctx.build_setting_value)]
