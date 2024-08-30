@@ -281,7 +281,7 @@ func CopyContent(ctx context.Context, from content.Provider, to content.Ingester
 
 	reader, err := from.ReaderAt(ctx, desc)
 	if err != nil {
-		return fmt.Errorf("failed to create reader from ingestor: %w", err)
+		return fmt.Errorf("failed to create reader for '%s' from ingestor: %w", desc.Digest.String(), err)
 	}
 
 	ref := desc.Digest.String()
