@@ -143,9 +143,8 @@ oci_image_index = rule(
 def _oci_image_impl(ctx):
     toolchain = ctx.toolchains["@com_github_datadog_rules_oci//oci:toolchain"]
 
-    layout = ctx.attr.base[OCILayout]
-
     base_desc = get_descriptor_file(ctx, ctx.attr.base[OCIDescriptor])
+    base_layout = ctx.attr.base[OCILayout]
 
     manifest_desc_file = ctx.actions.declare_file("{}.manifest.descriptor.json".format(ctx.label.name))
     manifest_file = ctx.actions.declare_file("{}.manifest.json".format(ctx.label.name))
@@ -177,7 +176,7 @@ def _oci_image_impl(ctx):
     ctx.actions.run(
         executable = toolchain.sdk.ocitool,
         arguments = [
-                        "--layout={}".format(layout.blob_index.path),
+                        "--layout={}".format(base_layout.blob_index.path),
                         "append-layers",
                         "--bazel-version-file={}".format(ctx.version_file.path),
                         "--base={}".format(base_desc.path),
@@ -196,10 +195,14 @@ def _oci_image_impl(ctx):
                     ["--annotations={}={}".format(k, v) for k, v in annotations.items()] +
                     ["--labels={}={}".format(k, v) for k, v in labels.items()] +
                     ["--env={}".format(env) for env in ctx.attr.env],
-        inputs = [ctx.version_file, base_desc, layout.blob_index, entrypoint_config_file] +
-                 ctx.files.layers +
+        inputs = [
+                     ctx.version_file,
+                     base_desc,
+                     base_layout.blob_index,
+                     entrypoint_config_file,
+                 ] + ctx.files.layers +
                  layer_descriptor_files +
-                 layout.files.to_list(),
+                 base_layout.files.to_list(),
         outputs = [
             manifest_file,
             config_file,
@@ -214,7 +217,10 @@ def _oci_image_impl(ctx):
         ),
         OCILayout(
             blob_index = layout_file,
-            files = depset(ctx.files.layers + [manifest_file, config_file, layout_file]),
+            files = depset(
+                ctx.files.layers + [manifest_file, config_file, layout_file],
+                transitive = [base_layout.files],
+            ),
         ),
         DefaultInfo(
             files = depset([
