@@ -122,7 +122,7 @@ def _oci_image_index_impl(ctx):
         ),
         # Pass through any OCIImageLayoutInfo data from the manifests.
         OCIImageLayoutInfo(
-            oci_image_layout_dirs = depset(transitive = oci_layouts)
+            oci_image_layout_dirs = depset(transitive = oci_layouts),
         ),
         DefaultInfo(
             files = depset(outputs),
@@ -229,7 +229,7 @@ def _oci_image_impl(ctx):
             ),
         ),
         OCIImageLayoutInfo(
-            oci_image_layout_dirs = depset(ctx.files.pulled_base) if ctx.attr.pulled_base != None else [],
+            oci_image_layout_dirs = depset(ctx.files.pulled_base if ctx.attr.pulled_base != None else []),
         ),
         DefaultInfo(
             files = depset([
