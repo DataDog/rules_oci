@@ -8,9 +8,7 @@ def _oci_image_layout_impl(ctx):
     base_layouts = ctx.attr.manifest[OCIImageLayoutInfo]
     base_layout_dirs = ""
     if base_layouts != None:
-        base_layouts = base_layouts.oci_image_layout_dirs.to_list()
-        base_layout_dirs = ",".join([p.path for p in base_layouts])
-
+        base_layout_dirs = ",".join([p.path for p in base_layouts.oci_image_layout_dirs.to_list()])
 
     descriptor = ctx.attr.manifest[OCIDescriptor]
     out_dir = ctx.actions.declare_directory(ctx.label.name)
@@ -27,12 +25,16 @@ def _oci_image_layout_impl(ctx):
             # "bazel-out/os_arch-fastbuild/bin/...". Unfortunately, bazel
             # provides no direct way to access this directory, so here we traverse
             # up 3 levels from the bin directory.
-            "--layout-relative={root}".format(root = ctx.bin_dir.path+"/../../../"),
+            "--layout-relative={root}".format(root = ctx.bin_dir.path + "/../../../"),
             "--desc={desc}".format(desc = descriptor.descriptor_file.path),
             "--base-image-layouts={base_layouts}".format(base_layouts = base_layout_dirs),
             "--out-dir={out_dir}".format(out_dir = out_dir.path),
         ],
-        inputs = ctx.files.manifest,
+        inputs =
+            depset(direct = ctx.files.manifest + [layout.blob_index], transitive = [
+                base_layouts.oci_image_layout_dirs,
+                layout.files,
+            ]),
         outputs = [
             out_dir,
         ],
