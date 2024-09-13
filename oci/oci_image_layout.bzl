@@ -1,14 +1,15 @@
-load("@com_github_datadog_rules_oci//oci:providers.bzl", "OCIDescriptor", "OCIImageLayoutInfo", "OCILayout")
+"""A rule to create a directory in OCI Image Layout format."""
+
 load("@com_github_datadog_rules_oci//oci:debug_flag.bzl", "DebugInfo")
+load("@com_github_datadog_rules_oci//oci:providers.bzl", "OCIDescriptor", "OCILayout")
 
 def _oci_image_layout_impl(ctx):
     toolchain = ctx.toolchains["@com_github_datadog_rules_oci//oci:toolchain"]
 
     layout = ctx.attr.manifest[OCILayout]
-    base_layouts = ctx.attr.manifest[OCIImageLayoutInfo]
-    base_layout_dirs = ""
-    if base_layouts != None:
-        base_layout_dirs = ",".join([p.path for p in base_layouts.oci_image_layout_dirs.to_list()])
+
+    # layout_files contains all available blobs for the image.
+    layout_files = ",".join([p.path for p in layout.files.to_list()])
 
     descriptor = ctx.attr.manifest[OCIDescriptor]
     out_dir = ctx.actions.declare_directory(ctx.label.name)
@@ -27,14 +28,14 @@ def _oci_image_layout_impl(ctx):
             # up 3 levels from the bin directory.
             "--layout-relative={root}".format(root = ctx.bin_dir.path + "/../../../"),
             "--desc={desc}".format(desc = descriptor.descriptor_file.path),
-            "--base-image-layouts={base_layouts}".format(base_layouts = base_layout_dirs),
+            "--layout-files={layout_files}".format(layout_files = layout_files),
             "--out-dir={out_dir}".format(out_dir = out_dir.path),
         ],
         inputs =
-            depset(direct = ctx.files.manifest + [layout.blob_index], transitive = [
-                base_layouts.oci_image_layout_dirs,
-                layout.files,
-            ]),
+            depset(
+                direct = ctx.files.manifest + [layout.blob_index],
+                transitive = [layout.files],
+            ),
         outputs = [
             out_dir,
         ],
@@ -73,7 +74,7 @@ oci_image_layout = rule(
             doc = """
                 An OCILayout index to be written to the OCI Image Format directory.
             """,
-            providers = [OCILayout, OCIImageLayoutInfo],
+            providers = [OCILayout],
         ),
         "_debug": attr.label(
             default = "//oci:debug",
