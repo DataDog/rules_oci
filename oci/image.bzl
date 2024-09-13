@@ -1,5 +1,6 @@
 """ image """
-load("@com_github_datadog_rules_oci//oci:providers.bzl", "OCIDescriptor", "OCIImageLayoutInfo", "OCILayout")
+
+load("@com_github_datadog_rules_oci//oci:providers.bzl", "OCIDescriptor", "OCILayout")
 
 # buildifier: disable=function-docstring
 def get_descriptor_file(ctx, desc):
@@ -110,8 +111,6 @@ def _oci_image_index_impl(ctx):
         outputs = outputs,
     )
 
-    oci_layouts = [m[OCIImageLayoutInfo].oci_image_layout_dirs for m in ctx.attr.manifests]
-
     return [
         OCIDescriptor(
             descriptor_file = index_desc_file,
@@ -119,10 +118,6 @@ def _oci_image_index_impl(ctx):
         OCILayout(
             blob_index = layout_file,
             files = depset(direct = [index_file, layout_file], transitive = [layout_files]),
-        ),
-        # Pass through any OCIImageLayoutInfo data from the manifests.
-        OCIImageLayoutInfo(
-            oci_image_layout_dirs = depset(transitive = oci_layouts),
         ),
         DefaultInfo(
             files = depset(outputs),
@@ -228,9 +223,6 @@ def _oci_image_impl(ctx):
                 transitive = [base_layout.files],
             ),
         ),
-        OCIImageLayoutInfo(
-            oci_image_layout_dirs = depset(ctx.files.pulled_base if ctx.attr.pulled_base != None else []),
-        ),
         DefaultInfo(
             files = depset([
                 entrypoint_config_file,
@@ -255,13 +247,6 @@ oci_image = rule(
                 OCIDescriptor,
                 OCILayout,
             ],
-        ),
-        "pulled_base": attr.label(
-            doc = """A directory that contains the base image in OCI Image Layout format.
-            See https://github.com/opencontainers/image-spec/blob/main/image-layout.md for a description
-            of the OCI Image Layout format. This is optional, and if present, is passed through as an output of oci_image,
-            by the OCIImageLayoutInfo provider.""",
-            allow_single_file = True,
         ),
         "entrypoint": attr.string_list(
             doc = """A list of entrypoints for the image; these will be inserted into the generated

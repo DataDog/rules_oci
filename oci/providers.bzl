@@ -64,11 +64,3 @@ OCIPlatform = provider(
         "variant": "Variant is an optional field specifying a variant of the CPU",
     },
 )
-
-OCIImageLayoutInfo = provider(
-    doc = "This provider represents a list of directories that each contain an OCI Image Layout." +
-    "See https://github.com/opencontainers/image-spec/blob/main/image-layout.md for a description of the format.",
-    fields = {
-        "oci_image_layout_dirs": "A list of directories, each containing an OCI Image Layout."
-    },
-)

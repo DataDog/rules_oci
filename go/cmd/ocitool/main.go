@@ -215,8 +215,8 @@ as described in https://github.com/opencontainers/image-spec/blob/main/image-lay
 					Name: "desc",
 				},
 				&cli.StringSliceFlag{
-					Name:  "base-image-layouts",
-					Usage: "A comma separated list of directory paths, each path containing an OCI Image Layout.",
+					Name:  "layout-files",
+					Usage: "A comma separated list of blob files to be placed in the OCI Image Layout (e.g. image layers).",
 				},
 				&cli.StringFlag{
 					Name:  "out-dir",

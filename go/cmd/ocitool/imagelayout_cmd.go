@@ -13,33 +13,42 @@ import (
 	"github.com/urfave/cli/v2"
 )
 
-// Given a slice of baseLayoutPaths, where each path contains an OCI Image Format,
-// return an index that maps sha256 values to paths.
-// If relPath is non-empty, it is prepended to all baseLayoutPaths.
-func getBaseLayoutBlobIndex(baseLayoutPaths []string, relPath string) (blob.Index, error) {
+// Given a slice of layoutFilePaths, where each path contains a file that may
+// be used within an OCI Image Format, return an index that maps sha256 values
+// to paths.
+// If relPath is non-empty, it is prepended to all layoutFilePaths.
+func getLayoutFilesBlobIndex(layoutFilePaths []string, relPath string) (blob.Index, error) {
 	var result blob.Index
 	result.Blobs = make(map[digest.Digest]string)
-
-	for _, p := range baseLayoutPaths {
+	for _, p := range layoutFilePaths {
 		if len(strings.TrimSpace(p)) == 0 {
 			// Ignore empty paths.
 			continue
 		}
-		blobsDir := path.Join(p, "blobs", "sha256")
 		if relPath != "" {
-			blobsDir = path.Join(relPath, blobsDir)
+			p = path.Join(relPath, p)
 		}
-		entries, err := os.ReadDir(blobsDir)
-		if err != nil {
-			return blob.Index{}, fmt.Errorf("unable to read OCI Image Format blobs dir. Base layout paths: %v, Relpath: %s, Path: %s, Error: %w", baseLayoutPaths, relPath, blobsDir, err)
-		}
-		for _, entry := range entries {
-			if !entry.Type().IsRegular() {
-				continue
+		// Use an immediately invoked function here so that defer closes the
+		// file at a suitable time.
+		err := func() error {
+			f, err := os.Open(p)
+			if err != nil {
+				return err
 			}
-			name := entry.Name()
-			result.Blobs[digest.Digest(name)] = path.Join(blobsDir, name)
+			defer f.Close()
+			digester := digest.SHA256.Digester()
+			_, err = f.WriteTo(digester.Hash())
+			if err != nil {
+				return err
+			}
+			digest := digester.Digest()
+			result.Blobs[digest] = p
+			return nil
+		}()
+		if err != nil {
+			return blob.Index{}, err
 		}
+
 	}
 
 	return result, nil
@@ -50,11 +59,6 @@ func getBaseLayoutBlobIndex(baseLayoutPaths []string, relPath string) (blob.Inde
 // for the structure of OCI Image Layout directories.
 func CreateOciImageLayoutCmd(c *cli.Context) error {
 	relPath := c.String("layout-relative")
-	baseLayoutBlobIdx, err := getBaseLayoutBlobIndex(c.StringSlice("base-image-layouts"), relPath)
-	if err != nil {
-		return err
-	}
-
 	// Load providers that read local files, and create a multiprovider that
 	// contains all of them, as well as providers for base image blobs.
 	providers, err := LoadLocalProviders(c.StringSlice("layout"), relPath)
@@ -62,8 +66,13 @@ func CreateOciImageLayoutCmd(c *cli.Context) error {
 		return err
 	}
 
-	if len(baseLayoutBlobIdx.Blobs) > 0 {
-		providers = append(providers, &baseLayoutBlobIdx)
+	layoutFilesBlobIdx, err := getLayoutFilesBlobIndex(c.StringSlice("layout-files"), relPath)
+	if err != nil {
+		return err
+	}
+
+	if len(layoutFilesBlobIdx.Blobs) > 0 {
+		providers = append(providers, &layoutFilesBlobIdx)
 	}
 
 	multiProvider := ociutil.MultiProvider(providers...)
