@@ -48,13 +48,14 @@ func getLayoutFilesBlobIndex(layoutFilePaths []string, relPath string) (blob.Ind
 		if err != nil {
 			return blob.Index{}, err
 		}
-
 	}
 
 	return result, nil
 }
 
 // This command creates an OCI Image Layout directory based on the layout parameter.
+// The layout-files parameter contains a list of files that are used as blobs
+// when referenced by desriptors in the layout parameter.
 // See https://github.com/opencontainers/image-spec/blob/main/image-layout.md
 // for the structure of OCI Image Layout directories.
 func CreateOciImageLayoutCmd(c *cli.Context) error {
