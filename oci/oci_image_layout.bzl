@@ -48,26 +48,12 @@ oci_image_layout = rule(
     doc = """
         Writes an OCI Image Index and related blobs to an OCI Image Format
         directory. See https://github.com/opencontainers/image-spec/blob/main/image-layout.md
-        for the specification of the OCI Image Format directory. Local blobs are
-        used where available, and if a referenced blob is not present, it is
-        fetched from the provided OCI repository and placed in the output.
+        for the specification of the OCI Image Format directory.
 
-        In order for this rule to work correctly in its current state, the
-        following flags must be provided to bazel:
-        --spawn_strategy=local
-
-        The spawn_strategy flag must be set to local because currently,
-        oci_image_index is only declaring the new JSON files it creates as
-        outputs; it's not declaring any manifests or layers from the images as
-        outputs. By default, Bazel only permits rules to access specifically
-        declared outputs of the rule's direct dependencies. In order for this
-        rule to access the transitive set of outputs of all dependencies, we
-        must disable bazel's sandboxing by setting spawn_strategy=local.
+        All blobs must be provided in the manifest's OCILayout provider, in the
+        files attribute. If blobs are missing, creation of the OCI Image Layout
+        will fail.
     """,
-    # TODO(kim.mason): Fix oci_image/oci_image_index so they explicitly declare
-    # outputs that include everything needed to build the image.
-    # TODO(kim.mason): Make it so that Docker credential helpers are available
-    # to oci_image_layout without making the system PATH available.
     implementation = _oci_image_layout_impl,
     attrs = {
         "manifest": attr.label(
