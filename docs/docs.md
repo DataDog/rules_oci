@@ -72,6 +72,31 @@ Create a tarball and an OCI descriptor for it
 | <a id="oci_image_layer-symlinks"></a>symlinks |  Dictionary of symlink -> target entries to place in the tarball   | <a href="https://bazel.build/rules/lib/dict">Dictionary: String -> String</a> | optional |  `{}`  |
 
 
+<a id="oci_image_layout"></a>
+
+## oci_image_layout
+
+<pre>
+oci_image_layout(<a href="#oci_image_layout-name">name</a>, <a href="#oci_image_layout-manifest">manifest</a>)
+</pre>
+
+Writes an OCI Image Index and related blobs to an OCI Image Format
+directory. See https://github.com/opencontainers/image-spec/blob/main/image-layout.md
+for the specification of the OCI Image Format directory.
+
+All blobs must be provided in the manifest's OCILayout provider, in the
+files attribute. If blobs are missing, creation of the OCI Image Layout
+will fail.
+
+**ATTRIBUTES**
+
+
+| Name  | Description | Type | Mandatory | Default |
+| :------------- | :------------- | :------------- | :------------- | :------------- |
+| <a id="oci_image_layout-name"></a>name |  A unique name for this target.   | <a href="https://bazel.build/concepts/labels#target-names">Name</a> | required |  |
+| <a id="oci_image_layout-manifest"></a>manifest |  An OCILayout index to be written to the OCI Image Format directory.   | <a href="https://bazel.build/concepts/labels">Label</a> | optional |  `None`  |
+
+
 <a id="oci_push"></a>
 
 ## oci_push

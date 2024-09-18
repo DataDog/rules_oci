@@ -48,6 +48,7 @@ def _oci_image_layer_impl(ctx):
     return [
         OCIDescriptor(
             descriptor_file = descriptor_file,
+            file = ctx.outputs.layer,
         ),
     ]
 
