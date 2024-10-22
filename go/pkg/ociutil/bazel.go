@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"slices"
 	"sync"
 
 	"github.com/bazelbuild/bazel-gazelle/rule"
@@ -51,9 +52,19 @@ func GenerateBuildFilesHandler(handler images.HandlerFunc, layoutRoot string, pr
 
 	layoutBuild.Save(filepath.Join(layoutRoot, "BUILD.bazel"))
 
+	// It's possible to encounter the same blob multiple times. We record the
+	// ones we've already encountered so we don't process them twice.
+	// Duplicate rules make bazel sad.
+	handledBlobs := make([]string, 0)
+
 	return func(ctx context.Context, desc ocispec.Descriptor) ([]ocispec.Descriptor, error) {
 		writemx.Lock()
 		defer writemx.Unlock()
+
+		if slices.Contains(handledBlobs, desc.Digest.String()) {
+			// We've already seen this blob; do nothing.
+			return handler(ctx, desc)
+		}
 
 		if !blobExists(layoutRoot, desc.Digest) {
 			return nil, images.ErrSkipDesc
@@ -78,7 +89,6 @@ func GenerateBuildFilesHandler(handler images.HandlerFunc, layoutRoot string, pr
 			}
 
 			imageManifestRule(desc, manifest).Insert(f)
-			break
 		case ocispec.MediaTypeImageIndex, images.MediaTypeDockerSchema2ManifestList:
 			index, err := ImageIndexFromProvider(ctx, provider, desc)
 			if err != nil {
@@ -86,7 +96,6 @@ func GenerateBuildFilesHandler(handler images.HandlerFunc, layoutRoot string, pr
 			}
 
 			imageIndexManifestRule(desc, index).Insert(f)
-			break
 		}
 
 		// Save all BUILD files
@@ -104,17 +113,14 @@ func GenerateBuildFilesHandler(handler images.HandlerFunc, layoutRoot string, pr
 			return nil, err
 		}
 
+		handledBlobs = append(handledBlobs, desc.Digest.String())
 		return handler(ctx, desc)
 	}
 }
 
 func blobExists(layoutRoot string, dgst digest.Digest) bool {
 	_, err := os.Stat(descToFilePath(layoutRoot, dgst))
-	if os.IsNotExist(err) {
-		return false
-	}
-
-	return true
+	return !os.IsNotExist(err)
 }
 
 func descToFilePath(root string, dgst digest.Digest) string {
@@ -187,8 +193,4 @@ func imageIndexManifestRule(desc ocispec.Descriptor, manifest ocispec.Index) *ru
 	r.SetAttr("layout", "//:layout")
 
 	return r
-}
-
-func blobPath(layoutRoot string, dgst digest.Digest) string {
-	return filepath.Join(layoutRoot, dgst.Algorithm().String())
 }
