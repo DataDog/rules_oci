@@ -8,7 +8,7 @@ import (
 	ocispec "github.com/opencontainers/image-spec/specs-go/v1"
 )
 
-// MultiProvider will read from the first provider that can read the requrested
+// MultiProvider will read from the first provider that can read the requested
 // descriptor.
 func MultiProvider(providers ...content.Provider) content.Provider {
 	return &multiProvider{
