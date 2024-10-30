@@ -13,6 +13,7 @@ go_library(
         "json.go",
         "manifest.go",
         "multiprovider.go",
+        "ociimagelayout.go",
         "platforms.go",
         "provider.go",
         "push.go",

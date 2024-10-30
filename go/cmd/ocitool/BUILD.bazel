@@ -8,6 +8,7 @@ go_library(
         "desc_helpers.go",
         "digest_cmd.go",
         "gen_cmd.go",
+        "imagelayout_cmd.go",
         "index_cmd.go",
         "main.go",
         "manifest_cmd.go",
