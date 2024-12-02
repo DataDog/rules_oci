@@ -70,6 +70,11 @@ var app = &cli.App{
 					Name:  "file-map",
 					Value: &flagutil.KeyValueFlag{},
 				},
+                &cli.BoolFlag{
+					Name:  "zstd-compression",
+					Usage: "Use the zstd library for compression.",
+					Value: false,
+				},
 			},
 		},
 		{

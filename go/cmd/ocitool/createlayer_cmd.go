@@ -10,6 +10,7 @@ import (
 	"path"
 	"path/filepath"
 
+    "datadog/zstd"
 	"github.com/DataDog/rules_oci/go/internal/flagutil"
 	"github.com/DataDog/rules_oci/go/internal/tarutil"
 	"github.com/DataDog/rules_oci/go/pkg/ociutil"
@@ -35,48 +36,64 @@ func CreateLayerCmd(c *cli.Context) error {
 
 	digester := digest.SHA256.Digester()
 	wc := ociutil.NewWriterCounter(io.MultiWriter(out, digester.Hash()))
-	gw := gzip.NewWriter(wc)
-	gw.Name = path.Base(out.Name())
-	defer gw.Close()
+	outerWriter := nil
+	desc := nil
 
-	tw := tar.NewWriter(gw)
-	defer tw.Close()
+	if(config.UseZstd){
+	    outerWriter = zstd.NewWriter(wc)
+	} else {
+        outerWriter := gzip.NewWriter(wc)
+        outerWriter.Name = path.Base(out.Name())
+    }
 
-	for _, filePath := range files {
-		err = tarutil.AppendFileToTarWriter(filePath, filepath.Join(dir, filepath.Base(filePath)), tw)
-		if err != nil {
-			return err
-		}
-	}
+    defer outerWriter.Close()
 
-	for filePath, storePath := range config.FileMapping {
-		err = tarutil.AppendFileToTarWriter(filePath, storePath, tw)
-		if err != nil {
-			return err
-		}
-	}
+    tw := tar.NewWriter(outerWriter)
+    defer tw.Close()
 
-	for k, v := range config.SymlinkMapping {
-		err = tw.WriteHeader(&tar.Header{
-			Typeflag: tar.TypeSymlink,
-			Name:     k,
-			Linkname: v,
-		})
-		if err != nil {
-			return fmt.Errorf("failed to create symlink: %w", err)
-		}
-	}
+    for _, filePath := range files {
+        err = tarutil.AppendFileToTarWriter(filePath, filepath.Join(dir, filepath.Base(filePath)), tw)
+        if err != nil {
+            return err
+        }
+    }
 
-	// Need to flush before we count bytes and digest, might as well close since
-	// it's not needed anymore.
-	tw.Close()
-	gw.Close()
+    for filePath, storePath := range config.FileMapping {
+        err = tarutil.AppendFileToTarWriter(filePath, storePath, tw)
+        if err != nil {
+            return err
+        }
+    }
 
-	desc := ocispec.Descriptor{
-		MediaType: ocispec.MediaTypeImageLayerGzip,
-		Size:      int64(wc.Count()),
-		Digest:    digester.Digest(),
-	}
+    for k, v := range config.SymlinkMapping {
+        err = tw.WriteHeader(&tar.Header{
+            Typeflag: tar.TypeSymlink,
+            Name:     k,
+            Linkname: v,
+        })
+        if err != nil {
+            return fmt.Errorf("failed to create symlink: %w", err)
+        }
+    }
+
+    // Need to flush before we count bytes and digest, might as well close since
+    // it's not needed anymore.
+    tw.Close()
+    outerWriter.Close()
+
+    if(config.UseZstd) {
+        desc := ocispec.Descriptor{
+            MediaType: ocispec.MediaTypeImageLayerZstd,
+            Size:      int64(wc.Count()),
+            Digest:    digester.Digest(),
+        }
+    } else {
+        desc := ocispec.Descriptor{
+        MediaType: ocispec.MediaTypeImageLayerGzip,
+        Size:      int64(wc.Count()),
+        Digest:    digester.Digest(),
+        }
+    }
 
 	bazelLabel := config.BazelLabel
 	if bazelLabel != "" {
@@ -102,6 +119,7 @@ type createLayerConfig struct {
 	FileMapping    map[string]string `json:"file-map" toml:"file-map" yaml:"file-map"`
 	OutputLayer    string            `json:"out" toml:"out" yaml:"out"`
 	SymlinkMapping map[string]string `json:"symlink" toml:"symlink" yaml:"symlink"`
+	UseZstd        bool              `json:"zstd-compression" toml:"zstd-compression" yaml:"zstd-compression"`
 }
 
 func newCreateLayerConfig(c *cli.Context) *createLayerConfig {
@@ -113,6 +131,7 @@ func newCreateLayerConfig(c *cli.Context) *createLayerConfig {
 		OutputLayer:    c.String("out"),
 		Descriptor:     c.String("outd"),
 		SymlinkMapping: c.Generic("symlink").(*flagutil.KeyValueFlag).Map,
+		UseZstd:        c.Bool("zstd-compression"),
 	}
 }
 

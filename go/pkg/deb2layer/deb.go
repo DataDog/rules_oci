@@ -11,6 +11,7 @@ import (
 	"regexp"
 	"strings"
 
+	"datadog/zstd"
 	"github.com/blakesmith/ar"
 )
 
@@ -325,6 +326,8 @@ func extToReader(ext string, inReader io.Reader) (io.Reader, error) {
 		}
 	case ".tar":
 		outReader = tar.NewReader(inReader)
+    case ".zst":
+        outReader = zstd.NewReader(inReader)
 	default:
 		return nil, fmt.Errorf("unknown extension %q", ext)
 	}

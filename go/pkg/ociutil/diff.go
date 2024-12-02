@@ -4,7 +4,7 @@ import (
 	"compress/gzip"
 	"context"
 	"fmt"
-
+    "datadog/zstd"
 	"github.com/containerd/containerd/content"
 	"github.com/opencontainers/go-digest"
 	ocispec "github.com/opencontainers/image-spec/specs-go/v1"
@@ -28,6 +28,15 @@ func GetLayerDiffID(ctx context.Context, store content.Store, desc ocispec.Descr
 		}
 
 		return digest.SHA256.FromReader(gr)
+    case ocispec.MediaTypeImageLayerZstd:
+        r, err := store.ReaderAt(ctx, desc)
+		if err != nil {
+			return "", fmt.Errorf("failed to get reader for layer: %w", err)
+		}
+		defer r.Close()
+
+		zr = zstd.NewReader(&readerAtReader{ReaderAt: r})
+		return digest.SHA256.FromReader(zr)
 	default:
 		return desc.Digest, nil
 	}
