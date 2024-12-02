@@ -33,6 +33,7 @@ require (
 
 require (
 	github.com/AdaLogics/go-fuzz-headers v0.0.0-20230811130428-ced1acdcaa24 // indirect
+	github.com/DataDog/zstd v1.5.6 // indirect
 	github.com/bazelbuild/buildtools v0.0.0-20240422193413-1429e15ae755 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
