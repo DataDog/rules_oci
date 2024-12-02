@@ -10,7 +10,7 @@ import (
 	"path"
 	"path/filepath"
 
-    "datadog/zstd"
+    "github.com/DataDog/zstd"
 	"github.com/DataDog/rules_oci/go/internal/flagutil"
 	"github.com/DataDog/rules_oci/go/internal/tarutil"
 	"github.com/DataDog/rules_oci/go/pkg/ociutil"

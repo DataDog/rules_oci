@@ -11,7 +11,7 @@ import (
 	"regexp"
 	"strings"
 
-	"datadog/zstd"
+	"github.com/DataDog/zstd"
 	"github.com/blakesmith/ar"
 )
 
