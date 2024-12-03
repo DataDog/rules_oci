@@ -42,7 +42,7 @@ func CreateLayerCmd(c *cli.Context) error {
 	var mediaType string
 
 	if config.Compression == "zstd" {
-		zstdWriter = zstd.NewWriter(wc)
+		zstdWriter = zstd.NewWriterLevel(wc, zstd.BestSpeed)
 		mediaType = ocispec.MediaTypeImageLayerZstd
 		tw = tar.NewWriter(zstdWriter)
 	} else {
