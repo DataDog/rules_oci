@@ -1,52 +1,52 @@
 package main
 
 import (
-	"archive/tar"
-	"compress/gzip"
-	"encoding/json"
-	"fmt"
-	"io"
-	"os"
-	"path"
-	"path/filepath"
+    "archive/tar"
+    "compress/gzip"
+    "encoding/json"
+    "fmt"
+    "io"
+    "os"
+    "path"
+    "path/filepath"
 
     "github.com/DataDog/zstd"
-	"github.com/DataDog/rules_oci/go/internal/flagutil"
-	"github.com/DataDog/rules_oci/go/internal/tarutil"
-	"github.com/DataDog/rules_oci/go/pkg/ociutil"
-	"github.com/DataDog/rules_oci/go/pkg/layer"
-	"github.com/opencontainers/go-digest"
-	ocispec "github.com/opencontainers/image-spec/specs-go/v1"
-	"github.com/urfave/cli/v2"
+    "github.com/DataDog/rules_oci/go/internal/flagutil"
+    "github.com/DataDog/rules_oci/go/internal/tarutil"
+    "github.com/DataDog/rules_oci/go/pkg/ociutil"
+    "github.com/DataDog/rules_oci/go/pkg/layer"
+    "github.com/opencontainers/go-digest"
+    ocispec "github.com/opencontainers/image-spec/specs-go/v1"
+    "github.com/urfave/cli/v2"
 )
 
 func CreateLayerCmd(c *cli.Context) error {
-	config, err := parseConfig(c)
-	if err != nil {
-		return fmt.Errorf("problem parsing config: %w", err)
-	}
+    config, err := parseConfig(c)
+    if err != nil {
+        return fmt.Errorf("problem parsing config: %w", err)
+    }
 
-	dir := config.Directory
-	files := config.Files
+    dir := config.Directory
+    files := config.Files
 
-	out, err := os.Create(config.OutputLayer)
-	if err != nil {
-		return err
-	}
+    out, err := os.Create(config.OutputLayer)
+    if err != nil {
+        return err
+    }
 
-	digester := digest.SHA256.Digester()
-	wc := ociutil.NewWriterCounter(io.MultiWriter(out, digester.Hash()))
-	var tw *tar.Writer
-	var zstdWriter *zstd.Writer
-	var gzipWriter *gzip.Writer
-	var mediaType string
+    digester := digest.SHA256.Digester()
+    wc := ociutil.NewWriterCounter(io.MultiWriter(out, digester.Hash()))
+    var tw *tar.Writer
+    var zstdWriter *zstd.Writer
+    var gzipWriter *gzip.Writer
+    var mediaType string
 
-	if(config.UseZstd){
-	    zstdWriter = zstd.NewWriter(wc)
-	    mediaType = ocispec.MediaTypeImageLayerZstd
-	    defer zstdWriter.Close()
-	    tw = tar.NewWriter(zstdWriter)
-	} else {
+    if(config.UseZstd){
+        zstdWriter = zstd.NewWriter(wc)
+        mediaType = ocispec.MediaTypeImageLayerZstd
+        defer zstdWriter.Close()
+        tw = tar.NewWriter(zstdWriter)
+    } else {
         gzipWriter = gzip.NewWriter(wc)
         gzipWriter.Name = path.Base(out.Name())
         mediaType = ocispec.MediaTypeImageLayerGzip
@@ -96,62 +96,62 @@ func CreateLayerCmd(c *cli.Context) error {
         Digest:    digester.Digest(),
     }
 
-	bazelLabel := config.BazelLabel
-	if bazelLabel != "" {
-		desc.Annotations = map[string]string{
-			// This will also be added to the image config layer history by append-layers
-			layer.AnnotationArtifactDescription: bazelLabel,
-		}
-	}
+    bazelLabel := config.BazelLabel
+    if bazelLabel != "" {
+        desc.Annotations = map[string]string{
+            // This will also be added to the image config layer history by append-layers
+            layer.AnnotationArtifactDescription: bazelLabel,
+        }
+    }
 
-	err = ociutil.WriteDescriptorToFile(config.Descriptor, desc)
-	if err != nil {
-		return err
-	}
+    err = ociutil.WriteDescriptorToFile(config.Descriptor, desc)
+    if err != nil {
+        return err
+    }
 
-	return nil
+    return nil
 }
 
 type createLayerConfig struct {
-	BazelLabel     string            `json:"bazel-label" toml:"bazel-label" yaml:"bazel-label"`
-	Descriptor     string            `json:"outd" toml:"outd" yaml:"outd"`
-	Directory      string            `json:"dir" toml:"dir" yaml:"dir"`
-	Files          []string          `json:"file" toml:"file" yaml:"file"`
-	FileMapping    map[string]string `json:"file-map" toml:"file-map" yaml:"file-map"`
-	OutputLayer    string            `json:"out" toml:"out" yaml:"out"`
-	SymlinkMapping map[string]string `json:"symlink" toml:"symlink" yaml:"symlink"`
-	UseZstd        bool              `json:"zstd-compression" toml:"zstd-compression" yaml:"zstd-compression"`
+    BazelLabel     string            `json:"bazel-label" toml:"bazel-label" yaml:"bazel-label"`
+    Descriptor     string            `json:"outd" toml:"outd" yaml:"outd"`
+    Directory      string            `json:"dir" toml:"dir" yaml:"dir"`
+    Files          []string          `json:"file" toml:"file" yaml:"file"`
+    FileMapping    map[string]string `json:"file-map" toml:"file-map" yaml:"file-map"`
+    OutputLayer    string            `json:"out" toml:"out" yaml:"out"`
+    SymlinkMapping map[string]string `json:"symlink" toml:"symlink" yaml:"symlink"`
+    UseZstd        bool              `json:"zstd-compression" toml:"zstd-compression" yaml:"zstd-compression"`
 }
 
 func newCreateLayerConfig(c *cli.Context) *createLayerConfig {
-	return &createLayerConfig{
-		BazelLabel:     c.String("bazel-label"),
-		Directory:      c.String("dir"),
-		Files:          c.StringSlice("file"),
-		FileMapping:    c.Generic("file-map").(*flagutil.KeyValueFlag).Map,
-		OutputLayer:    c.String("out"),
-		Descriptor:     c.String("outd"),
-		SymlinkMapping: c.Generic("symlink").(*flagutil.KeyValueFlag).Map,
-		UseZstd:        c.Bool("zstd-compression"),
-	}
+    return &createLayerConfig{
+        BazelLabel:     c.String("bazel-label"),
+        Directory:      c.String("dir"),
+        Files:          c.StringSlice("file"),
+        FileMapping:    c.Generic("file-map").(*flagutil.KeyValueFlag).Map,
+        OutputLayer:    c.String("out"),
+        Descriptor:     c.String("outd"),
+        SymlinkMapping: c.Generic("symlink").(*flagutil.KeyValueFlag).Map,
+        UseZstd:        c.Bool("zstd-compression"),
+    }
 }
 
 func parseConfig(c *cli.Context) (*createLayerConfig, error) {
-	configFile := c.Path("configuration-file")
-	if configFile == "" {
-		return newCreateLayerConfig(c), nil
-	}
+    configFile := c.Path("configuration-file")
+    if configFile == "" {
+        return newCreateLayerConfig(c), nil
+    }
 
-	file, err := os.ReadFile(configFile)
-	if err != nil {
-		return nil, fmt.Errorf("problem reading config file: %w", err)
-	}
+    file, err := os.ReadFile(configFile)
+    if err != nil {
+        return nil, fmt.Errorf("problem reading config file: %w", err)
+    }
 
-	var config createLayerConfig
-	err = json.Unmarshal(file, &config)
-	if err != nil {
-		return nil, fmt.Errorf("problem parsing config file as JSON: %w", err)
-	}
+    var config createLayerConfig
+    err = json.Unmarshal(file, &config)
+    if err != nil {
+        return nil, fmt.Errorf("problem parsing config file as JSON: %w", err)
+    }
 
-	return &config, nil
+    return &config, nil
 }
