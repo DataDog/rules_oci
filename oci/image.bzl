@@ -27,7 +27,7 @@ def _oci_image_layer_impl(ctx):
     descriptor_file = ctx.actions.declare_file("{}.descriptor.json".format(ctx.label.name))
 
     archive = None
-    if ctx.attr.compression == "COMPRESSION_ZSTD":
+    if ctx.attr.compression == "zstd":
         archive = ctx.actions.declare_file(ctx.label.name + ".tar.zst")
     else:
         archive = ctx.actions.declare_file(ctx.label.name + ".tar.gz")
@@ -80,8 +80,8 @@ oci_image_layer = rule(
         ),
         "compression": attr.string(
             doc = "Indicates which compression library should be used.",
-            default = "COMPRESSION_GZIP",
-            values = ["COMPRESSION_GZIP", "COMPRESSION_ZSTD"],
+            default = "gzip",
+            values = ["gzip", "zstd"],
         ),
     },
     toolchains = ["@com_github_datadog_rules_oci//oci:toolchain"],

@@ -41,7 +41,7 @@ func CreateLayerCmd(c *cli.Context) error {
 	var gzipWriter *gzip.Writer
 	var mediaType string
 
-	if config.Compression == "COMPRESSION_ZSTD" {
+	if config.Compression == "zstd" {
 		zstdWriter = zstd.NewWriter(wc)
 		mediaType = ocispec.MediaTypeImageLayerZstd
 		tw = tar.NewWriter(zstdWriter)
@@ -82,7 +82,8 @@ func CreateLayerCmd(c *cli.Context) error {
 	// Need to flush before we count bytes and digest, might as well close since
 	// it's not needed anymore.
 	tw.Close()
-	if config.Compression == "COMPRESSION_ZSTD" {
+
+	if config.Compression == "zstd" {
 		zstdWriter.Close()
 	} else {
 		gzipWriter.Close()
