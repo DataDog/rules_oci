@@ -44,13 +44,11 @@ func CreateLayerCmd(c *cli.Context) error {
     if(config.UseZstd){
         zstdWriter = zstd.NewWriter(wc)
         mediaType = ocispec.MediaTypeImageLayerZstd
-        defer zstdWriter.Close()
         tw = tar.NewWriter(zstdWriter)
     } else {
         gzipWriter = gzip.NewWriter(wc)
         gzipWriter.Name = path.Base(out.Name())
         mediaType = ocispec.MediaTypeImageLayerGzip
-        defer gzipWriter.Close()
         tw = tar.NewWriter(gzipWriter)
     }
 
