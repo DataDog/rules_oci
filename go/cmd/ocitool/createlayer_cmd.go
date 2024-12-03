@@ -41,7 +41,7 @@ func CreateLayerCmd(c *cli.Context) error {
 	var gzipWriter *gzip.Writer
 	var mediaType string
 
-	if config.UseZstd {
+	if config.Compression == "COMPRESSION_ZSTD" {
 		zstdWriter = zstd.NewWriter(wc)
 		mediaType = ocispec.MediaTypeImageLayerZstd
 		tw = tar.NewWriter(zstdWriter)
@@ -82,7 +82,7 @@ func CreateLayerCmd(c *cli.Context) error {
 	// Need to flush before we count bytes and digest, might as well close since
 	// it's not needed anymore.
 	tw.Close()
-	if config.UseZstd {
+	if config.Compression == "COMPRESSION_ZSTD" {
 		zstdWriter.Close()
 	} else {
 		gzipWriter.Close()
@@ -118,7 +118,7 @@ type createLayerConfig struct {
 	FileMapping    map[string]string `json:"file-map" toml:"file-map" yaml:"file-map"`
 	OutputLayer    string            `json:"out" toml:"out" yaml:"out"`
 	SymlinkMapping map[string]string `json:"symlink" toml:"symlink" yaml:"symlink"`
-	UseZstd        bool              `json:"zstd-compression" toml:"zstd-compression" yaml:"zstd-compression"`
+	Compression    string            `json:"compression" toml:"compression" yaml:"compression"`
 }
 
 func newCreateLayerConfig(c *cli.Context) *createLayerConfig {
@@ -130,7 +130,7 @@ func newCreateLayerConfig(c *cli.Context) *createLayerConfig {
 		OutputLayer:    c.String("out"),
 		Descriptor:     c.String("outd"),
 		SymlinkMapping: c.Generic("symlink").(*flagutil.KeyValueFlag).Map,
-		UseZstd:        c.Bool("zstd-compression"),
+		Compression:    c.String("compression"),
 	}
 }
 

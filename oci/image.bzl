@@ -27,7 +27,7 @@ def _oci_image_layer_impl(ctx):
     descriptor_file = ctx.actions.declare_file("{}.descriptor.json".format(ctx.label.name))
 
     archive = None
-    if ctx.attr.zstd_compression:
+    if ctx.attr.compression == "COMPRESSION_ZSTD":
         archive = ctx.actions.declare_file(ctx.label.name + ".tar.zst")
     else:
         archive = ctx.actions.declare_file(ctx.label.name + ".tar.gz")
@@ -40,7 +40,7 @@ def _oci_image_layer_impl(ctx):
                         "--outd={}".format(descriptor_file.path),
                         "--dir={}".format(ctx.attr.directory),
                         "--bazel-label={}".format(ctx.label),
-                        "--zstd-compression={}".format(ctx.attr.zstd_compression),
+                        "--compression={}".format(ctx.attr.compression),
                     ] +
                     ["--file={}".format(f.path) for f in ctx.files.files] +
                     ["--symlink={}={}".format(k, v) for k, v in ctx.attr.symlinks.items()] +
@@ -78,9 +78,9 @@ oci_image_layer = rule(
             doc = "Dictionary of file -> file location in tarball",
             allow_files = True,
         ),
-        "zstd_compression": attr.bool(
-            doc = "Indicates whether zstd compression should be used.",
-            default = False,
+        "compression": attr.string(
+            doc = "Indicates which compression library should be used.  Options include COMPRESSION_GZIP and COMPRESSION_ZSTD.",
+            default = "COMPRESSION_GZIP",
         ),
     },
     toolchains = ["@com_github_datadog_rules_oci//oci:toolchain"],
