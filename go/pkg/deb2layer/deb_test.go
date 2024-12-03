@@ -20,7 +20,7 @@ var (
 // TestDebToLayer checks that the expected files are in the resulting layer
 // based on a deb file created by Bazel's rules_pkg
 func TestDebToLayer(t *testing.T) {
-    // XXX Fix generating deb package
+	// XXX Fix generating deb package
 	f, err := os.Open("testdeb.deb")
 	if err != nil {
 		t.Fatalf("%v", err)

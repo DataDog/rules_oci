@@ -70,6 +70,10 @@ var app = &cli.App{
 					Name:  "file-map",
 					Value: &flagutil.KeyValueFlag{},
 				},
+				&cli.StringFlag{
+					Name:  "compression",
+					Usage: "Select a library to use for compression.",
+				},
 			},
 		},
 		{

@@ -6,12 +6,12 @@ import (
 	"compress/gzip"
 	"errors"
 	"fmt"
+	"github.com/blakesmith/ar"
+	"github.com/klauspost/compress/zstd"
 	"io"
 	"path/filepath"
 	"regexp"
 	"strings"
-
-	"github.com/blakesmith/ar"
 )
 
 const (
@@ -325,6 +325,11 @@ func extToReader(ext string, inReader io.Reader) (io.Reader, error) {
 		}
 	case ".tar":
 		outReader = tar.NewReader(inReader)
+	case ".zst":
+		outReader, err = zstd.NewReader(inReader)
+		if err != nil {
+			return nil, err
+		}
 	default:
 		return nil, fmt.Errorf("unknown extension %q", ext)
 	}

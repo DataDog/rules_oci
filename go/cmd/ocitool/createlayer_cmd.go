@@ -12,8 +12,9 @@ import (
 
 	"github.com/DataDog/rules_oci/go/internal/flagutil"
 	"github.com/DataDog/rules_oci/go/internal/tarutil"
-	"github.com/DataDog/rules_oci/go/pkg/ociutil"
 	"github.com/DataDog/rules_oci/go/pkg/layer"
+	"github.com/DataDog/rules_oci/go/pkg/ociutil"
+	"github.com/klauspost/compress/zstd"
 	"github.com/opencontainers/go-digest"
 	ocispec "github.com/opencontainers/image-spec/specs-go/v1"
 	"github.com/urfave/cli/v2"
@@ -35,11 +36,25 @@ func CreateLayerCmd(c *cli.Context) error {
 
 	digester := digest.SHA256.Digester()
 	wc := ociutil.NewWriterCounter(io.MultiWriter(out, digester.Hash()))
-	gw := gzip.NewWriter(wc)
-	gw.Name = path.Base(out.Name())
-	defer gw.Close()
+	var tw *tar.Writer
+	var zstdWriter *zstd.Encoder
+	var gzipWriter *gzip.Writer
+	var mediaType string
 
-	tw := tar.NewWriter(gw)
+	if config.Compression == "zstd" {
+		zstdWriter, err = zstd.NewWriter(wc)
+		if err != nil {
+			return err
+		}
+		mediaType = ocispec.MediaTypeImageLayerZstd
+		tw = tar.NewWriter(zstdWriter)
+	} else {
+		gzipWriter = gzip.NewWriter(wc)
+		gzipWriter.Name = path.Base(out.Name())
+		mediaType = ocispec.MediaTypeImageLayerGzip
+		tw = tar.NewWriter(gzipWriter)
+	}
+
 	defer tw.Close()
 
 	for _, filePath := range files {
@@ -70,10 +85,15 @@ func CreateLayerCmd(c *cli.Context) error {
 	// Need to flush before we count bytes and digest, might as well close since
 	// it's not needed anymore.
 	tw.Close()
-	gw.Close()
+
+	if config.Compression == "zstd" {
+		zstdWriter.Close()
+	} else {
+		gzipWriter.Close()
+	}
 
 	desc := ocispec.Descriptor{
-		MediaType: ocispec.MediaTypeImageLayerGzip,
+		MediaType: mediaType,
 		Size:      int64(wc.Count()),
 		Digest:    digester.Digest(),
 	}
@@ -102,6 +122,7 @@ type createLayerConfig struct {
 	FileMapping    map[string]string `json:"file-map" toml:"file-map" yaml:"file-map"`
 	OutputLayer    string            `json:"out" toml:"out" yaml:"out"`
 	SymlinkMapping map[string]string `json:"symlink" toml:"symlink" yaml:"symlink"`
+	Compression    string            `json:"compression" toml:"compression" yaml:"compression"`
 }
 
 func newCreateLayerConfig(c *cli.Context) *createLayerConfig {
@@ -113,6 +134,7 @@ func newCreateLayerConfig(c *cli.Context) *createLayerConfig {
 		OutputLayer:    c.String("out"),
 		Descriptor:     c.String("outd"),
 		SymlinkMapping: c.Generic("symlink").(*flagutil.KeyValueFlag).Map,
+		Compression:    c.String("compression"),
 	}
 }
 

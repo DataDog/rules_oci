@@ -26,14 +26,21 @@ def _oci_image_layer_impl(ctx):
 
     descriptor_file = ctx.actions.declare_file("{}.descriptor.json".format(ctx.label.name))
 
+    archive = None
+    if ctx.attr.compression == "zstd":
+        archive = ctx.actions.declare_file(ctx.label.name + ".tar.zst")
+    else:
+        archive = ctx.actions.declare_file(ctx.label.name + ".tar.gz")
+
     ctx.actions.run(
         executable = toolchain.sdk.ocitool,
         arguments = [
                         "create-layer",
-                        "--out={}".format(ctx.outputs.layer.path),
+                        "--out={}".format(archive.path),
                         "--outd={}".format(descriptor_file.path),
                         "--dir={}".format(ctx.attr.directory),
                         "--bazel-label={}".format(ctx.label),
+                        "--compression={}".format(ctx.attr.compression),
                     ] +
                     ["--file={}".format(f.path) for f in ctx.files.files] +
                     ["--symlink={}={}".format(k, v) for k, v in ctx.attr.symlinks.items()] +
@@ -41,15 +48,16 @@ def _oci_image_layer_impl(ctx):
         inputs = ctx.files.files + ctx.files.file_map,
         outputs = [
             descriptor_file,
-            ctx.outputs.layer,
+            archive,
         ],
     )
 
     return [
         OCIDescriptor(
             descriptor_file = descriptor_file,
-            file = ctx.outputs.layer,
+            file = archive,
         ),
+        DefaultInfo(files = depset([archive])),
     ]
 
 oci_image_layer = rule(
@@ -70,11 +78,13 @@ oci_image_layer = rule(
             doc = "Dictionary of file -> file location in tarball",
             allow_files = True,
         ),
+        "compression": attr.string(
+            doc = "Indicates which compression library should be used.",
+            default = "gzip",
+            values = ["gzip", "zstd"],
+        ),
     },
     toolchains = ["@com_github_datadog_rules_oci//oci:toolchain"],
-    outputs = {
-        "layer": "%{name}-layer.tar.gz",
-    },
 )
 
 def _oci_image_index_impl(ctx):
