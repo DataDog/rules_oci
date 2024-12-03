@@ -10,8 +10,7 @@ import (
 	"path/filepath"
 	"regexp"
 	"strings"
-
-	"github.com/DataDog/zstd"
+	"github.com/klauspost/compress/zstd"
 	"github.com/blakesmith/ar"
 )
 
@@ -327,7 +326,10 @@ func extToReader(ext string, inReader io.Reader) (io.Reader, error) {
 	case ".tar":
 		outReader = tar.NewReader(inReader)
 	case ".zst":
-		outReader = zstd.NewReader(inReader)
+		outReader, err = zstd.NewReader(inReader)
+        if err != nil {
+		    return nil, err
+	    }
 	default:
 		return nil, fmt.Errorf("unknown extension %q", ext)
 	}

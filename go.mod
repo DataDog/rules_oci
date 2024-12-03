@@ -15,9 +15,8 @@ require (
 	github.com/containerd/log v0.1.0
 	github.com/containerd/platforms v0.2.1
 	github.com/containerd/typeurl/v2 v2.1.1
-	github.com/DataDog/zstd v1.5.6
 	github.com/docker/docker-credential-helpers v0.8.1
-	github.com/klauspost/compress v1.17.8
+	github.com/klauspost/compress v1.17.11
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/moby/sys/sequential v0.5.0
 	github.com/opencontainers/go-digest v1.0.0

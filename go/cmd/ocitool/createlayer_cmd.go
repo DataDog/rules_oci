@@ -14,7 +14,7 @@ import (
 	"github.com/DataDog/rules_oci/go/internal/tarutil"
 	"github.com/DataDog/rules_oci/go/pkg/layer"
 	"github.com/DataDog/rules_oci/go/pkg/ociutil"
-	"github.com/DataDog/zstd"
+	"github.com/klauspost/compress/zstd"
 	"github.com/opencontainers/go-digest"
 	ocispec "github.com/opencontainers/image-spec/specs-go/v1"
 	"github.com/urfave/cli/v2"
@@ -37,12 +37,15 @@ func CreateLayerCmd(c *cli.Context) error {
 	digester := digest.SHA256.Digester()
 	wc := ociutil.NewWriterCounter(io.MultiWriter(out, digester.Hash()))
 	var tw *tar.Writer
-	var zstdWriter *zstd.Writer
+	var zstdWriter *zstd.Encoder
 	var gzipWriter *gzip.Writer
 	var mediaType string
 
 	if config.Compression == "zstd" {
-		zstdWriter = zstd.NewWriterLevel(wc, zstd.BestSpeed)
+		zstdWriter, err = zstd.NewWriter(wc)
+        if err != nil {
+		    return err
+	    }
 		mediaType = ocispec.MediaTypeImageLayerZstd
 		tw = tar.NewWriter(zstdWriter)
 	} else {

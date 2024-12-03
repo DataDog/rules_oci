@@ -4,7 +4,7 @@ import (
 	"compress/gzip"
 	"context"
 	"fmt"
-	"github.com/DataDog/zstd"
+	"github.com/klauspost/compress/zstd"
 	"github.com/containerd/containerd/content"
 	"github.com/opencontainers/go-digest"
 	ocispec "github.com/opencontainers/image-spec/specs-go/v1"
@@ -35,7 +35,10 @@ func GetLayerDiffID(ctx context.Context, store content.Store, desc ocispec.Descr
 		}
 		defer r.Close()
 
-		zr := zstd.NewReader(&readerAtReader{ReaderAt: r})
+		zr, err := zstd.NewReader(&readerAtReader{ReaderAt: r})
+        if err != nil {
+		    return "", err
+	    }
 		return digest.SHA256.FromReader(zr)
 	default:
 		return desc.Digest, nil

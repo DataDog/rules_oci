@@ -7,7 +7,7 @@ go_library(
     visibility = ["//visibility:public"],
     deps = [
         "@com_github_blakesmith_ar//:go_default_library",
-        "@com_github_datadog_zstd//:go_default_library",
+        "@com_github_klauspost_compress//zstd:go_default_library",
     ],
 )
 
