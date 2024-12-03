@@ -43,9 +43,9 @@ func CreateLayerCmd(c *cli.Context) error {
 
 	if config.Compression == "zstd" {
 		zstdWriter, err = zstd.NewWriter(wc)
-        if err != nil {
-		    return err
-	    }
+		if err != nil {
+			return err
+		}
 		mediaType = ocispec.MediaTypeImageLayerZstd
 		tw = tar.NewWriter(zstdWriter)
 	} else {
