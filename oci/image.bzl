@@ -34,6 +34,7 @@ def _oci_image_layer_impl(ctx):
                         "--outd={}".format(descriptor_file.path),
                         "--dir={}".format(ctx.attr.directory),
                         "--bazel-label={}".format(ctx.label),
+                        "--zstd-compression={}".format(ctx.attr.zstd_compression),
                     ] +
                     ["--file={}".format(f.path) for f in ctx.files.files] +
                     ["--symlink={}={}".format(k, v) for k, v in ctx.attr.symlinks.items()] +
@@ -69,6 +70,10 @@ oci_image_layer = rule(
         "file_map": attr.label_keyed_string_dict(
             doc = "Dictionary of file -> file location in tarball",
             allow_files = True,
+        ),
+        "zstd_compression": attr.bool(
+            doc = "Indicates whether zstd compression should be used.",
+            default = False,
         ),
     },
     toolchains = ["@com_github_datadog_rules_oci//oci:toolchain"],
