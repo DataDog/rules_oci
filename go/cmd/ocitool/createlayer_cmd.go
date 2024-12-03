@@ -36,19 +36,24 @@ func CreateLayerCmd(c *cli.Context) error {
 
 	digester := digest.SHA256.Digester()
 	wc := ociutil.NewWriterCounter(io.MultiWriter(out, digester.Hash()))
-	outerWriter := nil
-	desc := nil
+	var tw *tar.Writer
+	var zstdWriter *zstd.Writer
+	var gzipWriter *gzip.Writer
+	var mediaType string
 
 	if(config.UseZstd){
-	    outerWriter = zstd.NewWriter(wc)
+	    zstdWriter = zstd.NewWriter(wc)
+	    mediaType = ocispec.MediaTypeImageLayerZstd
+	    defer zstdWriter.Close()
+	    tw = tar.NewWriter(zstdWriter)
 	} else {
-        outerWriter := gzip.NewWriter(wc)
-        outerWriter.Name = path.Base(out.Name())
+        gzipWriter = gzip.NewWriter(wc)
+        gzipWriter.Name = path.Base(out.Name())
+        mediaType = ocispec.MediaTypeImageLayerGzip
+        defer gzipWriter.Close()
+        tw = tar.NewWriter(gzipWriter)
     }
 
-    defer outerWriter.Close()
-
-    tw := tar.NewWriter(outerWriter)
     defer tw.Close()
 
     for _, filePath := range files {
@@ -79,20 +84,16 @@ func CreateLayerCmd(c *cli.Context) error {
     // Need to flush before we count bytes and digest, might as well close since
     // it's not needed anymore.
     tw.Close()
-    outerWriter.Close()
-
-    if(config.UseZstd) {
-        desc := ocispec.Descriptor{
-            MediaType: ocispec.MediaTypeImageLayerZstd,
-            Size:      int64(wc.Count()),
-            Digest:    digester.Digest(),
-        }
+    if(config.UseZstd){
+        zstdWriter.Close()
     } else {
-        desc := ocispec.Descriptor{
-        MediaType: ocispec.MediaTypeImageLayerGzip,
+        gzipWriter.Close()
+    }
+
+    desc := ocispec.Descriptor{
+        MediaType: mediaType,
         Size:      int64(wc.Count()),
         Digest:    digester.Digest(),
-        }
     }
 
 	bazelLabel := config.BazelLabel

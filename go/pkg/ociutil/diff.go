@@ -35,7 +35,7 @@ func GetLayerDiffID(ctx context.Context, store content.Store, desc ocispec.Descr
 		}
 		defer r.Close()
 
-		zr = zstd.NewReader(&readerAtReader{ReaderAt: r})
+		zr := zstd.NewReader(&readerAtReader{ReaderAt: r})
 		return digest.SHA256.FromReader(zr)
 	default:
 		return desc.Digest, nil
