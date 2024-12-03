@@ -15,6 +15,7 @@ require (
 	github.com/containerd/log v0.1.0
 	github.com/containerd/platforms v0.2.1
 	github.com/containerd/typeurl/v2 v2.1.1
+	github.com/DataDog/zstd v1.5.6
 	github.com/docker/docker-credential-helpers v0.8.1
 	github.com/klauspost/compress v1.17.8
 	github.com/mitchellh/go-homedir v1.1.0
@@ -33,7 +34,6 @@ require (
 
 require (
 	github.com/AdaLogics/go-fuzz-headers v0.0.0-20230811130428-ced1acdcaa24 // indirect
-	github.com/DataDog/zstd v1.5.6 // indirect
 	github.com/bazelbuild/buildtools v0.0.0-20240422193413-1429e15ae755 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
