@@ -55,7 +55,7 @@ oci_image_index(<a href="#oci_image_index-name">name</a>, <a href="#oci_image_in
 ## oci_image_layer
 
 <pre>
-oci_image_layer(<a href="#oci_image_layer-name">name</a>, <a href="#oci_image_layer-directory">directory</a>, <a href="#oci_image_layer-file_map">file_map</a>, <a href="#oci_image_layer-files">files</a>, <a href="#oci_image_layer-symlinks">symlinks</a>)
+oci_image_layer(<a href="#oci_image_layer-name">name</a>, <a href="#oci_image_layer-compression">compression</a>, <a href="#oci_image_layer-directory">directory</a>, <a href="#oci_image_layer-file_map">file_map</a>, <a href="#oci_image_layer-files">files</a>, <a href="#oci_image_layer-symlinks">symlinks</a>)
 </pre>
 
 Create a tarball and an OCI descriptor for it
@@ -66,6 +66,7 @@ Create a tarball and an OCI descriptor for it
 | Name  | Description | Type | Mandatory | Default |
 | :------------- | :------------- | :------------- | :------------- | :------------- |
 | <a id="oci_image_layer-name"></a>name |  A unique name for this target.   | <a href="https://bazel.build/concepts/labels#target-names">Name</a> | required |  |
+| <a id="oci_image_layer-compression"></a>compression |  Indicates which compression library should be used.   | String | optional |  `"gzip"`  |
 | <a id="oci_image_layer-directory"></a>directory |  Directory in the tarball to place the `files`   | String | optional |  `""`  |
 | <a id="oci_image_layer-file_map"></a>file_map |  Dictionary of file -> file location in tarball   | <a href="https://bazel.build/rules/lib/dict">Dictionary: Label -> String</a> | optional |  `{}`  |
 | <a id="oci_image_layer-files"></a>files |  List of files to include under `directory`   | <a href="https://bazel.build/concepts/labels">List of labels</a> | optional |  `[]`  |
