@@ -79,8 +79,9 @@ oci_image_layer = rule(
             allow_files = True,
         ),
         "compression": attr.string(
-            doc = "Indicates which compression library should be used.  Options include COMPRESSION_GZIP and COMPRESSION_ZSTD.",
+            doc = "Indicates which compression library should be used.",
             default = "COMPRESSION_GZIP",
+            values = ["COMPRESSION_GZIP", "COMPRESSION_ZSTD"],
         ),
     },
     toolchains = ["@com_github_datadog_rules_oci//oci:toolchain"],
