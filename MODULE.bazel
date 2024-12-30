@@ -64,11 +64,11 @@ go_deps.module_override(
 oci_pull = use_repo_rule("//oci:defs.bzl", "oci_pull")
 
 oci_pull(
-    name = "ubuntu_focal",
-    # Latest at "focal" tag
-    digest = "sha256:9d6a8699fb5c9c39cf08a0871bd6219f0400981c570894cd8cbea30d3424a31f",
-    registry = "ghcr.io",
-    repository = "datadog/rules_oci/ubuntu",
+    name = "ubuntu_noble",
+    # "noble" tag as of 2024-12-30
+    digest = "sha256:80dd3c3b9c6cecb9f1667e9290b3bc61b78c2678c02cbdae5f0fea92cc6734ab",
+    registry = "mirror.gcr.io",
+    repository = "library/ubuntu",
 )
 
 register_toolchains(
