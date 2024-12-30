@@ -22,7 +22,7 @@ go_multiarch_image(
         "amd64",
         "arm64",
     ],
-    base = "@ubuntu_focal//image",
+    base = "@ubuntu_noble//image",
     embed = [":go_default_library"],
     visibility = ["//visibility:public"],
 )
