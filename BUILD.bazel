@@ -1,29 +1,18 @@
 load("@aspect_bazel_lib//lib:write_source_files.bzl", "write_source_files")
-load("@buildifier_prebuilt//:rules.bzl", "buildifier", "buildifier_test")
 load("@gazelle//:def.bzl", "DEFAULT_LANGUAGES", "gazelle", "gazelle_binary")
+load("@npm//:defs.bzl", "npm_link_all_packages")
 load("//oci:toolchain.bzl", "oci_local_toolchain")
 
 # gazelle:prefix github.com/DataDog/rules_oci
 # gazelle:go_naming_convention go_default_library
 # gazelle:lang go
 
+npm_link_all_packages(
+    name = "node_modules",
+)
+
 oci_local_toolchain(
     name = "oci_local_toolchain",
-)
-
-buildifier(
-    name = "buildifier",
-    exclude_patterns = ["./.git/*"],
-    lint_mode = "warn",
-    mode = "fix",
-)
-
-buildifier_test(
-    name = "buildifier_test",
-    exclude_patterns = ["./.git/*"],
-    lint_mode = "warn",
-    no_sandbox = True,
-    workspace = "//:WORKSPACE",
 )
 
 gazelle(
@@ -53,4 +42,14 @@ write_source_files(
         "bin/ocitool-linux-amd64": "//go/cmd/ocitool",
         "bin/ocitool-linux-arm64": "//go/cmd/ocitool",
     },
+)
+
+alias(
+    name = "format",
+    actual = "//tools/format",
+)
+
+exports_files(
+    ["WORKSPACE"],
+    visibility = ["//visibility:public"],
 )
