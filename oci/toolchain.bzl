@@ -1,5 +1,7 @@
 """ toolchain """
 
+load(":providers.bzl", "OCISDK")
+
 # Follow golang's conventions for naming os and arch
 OS_CONSTRAINTS = {
     "darwin": "@platforms//os:osx",
@@ -10,13 +12,6 @@ ARCH_CONSTRAINTS = {
     "amd64": "@platforms//cpu:x86_64",
     "arm64": "@platforms//cpu:arm64",
 }
-
-OCISDK = provider(
-    "The OCI SDK",
-    fields = {
-        "ocitool": "",
-    },
-)
 
 def _oci_toolchain_impl(ctx):
     return [platform_common.ToolchainInfo(

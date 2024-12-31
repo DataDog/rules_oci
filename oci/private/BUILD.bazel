@@ -1,9 +1,9 @@
 load("@rules_pkg//pkg:mappings.bzl", "pkg_files")
-load("//oci:toolchain.bzl", "create_compiled_oci_toolchains")
 
-exports_files(glob(["*"]))
-
-create_compiled_oci_toolchains(name = "oci_toolchain")
+exports_files(
+    glob(["*.bzl"]),
+    visibility = ["//oci:__subpackages__"],
+)
 
 pkg_files(
     name = "files",
@@ -11,6 +11,6 @@ pkg_files(
         "*.bzl",
         "*.bazel",
     ]),
-    prefix = "bin",
+    prefix = "oci/private",
     visibility = ["//release:__subpackages__"],
 )

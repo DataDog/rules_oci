@@ -1,10 +1,10 @@
 """A rule to create a directory in OCI Image Layout format."""
 
-load("@com_github_datadog_rules_oci//oci:debug_flag.bzl", "DebugInfo")
-load("@com_github_datadog_rules_oci//oci:providers.bzl", "OCIDescriptor", "OCILayout")
+load("//oci:providers.bzl", "OCIDescriptor", "OCILayout")
+load(":debug_flag.bzl", "DebugInfo")
 
 def _oci_image_layout_impl(ctx):
-    toolchain = ctx.toolchains["@com_github_datadog_rules_oci//oci:toolchain"]
+    toolchain = ctx.toolchains["//oci:toolchain"]
 
     layout = ctx.attr.manifest[OCILayout]
 
@@ -70,5 +70,5 @@ oci_image_layout = rule(
     provides = [
         DefaultInfo,
     ],
-    toolchains = ["@com_github_datadog_rules_oci//oci:toolchain"],
+    toolchains = ["//oci:toolchain"],
 )
