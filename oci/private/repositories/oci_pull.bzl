@@ -1,4 +1,4 @@
-""" pull """
+""" oci_pull """
 
 # A directory to store cached OCI artifacts
 # TODO(griffin) currently not used, but going to start depending on this for
@@ -51,7 +51,7 @@ def generate_build_files(rctx, layout_root, digest = ""):
     if res.return_code > 0:
         failout("failed to pull manifest", res)
 
-def _oci_pull_impl(rctx):
+def _impl(rctx):
     pull(
         rctx,
         rctx.path("."),
@@ -68,7 +68,7 @@ def _oci_pull_impl(rctx):
     )
 
 oci_pull = repository_rule(
-    implementation = _oci_pull_impl,
+    implementation = _impl,
     doc = """
     """,
     attrs = {

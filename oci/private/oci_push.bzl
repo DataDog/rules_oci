@@ -1,10 +1,10 @@
-""" push """
+""" oci_push """
 
 load("@aspect_bazel_lib//lib:stamping.bzl", "STAMP_ATTRS", "maybe_stamp")
 load("//oci:providers.bzl", "OCIDescriptor", "OCILayout", "OCIReferenceInfo")
 load(":debug_flag.bzl", "DebugInfo")
 
-def _oci_push_impl(ctx):
+def _impl(ctx):
     toolchain = ctx.toolchains["//oci:toolchain"]
 
     layout = ctx.attr.manifest[OCILayout]
@@ -137,7 +137,7 @@ oci_push = rule(
     doc = """
         Pushes a manifest or a list of manifests to an OCI registry.
     """,
-    implementation = _oci_push_impl,
+    implementation = _impl,
     executable = True,
     attrs = dict({
         "manifest": attr.label(

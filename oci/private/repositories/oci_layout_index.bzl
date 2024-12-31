@@ -1,8 +1,8 @@
-""" layout """
+""" oci_layout_index """
 
 load("@com_github_datadog_rules_oci//oci:providers.bzl", "OCIDescriptor", "OCILayout")
 
-def _oci_layout_index_impl(ctx):
+def _impl(ctx):
     blobs_map = {}
     all_files = []
     for blob in ctx.attr.blobs:
@@ -29,7 +29,7 @@ def _oci_layout_index_impl(ctx):
     ]
 
 oci_layout_index = rule(
-    implementation = _oci_layout_index_impl,
+    implementation = _impl,
     attrs = {
         "index": attr.label(
             providers = [OCIDescriptor],
