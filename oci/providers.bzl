@@ -1,4 +1,4 @@
-""" providers """
+""" public providers """
 
 OCIReferenceInfo = provider(
     doc = "Refers to any artifact represented by an OCI-like reference URI",
@@ -53,14 +53,9 @@ OCIImageIndexManifest = provider(
     },
 )
 
-# buildifier: disable=name-conventions
-OCIPlatform = provider(
-    doc = "Platform describes the platform which the image in the manifest runs on",
+OCISDK = provider(
+    "The OCI SDK",
     fields = {
-        "architecture": "Architecture field specifies the CPU architecture, in the GOARCH format.",
-        "os": "OS specifies the operating system, in the GOOS format.",
-        "os_version": "OSVersion is an optional field specifying the operating system version",
-        "os_features": "OSFeatures is an optional field specifying an array of strings, each listing a required OS feature",
-        "variant": "Variant is an optional field specifying a variant of the CPU",
+        "ocitool": "",
     },
 )

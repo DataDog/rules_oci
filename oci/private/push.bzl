@@ -1,11 +1,11 @@
 """ push """
 
 load("@aspect_bazel_lib//lib:stamping.bzl", "STAMP_ATTRS", "maybe_stamp")
-load("@com_github_datadog_rules_oci//oci:debug_flag.bzl", "DebugInfo")
-load("@com_github_datadog_rules_oci//oci:providers.bzl", "OCIDescriptor", "OCILayout", "OCIReferenceInfo")
+load("//oci:providers.bzl", "OCIDescriptor", "OCILayout", "OCIReferenceInfo")
+load(":debug_flag.bzl", "DebugInfo")
 
 def _oci_push_impl(ctx):
-    toolchain = ctx.toolchains["@com_github_datadog_rules_oci//oci:toolchain"]
+    toolchain = ctx.toolchains["//oci:toolchain"]
 
     layout = ctx.attr.manifest[OCILayout]
 
@@ -202,5 +202,5 @@ oci_push = rule(
     provides = [
         OCIReferenceInfo,
     ],
-    toolchains = ["@com_github_datadog_rules_oci//oci:toolchain"],
+    toolchains = ["//oci:toolchain"],
 )

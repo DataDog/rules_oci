@@ -48,7 +48,7 @@ go_deps.module_override(
     path = "github.com/containerd/containerd",
 )
 
-oci_pull = use_repo_rule("//oci:defs.bzl", "oci_pull")
+oci_pull = use_repo_rule("//oci:repositories.bzl", "oci_pull")
 
 oci_pull(
     name = "ubuntu_noble",

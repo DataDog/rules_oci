@@ -1,6 +1,6 @@
 """ image """
 
-load("@com_github_datadog_rules_oci//oci:providers.bzl", "OCIDescriptor", "OCILayout")
+load("//oci:providers.bzl", "OCIDescriptor", "OCILayout")
 
 # buildifier: disable=function-docstring
 def get_descriptor_file(ctx, desc):
@@ -22,7 +22,7 @@ def get_descriptor_file(ctx, desc):
     return out
 
 def _oci_image_layer_impl(ctx):
-    toolchain = ctx.toolchains["@com_github_datadog_rules_oci//oci:toolchain"]
+    toolchain = ctx.toolchains["//oci:toolchain"]
 
     descriptor_file = ctx.actions.declare_file("{}.descriptor.json".format(ctx.label.name))
 
@@ -71,14 +71,14 @@ oci_image_layer = rule(
             allow_files = True,
         ),
     },
-    toolchains = ["@com_github_datadog_rules_oci//oci:toolchain"],
+    toolchains = ["//oci:toolchain"],
     outputs = {
         "layer": "%{name}-layer.tar.gz",
     },
 )
 
 def _oci_image_index_impl(ctx):
-    toolchain = ctx.toolchains["@com_github_datadog_rules_oci//oci:toolchain"]
+    toolchain = ctx.toolchains["//oci:toolchain"]
 
     layout_files = depset(None, transitive = [m[OCILayout].files for m in ctx.attr.manifests])
 
@@ -138,11 +138,11 @@ oci_image_index = rule(
             """,
         ),
     },
-    toolchains = ["@com_github_datadog_rules_oci//oci:toolchain"],
+    toolchains = ["//oci:toolchain"],
 )
 
 def _oci_image_impl(ctx):
-    toolchain = ctx.toolchains["@com_github_datadog_rules_oci//oci:toolchain"]
+    toolchain = ctx.toolchains["//oci:toolchain"]
 
     base_desc = get_descriptor_file(ctx, ctx.attr.base[OCIDescriptor])
     base_layout = ctx.attr.base[OCILayout]
@@ -282,5 +282,5 @@ oci_image = rule(
             then the value of annotations will be used instead.""",
         ),
     },
-    toolchains = ["@com_github_datadog_rules_oci//oci:toolchain"],
+    toolchains = ["//oci:toolchain"],
 )
