@@ -30,6 +30,7 @@ bzl_library(
         "//oci:providers.bzl",
         "//oci/private:debug_flag.bzl",
         "//oci/private:image.bzl",
+        "//oci/private:oci_image_layer.bzl",
         "//oci/private:oci_image_layout.bzl",
         "//oci/private:push.bzl",
         "@aspect_bazel_lib//lib:stamping",
