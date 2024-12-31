@@ -50,28 +50,6 @@ oci_image_index(<a href="#oci_image_index-name">name</a>, <a href="#oci_image_in
 | <a id="oci_image_index-manifests"></a>manifests |  -   | <a href="https://bazel.build/concepts/labels">List of labels</a> | optional |  `[]`  |
 
 
-<a id="oci_image_layer"></a>
-
-## oci_image_layer
-
-<pre>
-oci_image_layer(<a href="#oci_image_layer-name">name</a>, <a href="#oci_image_layer-directory">directory</a>, <a href="#oci_image_layer-file_map">file_map</a>, <a href="#oci_image_layer-files">files</a>, <a href="#oci_image_layer-symlinks">symlinks</a>)
-</pre>
-
-Create a tarball and an OCI descriptor for it
-
-**ATTRIBUTES**
-
-
-| Name  | Description | Type | Mandatory | Default |
-| :------------- | :------------- | :------------- | :------------- | :------------- |
-| <a id="oci_image_layer-name"></a>name |  A unique name for this target.   | <a href="https://bazel.build/concepts/labels#target-names">Name</a> | required |  |
-| <a id="oci_image_layer-directory"></a>directory |  Directory in the tarball to place the `files`   | String | optional |  `""`  |
-| <a id="oci_image_layer-file_map"></a>file_map |  Dictionary of file -> file location in tarball   | <a href="https://bazel.build/rules/lib/dict">Dictionary: Label -> String</a> | optional |  `{}`  |
-| <a id="oci_image_layer-files"></a>files |  List of files to include under `directory`   | <a href="https://bazel.build/concepts/labels">List of labels</a> | optional |  `[]`  |
-| <a id="oci_image_layer-symlinks"></a>symlinks |  Dictionary of symlink -> target entries to place in the tarball   | <a href="https://bazel.build/rules/lib/dict">Dictionary: String -> String</a> | optional |  `{}`  |
-
-
 <a id="oci_image_layout"></a>
 
 ## oci_image_layout
@@ -120,5 +98,28 @@ Pushes a manifest or a list of manifests to an OCI registry.
 | <a id="oci_push-stamp"></a>stamp |  Whether to encode build information into the output. Possible values:<br><br>- `stamp = 1`: Always stamp the build information into the output, even in     [--nostamp](https://docs.bazel.build/versions/main/user-manual.html#flag--stamp) builds.     This setting should be avoided, since it is non-deterministic.     It potentially causes remote cache misses for the target and     any downstream actions that depend on the result. - `stamp = 0`: Never stamp, instead replace build information by constant values.     This gives good build result caching. - `stamp = -1`: Embedding of build information is controlled by the     [--[no]stamp](https://docs.bazel.build/versions/main/user-manual.html#flag--stamp) flag.     Stamped targets are not rebuilt unless their dependencies change.   | Integer | optional |  `-1`  |
 | <a id="oci_push-tag"></a>tag |  (optional) A tag to include in the target reference. This will not be included on child images.<br><br>Subject to [$(location)](https://bazel.build/reference/be/make-variables#predefined_label_variables) and ["Make variable"](https://bazel.build/reference/be/make-variabmes) substitution.<br><br>**Stamping**<br><br>You can use values produced by the workspace status command in your tag. To do this write a script that prints key-value pairs separated by spaces, e.g.<br><br><pre><code class="language-sh">#!/usr/bin/env bash&#10;echo "STABLE_KEY1 VALUE1"&#10;echo "STABLE_KEY2 VALUE2"</code></pre><br><br>You can reference these keys in `tag` using curly braces,<br><br><pre><code class="language-python">oci_push(&#10;    name = "push",&#10;    tag = "v1.0-{STABLE_KEY1}",&#10;)</code></pre>   | String | optional |  `""`  |
 | <a id="oci_push-x_meta_headers"></a>x_meta_headers |  (optional) A list of key/values to to be sent to the registry as headers with an X-Meta- prefix.   | <a href="https://bazel.build/rules/lib/dict">Dictionary: String -> String</a> | optional |  `{}`  |
+
+
+<a id="oci_image_layer"></a>
+
+## oci_image_layer
+
+<pre>
+oci_image_layer(<a href="#oci_image_layer-name">name</a>, <a href="#oci_image_layer-directory">directory</a>, <a href="#oci_image_layer-file_map">file_map</a>, <a href="#oci_image_layer-files">files</a>, <a href="#oci_image_layer-symlinks">symlinks</a>, <a href="#oci_image_layer-kwargs">kwargs</a>)
+</pre>
+
+oci_image_layer
+
+**PARAMETERS**
+
+
+| Name  | Description | Default Value |
+| :------------- | :------------- | :------------- |
+| <a id="oci_image_layer-name"></a>name |  A unique name for this rule   |  none |
+| <a id="oci_image_layer-directory"></a>directory |  Directory in the tarball to place the `files`   |  `"/"` |
+| <a id="oci_image_layer-file_map"></a>file_map |  Dictionary of file -> file location in tarball   |  `None` |
+| <a id="oci_image_layer-files"></a>files |  List of files to include under `directory`   |  `None` |
+| <a id="oci_image_layer-symlinks"></a>symlinks |  Dictionary of symlink -> target entries to place in the tarball   |  `None` |
+| <a id="oci_image_layer-kwargs"></a>kwargs |  Additional arguments to pass to the rule, e.g. `tags` or `visibility`   |  none |
 
 
