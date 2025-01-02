@@ -29,7 +29,7 @@ gazelle_binary(
 
 alias(
     name = "go",
-    actual = "@rules_go//go",
+    actual = "@io_bazel_rules_go//go",
 )
 
 write_source_files(

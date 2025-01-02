@@ -1,6 +1,6 @@
 """ pkg_go_binary_multiple_platforms """
 
-load("@rules_go//go:def.bzl", _go_binary = "go_binary")
+load("@io_bazel_rules_go//go:def.bzl", _go_binary = "go_binary")
 load("@rules_pkg//pkg:mappings.bzl", "pkg_attributes", "pkg_files")
 
 _GOOSS = ["darwin", "linux"]

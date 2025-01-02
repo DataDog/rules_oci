@@ -1,5 +1,5 @@
 load("@com_github_datadog_rules_oci//oci:defs.bzl", "oci_push")
-load("@rules_go//go:def.bzl", "go_binary", "go_library")
+load("@io_bazel_rules_go//go:def.bzl", "go_binary", "go_library")
 load(":go.bzl", "go_multiarch_image")
 
 go_library(
