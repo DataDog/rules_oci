@@ -4,8 +4,6 @@ load("//oci:providers.bzl", "OCIDescriptor", "OCILayout")
 load(":common.bzl", "get_descriptor_file")
 
 def _impl(ctx):
-    toolchain = ctx.toolchains["//oci:toolchain"]
-
     layout_files = depset(None, transitive = [m[OCILayout].files for m in ctx.attr.manifests])
 
     index_desc_file = ctx.actions.declare_file("{}.index.descriptor.json".format(ctx.label.name))
@@ -23,7 +21,7 @@ def _impl(ctx):
     ]
 
     ctx.actions.run(
-        executable = toolchain.sdk.ocitool,
+        executable = ctx.executable._ocitool,
         arguments = ["--layout={}".format(m[OCILayout].blob_index.path) for m in ctx.attr.manifests] +
                     [
                         "create-index",
@@ -63,6 +61,11 @@ oci_image_index = rule(
             doc = """
             """,
         ),
+        "_ocitool": attr.label(
+            allow_single_file = True,
+            cfg = "exec",
+            default = "//go/cmd/ocitool",
+            executable = True,
+        ),
     },
-    toolchains = ["//oci:toolchain"],
 )

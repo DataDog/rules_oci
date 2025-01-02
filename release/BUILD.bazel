@@ -1,22 +1,12 @@
 load("@rules_pkg//pkg:pkg.bzl", "pkg_tar")
-load(":pkg_go_binary_multiple_platforms.bzl", "pkg_go_binary_multiple_platforms")
 
 pkg_tar(
     name = "release",
     srcs = [
-        ":ocitool",
-        "//bin:files",
         "//oci:files",
         "//oci/private:files",
         "//oci/private/repositories:files",
     ],
     empty_files = ["BUILD.bazel"],
     extension = "tar.gz",
-)
-
-pkg_go_binary_multiple_platforms(
-    name = "ocitool",
-    go_binary = ["//go/cmd/ocitool:go_default_library"],
-    mode = "0755",
-    prefix = "bin",
 )

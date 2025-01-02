@@ -94,20 +94,14 @@ base images.
 
 ### Developing
 
-#### Updating dependencies
+#### Run the tests
+
+Run `bazel test //...`
+
+#### Update the docs
+
+Run `bzl run //docs:update`
+
+#### Update go dependencies
 
 Run `bzl run //:go -- get DEPENDENCY`
-
-#### Tests
-
-Run the tests using
-
-```
-bazel run //:bootstrap
-bazel test //...
-```
-
-You will also need to make it possible for docker to access `ghcr.io` (see the code in
-[.github/workflows/main.yaml](.github/workflows/main.yaml) for what we do in CI; an equivalent
-method for local build using the [gh CLI](https://github.com/cli/cli) can be found
-[here](https://gist.github.com/mislav/e154d707db230dc882d7194ec85d79f6)).

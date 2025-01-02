@@ -1,5 +1,7 @@
 load("@rules_pkg//pkg:mappings.bzl", "pkg_files")
 
+# gazelle:lang go
+
 exports_files(
     glob(["*.bzl"]),
     visibility = ["//oci:__subpackages__"],

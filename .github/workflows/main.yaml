@@ -10,13 +10,4 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - uses: bazelbuild/setup-bazelisk@v1
-      # Setup Credential Helper to authenticate to Github Container Registry
-      - run: echo '{"credHelpers":{"ghcr.io":"ghcr"}}' > ~/.docker/config.json
-      - run: echo "${HOME}/.local/bin" >> $GITHUB_PATH
-      - run: mkdir -p ~/.local/bin
-      - run: echo -e "#!/usr/bin/env bash\n echo '{\"ServerURL\":\"ghcr.io\",\"Username\":\"Bearer\",\"Secret\":\"${{ secrets.GITHUB_TOKEN }}\"}'" > ~/.local/bin/docker-credential-ghcr
-      - run: chmod +x ~/.local/bin/docker-credential-ghcr
-      # Setup local toolchain
-      - run: bazel build --config=ci //go/cmd/ocitool:ocitool && cp bazel-bin/go/cmd/ocitool/ocitool_/ocitool bin/ocitool-linux-amd64
-      # Run all tests
       - run: bazel test --config=ci //...

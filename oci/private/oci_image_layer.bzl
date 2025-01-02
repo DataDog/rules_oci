@@ -38,12 +38,10 @@ def oci_image_layer(
     )
 
 def _impl(ctx):
-    toolchain = ctx.toolchains["//oci:toolchain"]
-
     descriptor_file = ctx.actions.declare_file("{}.descriptor.json".format(ctx.label.name))
 
     ctx.actions.run(
-        executable = toolchain.sdk.ocitool,
+        executable = ctx.executable._ocitool,
         arguments = [
                         "create-layer",
                         "--out={}".format(ctx.outputs.layer.path),
@@ -78,8 +76,13 @@ _oci_image_layer = rule(
         "directory": attr.string(),
         "symlinks": attr.string_dict(),
         "file_map": attr.label_keyed_string_dict(allow_files = True),
+        "_ocitool": attr.label(
+            allow_single_file = True,
+            cfg = "exec",
+            default = "//go/cmd/ocitool",
+            executable = True,
+        ),
     },
-    toolchains = ["//oci:toolchain"],
     outputs = {
         "layer": "%{name}-layer.tar.gz",
     },

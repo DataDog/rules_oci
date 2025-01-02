@@ -19,27 +19,6 @@ var app = &cli.App{
 	},
 	Commands: []*cli.Command{
 		{
-			Name:   "pull",
-			Usage:  "Pull an OCI artifact",
-			Action: PullCmd,
-			Flags: []cli.Flag{
-				&cli.BoolFlag{
-					Name:  "shallow",
-					Usage: "Pull only the top level manifests.",
-					Value: false,
-				},
-			},
-		},
-		{
-			Name:   "generate-build-files",
-			Action: GenerateBuildFilesCmd,
-			Flags: []cli.Flag{
-				&cli.StringFlag{
-					Name: "image-digest",
-				},
-			},
-		},
-		{
 			Name:   "create-layer",
 			Action: CreateLayerCmd,
 			Flags: []cli.Flag{

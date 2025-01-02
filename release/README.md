@@ -11,8 +11,8 @@ bzl run //go/cmd/ocitool -- push-blob --ref "ghcr.io/datadog/rules_oci/rules:lat
 ## Updating Licenses and Headers
 
 ```
-go install github.com/DataDog/temporalite/internal/licensecheck@latest
-go install github.com/DataDog/temporalite/internal/copyright@latest
+bzl run //:go -- install github.com/DataDog/temporalite/internal/licensecheck@latest
+bzl run //:go -- install github.com/DataDog/temporalite/internal/copyright@latest
 licensecheck
 copyright
 ```

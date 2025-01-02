@@ -1,7 +1,5 @@
-load("@aspect_bazel_lib//lib:write_source_files.bzl", "write_source_files")
 load("@gazelle//:def.bzl", "DEFAULT_LANGUAGES", "gazelle", "gazelle_binary")
 load("@npm//:defs.bzl", "npm_link_all_packages")
-load("//oci:toolchain.bzl", "oci_local_toolchain")
 
 # gazelle:prefix github.com/DataDog/rules_oci
 # gazelle:go_naming_convention go_default_library
@@ -11,8 +9,9 @@ npm_link_all_packages(
     name = "node_modules",
 )
 
-oci_local_toolchain(
-    name = "oci_local_toolchain",
+alias(
+    name = "format",
+    actual = "//tools/format",
 )
 
 gazelle(
@@ -30,23 +29,6 @@ gazelle_binary(
 alias(
     name = "go",
     actual = "@io_bazel_rules_go//go",
-)
-
-write_source_files(
-    name = "bootstrap",
-    diff_test = False,
-    executable = True,
-    files = {
-        "bin/ocitool-darwin-amd64": "//go/cmd/ocitool",
-        "bin/ocitool-darwin-arm64": "//go/cmd/ocitool",
-        "bin/ocitool-linux-amd64": "//go/cmd/ocitool",
-        "bin/ocitool-linux-arm64": "//go/cmd/ocitool",
-    },
-)
-
-alias(
-    name = "format",
-    actual = "//tools/format",
 )
 
 exports_files(

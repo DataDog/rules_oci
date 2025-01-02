@@ -5,8 +5,6 @@ load("//oci:providers.bzl", "OCIDescriptor", "OCILayout", "OCIReferenceInfo")
 load(":debug_flag.bzl", "DebugInfo")
 
 def _impl(ctx):
-    toolchain = ctx.toolchains["//oci:toolchain"]
-
     layout = ctx.attr.manifest[OCILayout]
 
     ref = "{registry}/{repository}".format(
@@ -65,7 +63,7 @@ done
 
     digest_file = ctx.actions.declare_file("{name}.digest".format(name = ctx.label.name))
     ctx.actions.run(
-        executable = toolchain.sdk.ocitool,
+        executable = ctx.executable._ocitool,
         arguments = [
             "digest",
             "--desc={desc}".format(desc = ctx.attr.manifest[OCIDescriptor].descriptor_file.path),
@@ -104,7 +102,7 @@ done
         export OCI_REFERENCE={ref}@$(cat {digest})
         """.format(
             root = ctx.bin_dir.path,
-            tool = toolchain.sdk.ocitool.short_path,
+            tool = ctx.executable._ocitool.short_path,
             layout = layout.blob_index.short_path,
             desc = ctx.attr.manifest[OCIDescriptor].descriptor_file.short_path,
             ref = ref,
@@ -122,7 +120,13 @@ done
         DefaultInfo(
             runfiles = ctx.runfiles(
                 files = layout.files.to_list() +
-                        [toolchain.sdk.ocitool, ctx.attr.manifest[OCIDescriptor].descriptor_file, layout.blob_index, digest_file, tag_file],
+                        [
+                            ctx.executable._ocitool,
+                            ctx.attr.manifest[OCIDescriptor].descriptor_file,
+                            layout.blob_index,
+                            digest_file,
+                            tag_file,
+                        ],
             ),
         ),
         OCIReferenceInfo(
@@ -198,9 +202,14 @@ oci_push = rule(
             default = "//oci:debug",
             providers = [DebugInfo],
         ),
+        "_ocitool": attr.label(
+            allow_single_file = True,
+            cfg = "exec",
+            default = "//go/cmd/ocitool",
+            executable = True,
+        ),
     }, **STAMP_ATTRS),
     provides = [
         OCIReferenceInfo,
     ],
-    toolchains = ["//oci:toolchain"],
 )
