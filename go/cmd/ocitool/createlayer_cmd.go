@@ -12,8 +12,8 @@ import (
 
 	"github.com/DataDog/rules_oci/go/internal/flagutil"
 	"github.com/DataDog/rules_oci/go/internal/tarutil"
-	"github.com/DataDog/rules_oci/go/pkg/ociutil"
 	"github.com/DataDog/rules_oci/go/pkg/layer"
+	"github.com/DataDog/rules_oci/go/pkg/ociutil"
 	"github.com/opencontainers/go-digest"
 	ocispec "github.com/opencontainers/image-spec/specs-go/v1"
 	"github.com/urfave/cli/v2"
