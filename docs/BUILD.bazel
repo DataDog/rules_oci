@@ -1,12 +1,18 @@
 load("@aspect_bazel_lib//lib:docs.bzl", "stardoc_with_diff_test", "update_docs")
 
-exports_files(["docs.md"])
-
-# Sourced from https://github.com/bazelbuild/rules_go/pull/3000
-# For each doc file, generate MD from bzl_library, then perform diff test
 stardoc_with_diff_test(
-    name = "docs",
+    name = "defs",
     bzl_library_target = "//oci:defs",
+)
+
+stardoc_with_diff_test(
+    name = "providers",
+    bzl_library_target = "//oci:providers",
+)
+
+stardoc_with_diff_test(
+    name = "repositories",
+    bzl_library_target = "//oci:repositories",
 )
 
 update_docs()

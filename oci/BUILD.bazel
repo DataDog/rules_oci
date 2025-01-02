@@ -1,21 +1,16 @@
 load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
-load(":debug_flag.bzl", "debug_flag")
+load("@rules_pkg//pkg:mappings.bzl", "pkg_files")
+load("//oci/private:debug_flag.bzl", "debug_flag")
 
 # gazelle:lang go,starlark
 
-exports_files(["defs.bzl"])
+exports_files(
+    glob(["*.bzl"]),
+    visibility = ["//:__subpackages__"],
+)
 
 toolchain_type(
     name = "toolchain",
-    visibility = ["//visibility:public"],
-)
-
-filegroup(
-    name = "oci-files",
-    srcs = glob([
-        "*.bzl",
-        "*.bazel",
-    ]),
     visibility = ["//visibility:public"],
 )
 
@@ -26,80 +21,46 @@ debug_flag(
 )
 
 bzl_library(
-    name = "blob",
-    srcs = ["blob.bzl"],
-    visibility = ["//visibility:public"],
-    deps = ["@com_github_datadog_rules_oci//oci:providers"],
-)
-
-bzl_library(
     name = "defs",
-    srcs = ["defs.bzl"],
-    visibility = ["//visibility:public"],
-    deps = [
-        ":image",
-        ":oci_image_layout",
-        ":pull",
-        ":push",
+    srcs = [
+        ":defs.bzl",
     ],
-)
-
-bzl_library(
-    name = "image",
-    srcs = ["image.bzl"],
-    visibility = ["//visibility:public"],
-    deps = ["@com_github_datadog_rules_oci//oci:providers"],
-)
-
-bzl_library(
-    name = "layout",
-    srcs = ["layout.bzl"],
-    visibility = ["//visibility:public"],
-    deps = ["@com_github_datadog_rules_oci//oci:providers"],
-)
-
-bzl_library(
-    name = "manifests",
-    srcs = ["manifests.bzl"],
-    visibility = ["//visibility:public"],
-    deps = ["@com_github_datadog_rules_oci//oci:providers"],
-)
-
-bzl_library(
-    name = "oci_image_layout",
-    srcs = ["oci_image_layout.bzl"],
     visibility = ["//visibility:public"],
     deps = [
-        "@com_github_datadog_rules_oci//oci:debug_flag",
-        "@com_github_datadog_rules_oci//oci:providers",
-    ],
-)
-
-bzl_library(
-    name = "push",
-    srcs = ["push.bzl"],
-    visibility = ["//visibility:public"],
-    deps = [
+        "//oci:providers.bzl",
+        "//oci/private:debug_flag.bzl",
+        "//oci/private:image.bzl",
+        "//oci/private:oci_image_layout.bzl",
+        "//oci/private:push.bzl",
         "@aspect_bazel_lib//lib:stamping",
-        "@com_github_datadog_rules_oci//oci:debug_flag",
-        "@com_github_datadog_rules_oci//oci:providers",
     ],
-)
-
-bzl_library(
-    name = "debug_flag",
-    srcs = ["debug_flag.bzl"],
-    visibility = ["//visibility:public"],
 )
 
 bzl_library(
     name = "providers",
-    srcs = ["providers.bzl"],
+    srcs = [
+        ":providers.bzl",
+    ],
     visibility = ["//visibility:public"],
 )
 
 bzl_library(
-    name = "pull",
-    srcs = ["pull.bzl"],
+    name = "repositories",
+    srcs = [
+        ":repositories.bzl",
+    ],
     visibility = ["//visibility:public"],
+    deps = [
+        "//oci/private/repositories:pull.bzl",
+    ],
+)
+
+pkg_files(
+    name = "files",
+    srcs = glob([
+        "*.bzl",
+        "*.bazel",
+    ]),
+    prefix = "oci",
+    visibility = ["//release:__subpackages__"],
 )
