@@ -1,0 +1,34 @@
+load("@aspect_rules_lint//format:defs.bzl", "format_multirun", "format_test")
+load("@npm//:prettier/package_json.bzl", prettier = "bin")
+
+package(default_visibility = ["//:__subpackages__"])
+
+prettier.prettier_binary(
+    name = "prettier",
+    env = {
+        # Allow the binary to be run outside bazel
+        "BAZEL_BINDIR": ".",
+    },
+    fixed_args = [
+        "--log-level=warn",
+    ],
+)
+
+format_multirun(
+    name = "format",
+    go = "@go_sdk//:bin/gofmt",
+    markdown = ":prettier",
+    starlark = "@buildifier_prebuilt//:buildifier",
+    yaml = "@aspect_rules_lint//format:yamlfmt",
+)
+
+format_test(
+    name = "format_test",
+    size = "small",
+    go = "@go_sdk//:bin/gofmt",
+    markdown = ":prettier",
+    no_sandbox = True,
+    starlark = "@buildifier_prebuilt//:buildifier",
+    workspace = "//:WORKSPACE",
+    yaml = "@aspect_rules_lint//format:yamlfmt",
+)

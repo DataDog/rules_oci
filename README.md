@@ -6,10 +6,11 @@ DEPEND ON FOR PRODUCTION USE-CASES.
 A Bazel rule-set for extending, creating and publishing OCI artifacts, including image
 manifests, image indexes (multi-arch images) and custom artifacts
 ([ORAS](https://github.com/oras-project)), with a focus on:
-* **Speed**, only pulling artifacts that are needed at build-time (no more long image pull times)
-* **Extensibility**, creating custom artifacts to leverage standard OCI distribution
+
+- **Speed**, only pulling artifacts that are needed at build-time (no more long image pull times)
+- **Extensibility**, creating custom artifacts to leverage standard OCI distribution
   APIs
-* **Multi-arch images**, compiling and building multi-arch images with a single Bazel invocation
+- **Multi-arch images**, compiling and building multi-arch images with a single Bazel invocation
 
 In addition to Bazel rules, we offer many helpers for interacting with OCI
 artifacts under the `go/pkg` directory and a CLI tool for creating new OCI
@@ -67,27 +68,29 @@ in the image, but this trade-off is worth the speed of not downloaded many GBs o
 base images.
 
 ### Roadmap
-* [ ] Flesh out code for non-shallow pulls and cases where the layers are coming
+
+- [ ] Flesh out code for non-shallow pulls and cases where the layers are coming
       from a different registry.
-* [ ] Full Starlark DSL for creating custom artifacts, it's currently looks
-  a bit wonky
-* [ ] Support for the ORAS Artifact Spec
-* [ ] Support for custom artifact crawlers to pull artifacts that have children
-not represented by the OCI Image Spec. Ex pulling a full CNAB bundle and all
-dependencies.
-* [ ] Benchmark against `rules_docker` and raw `docker build`.
+- [ ] Full Starlark DSL for creating custom artifacts, it's currently looks
+      a bit wonky
+- [ ] Support for the ORAS Artifact Spec
+- [ ] Support for custom artifact crawlers to pull artifacts that have children
+      not represented by the OCI Image Spec. Ex pulling a full CNAB bundle and all
+      dependencies.
+- [ ] Benchmark against `rules_docker` and raw `docker build`.
 
 ### FAQ
 
 **Comparison to `rules_docker`**
-* `rules_docker` is built on `go-containerregistry`, which is focused on Docker,
+
+- `rules_docker` is built on `go-containerregistry`, which is focused on Docker,
   `rules_oci` uses `containerd` whose implementation complies more to the OCI spec
   and more easily supports custom artifacts
-* `rules_oci` focused on supporting the OCI Image spec, rather than the Docker
+- `rules_oci` focused on supporting the OCI Image spec, rather than the Docker
   spec
-* `rules_oci` doesn't have language specific rules, instead a higher-level
+- `rules_oci` doesn't have language specific rules, instead a higher-level
   package can build on `rules_oci` to create rules like `go_image`
-* `rules_docker` doesn't have support for multi-arch images [#1599](https://github.com/bazelbuild/rules_docker/issues/1599)
+- `rules_docker` doesn't have support for multi-arch images [#1599](https://github.com/bazelbuild/rules_docker/issues/1599)
 
 ### Developing
 
