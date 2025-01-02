@@ -17,11 +17,11 @@ oci_local_toolchain(
 
 gazelle(
     name = "gazelle",
-    gazelle = ":default_gazelle_binary",
+    gazelle = ":gazelle-binary",
 )
 
 gazelle_binary(
-    name = "default_gazelle_binary",
+    name = "gazelle-binary",
     languages = DEFAULT_LANGUAGES + [
         "@bazel_skylib_gazelle_plugin//bzl",
     ],
