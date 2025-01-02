@@ -28,11 +28,13 @@ bzl_library(
     visibility = ["//visibility:public"],
     deps = [
         "//oci:providers.bzl",
+        "//oci/private:common.bzl",
         "//oci/private:debug_flag.bzl",
-        "//oci/private:image.bzl",
+        "//oci/private:oci_image.bzl",
+        "//oci/private:oci_image_index.bzl",
         "//oci/private:oci_image_layer.bzl",
         "//oci/private:oci_image_layout.bzl",
-        "//oci/private:push.bzl",
+        "//oci/private:oci_push.bzl",
         "@aspect_bazel_lib//lib:stamping",
     ],
 )
@@ -52,7 +54,7 @@ bzl_library(
     ],
     visibility = ["//visibility:public"],
     deps = [
-        "//oci/private/repositories:pull.bzl",
+        "//oci/private/repositories:oci_pull.bzl",
     ],
 )
 

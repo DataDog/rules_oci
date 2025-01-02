@@ -26,23 +26,26 @@ func GenerateBuildFilesHandler(handler images.HandlerFunc, layoutRoot string, pr
 	blobBuildFiles[digest.SHA256] = rule.EmptyFile(algoBUILDPath(layoutRoot, digest.SHA256), "")
 
 	// Add load statements for all of the oci_* rules
-	ldBlob := rule.NewLoad("@com_github_datadog_rules_oci//oci/private/repositories:blob.bzl")
+	ldBlob := rule.NewLoad("@com_github_datadog_rules_oci//oci/private/repositories:oci_blob.bzl")
 	ldBlob.Add("oci_blob")
 
-	ldManifest := rule.NewLoad("@com_github_datadog_rules_oci//oci/private/repositories:manifests.bzl")
-	ldManifest.Add("oci_image_index_manifest")
-	ldManifest.Add("oci_image_manifest")
+	ldImageManifest := rule.NewLoad("@com_github_datadog_rules_oci//oci/private/repositories:oci_image_manifest.bzl")
+	ldImageManifest.Add("oci_image_manifest")
+
+	ldImageIndexManifest := rule.NewLoad("@com_github_datadog_rules_oci//oci/private/repositories:oci_image_index_manifest.bzl")
+	ldImageIndexManifest.Add("oci_image_index_manifest")
 
 	for algo, f := range blobBuildFiles {
 		ldBlob.Insert(f, 0)
-		ldManifest.Insert(f, 0)
+		ldImageManifest.Insert(f, 0)
+		ldImageIndexManifest.Insert(f, 0)
 		f.Save(algoBUILDPath(layoutRoot, algo))
 	}
 
 	// Top level build file for used as an index of the entire layout
 	layoutBuild := rule.EmptyFile(filepath.Join(layoutRoot, "BUILD.bazel"), "")
 
-	ldLayout := rule.NewLoad("@com_github_datadog_rules_oci//oci/private/repositories:layout.bzl")
+	ldLayout := rule.NewLoad("@com_github_datadog_rules_oci//oci/private/repositories:oci_layout_index.bzl")
 	ldLayout.Add("oci_layout_index")
 	ldLayout.Insert(layoutBuild, 0)
 
