@@ -29,7 +29,6 @@ use_repo(
     go_deps,
     "com_github_blakesmith_ar",
     "com_github_containerd_containerd",
-    "com_github_containerd_log",
     "com_github_docker_docker_credential_helpers",
     "com_github_mitchellh_go_homedir",
     "com_github_opencontainers_go_digest",
@@ -38,7 +37,6 @@ use_repo(
     "com_github_stretchr_testify",
     "com_github_urfave_cli_v2",
     "land_oras_oras_go",
-    "org_golang_x_sync",
 )
 go_deps.module_override(
     patch_strip = 1,
@@ -56,10 +54,6 @@ oci_pull(
     digest = "sha256:80dd3c3b9c6cecb9f1667e9290b3bc61b78c2678c02cbdae5f0fea92cc6734ab",
     registry = "mirror.gcr.io",
     repository = "library/ubuntu",
-)
-
-register_toolchains(
-    "@com_github_datadog_rules_oci//:oci_local_toolchain",
 )
 
 node = use_extension("@rules_nodejs//nodejs:extensions.bzl", "node", dev_dependency = True)

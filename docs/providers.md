@@ -26,45 +26,6 @@ OCIDescriptor(<a href="#OCIDescriptor-file">file</a>, <a href="#OCIDescriptor-de
 | <a id="OCIDescriptor-annotations"></a>annotations |  String map of aribtrary metadata    |
 
 
-<a id="OCIImageIndexManifest"></a>
-
-## OCIImageIndexManifest
-
-<pre>
-OCIImageIndexManifest(<a href="#OCIImageIndexManifest-manifests">manifests</a>, <a href="#OCIImageIndexManifest-annotations">annotations</a>)
-</pre>
-
-
-
-**FIELDS**
-
-
-| Name  | Description |
-| :------------- | :------------- |
-| <a id="OCIImageIndexManifest-manifests"></a>manifests |  List of descriptors    |
-| <a id="OCIImageIndexManifest-annotations"></a>annotations |  String map of arbitrary metadata    |
-
-
-<a id="OCIImageManifest"></a>
-
-## OCIImageManifest
-
-<pre>
-OCIImageManifest(<a href="#OCIImageManifest-config">config</a>, <a href="#OCIImageManifest-layers">layers</a>, <a href="#OCIImageManifest-annotations">annotations</a>)
-</pre>
-
-
-
-**FIELDS**
-
-
-| Name  | Description |
-| :------------- | :------------- |
-| <a id="OCIImageManifest-config"></a>config |  Descriptor that points to a configuration object    |
-| <a id="OCIImageManifest-layers"></a>layers |  List of descriptors    |
-| <a id="OCIImageManifest-annotations"></a>annotations |  String map of arbitrary metadata    |
-
-
 <a id="OCILayout"></a>
 
 ## OCILayout
@@ -104,23 +65,5 @@ Refers to any artifact represented by an OCI-like reference URI
 | <a id="OCIReferenceInfo-tag"></a>tag |  a organizational reference within a repository    |
 | <a id="OCIReferenceInfo-tag_file"></a>tag_file |  a file containing the organizational reference within a repository    |
 | <a id="OCIReferenceInfo-digest"></a>digest |  a file containing the digest of the artifact    |
-
-
-<a id="OCISDK"></a>
-
-## OCISDK
-
-<pre>
-OCISDK(<a href="#OCISDK-ocitool">ocitool</a>)
-</pre>
-
-The OCI SDK
-
-**FIELDS**
-
-
-| Name  | Description |
-| :------------- | :------------- |
-| <a id="OCISDK-ocitool"></a>ocitool |  -    |
 
 

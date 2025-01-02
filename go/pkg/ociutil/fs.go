@@ -4,10 +4,12 @@ import (
 	"context"
 	"io"
 	"io/fs"
+	"path/filepath"
 	"sync"
 
 	"github.com/containerd/containerd/content"
 
+	"github.com/opencontainers/go-digest"
 	ocispec "github.com/opencontainers/image-spec/specs-go/v1"
 )
 
@@ -93,4 +95,8 @@ func (f *fsFile) ReadAt(p []byte, off int64) (int, error) {
 	f.offset += int64(n)
 
 	return n, nil
+}
+
+func descToFilePath(root string, dgst digest.Digest) string {
+	return filepath.Join(root, "blobs", dgst.Algorithm().String(), dgst.Encoded())
 }

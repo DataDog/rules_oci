@@ -1,25 +1,5 @@
 """ public providers """
 
-OCIReferenceInfo = provider(
-    doc = "Refers to any artifact represented by an OCI-like reference URI",
-    fields = {
-        "registry": "the URI where the artifact is stored",
-        "repository": "a namespace for an artifact",
-        "tag": "a organizational reference within a repository",
-        "tag_file": "a file containing the organizational reference within a repository",
-        "digest": "a file containing the digest of the artifact",
-    },
-)
-
-# buildifier: disable=name-conventions
-OCILayout = provider(
-    "OCI Layout",
-    fields = {
-        "blob_index": "",
-        "files": "",
-    },
-)
-
 # buildifier: disable=name-conventions
 OCIDescriptor = provider(
     doc = "",
@@ -35,27 +15,21 @@ OCIDescriptor = provider(
 )
 
 # buildifier: disable=name-conventions
-OCIImageManifest = provider(
-    doc = "",
+OCILayout = provider(
+    "OCI Layout",
     fields = {
-        "config": "Descriptor that points to a configuration object",
-        "layers": "List of descriptors",
-        "annotations": "String map of arbitrary metadata",
+        "blob_index": "",
+        "files": "",
     },
 )
 
-# buildifier: disable=name-conventions
-OCIImageIndexManifest = provider(
-    doc = "",
+OCIReferenceInfo = provider(
+    doc = "Refers to any artifact represented by an OCI-like reference URI",
     fields = {
-        "manifests": "List of descriptors",
-        "annotations": "String map of arbitrary metadata",
-    },
-)
-
-OCISDK = provider(
-    "The OCI SDK",
-    fields = {
-        "ocitool": "",
+        "registry": "the URI where the artifact is stored",
+        "repository": "a namespace for an artifact",
+        "tag": "a organizational reference within a repository",
+        "tag_file": "a file containing the organizational reference within a repository",
+        "digest": "a file containing the digest of the artifact",
     },
 )

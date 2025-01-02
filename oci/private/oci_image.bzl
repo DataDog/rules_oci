@@ -4,8 +4,6 @@ load("//oci:providers.bzl", "OCIDescriptor", "OCILayout")
 load(":common.bzl", "get_descriptor_file")
 
 def _impl(ctx):
-    toolchain = ctx.toolchains["//oci:toolchain"]
-
     base_desc = get_descriptor_file(ctx, ctx.attr.base[OCIDescriptor])
     base_layout = ctx.attr.base[OCILayout]
 
@@ -37,7 +35,7 @@ def _impl(ctx):
     )
 
     ctx.actions.run(
-        executable = toolchain.sdk.ocitool,
+        executable = ctx.executable._ocitool,
         arguments = [
                         "--layout={}".format(base_layout.blob_index.path),
                         "append-layers",
@@ -143,6 +141,11 @@ oci_image = rule(
             will cause that label to be deleted.  For backwards compatibility, if this is not set,
             then the value of annotations will be used instead.""",
         ),
+        "_ocitool": attr.label(
+            allow_single_file = True,
+            cfg = "exec",
+            default = "//go/cmd/ocitool",
+            executable = True,
+        ),
     },
-    toolchains = ["//oci:toolchain"],
 )

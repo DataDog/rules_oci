@@ -9,11 +9,6 @@ exports_files(
     visibility = ["//:__subpackages__"],
 )
 
-toolchain_type(
-    name = "toolchain",
-    visibility = ["//visibility:public"],
-)
-
 debug_flag(
     name = "debug",
     build_setting_default = False,
@@ -22,9 +17,7 @@ debug_flag(
 
 bzl_library(
     name = "defs",
-    srcs = [
-        ":defs.bzl",
-    ],
+    srcs = ["defs.bzl"],
     visibility = ["//visibility:public"],
     deps = [
         "//oci:providers.bzl",
@@ -35,26 +28,29 @@ bzl_library(
         "//oci/private:oci_image_layer.bzl",
         "//oci/private:oci_image_layout.bzl",
         "//oci/private:oci_push.bzl",
+        "//oci/private/repositories:authn.bzl",
+        "//oci/private/repositories:download.bzl",
+        "//oci/private/repositories:oci_pull.bzl",
+        "@aspect_bazel_lib//lib:base64",
+        "@aspect_bazel_lib//lib:repo_utils",
         "@aspect_bazel_lib//lib:stamping",
+        "@bazel_skylib//lib:paths",
+        "@bazel_skylib//lib:versions",
+        "@rules_pkg//pkg:bzl_srcs",
     ],
-)
-
-bzl_library(
-    name = "providers",
-    srcs = [
-        ":providers.bzl",
-    ],
-    visibility = ["//visibility:public"],
 )
 
 bzl_library(
     name = "repositories",
-    srcs = [
-        ":repositories.bzl",
-    ],
+    srcs = ["repositories.bzl"],
     visibility = ["//visibility:public"],
     deps = [
+        "//oci/private/repositories:authn.bzl",
+        "//oci/private/repositories:download.bzl",
         "//oci/private/repositories:oci_pull.bzl",
+        "@aspect_bazel_lib//lib:base64",
+        "@aspect_bazel_lib//lib:repo_utils",
+        "@bazel_skylib//lib:versions",
     ],
 )
 
@@ -66,4 +62,16 @@ pkg_files(
     ]),
     prefix = "oci",
     visibility = ["//release:__subpackages__"],
+)
+
+bzl_library(
+    name = "providers",
+    srcs = ["providers.bzl"],
+    visibility = ["//visibility:public"],
+)
+
+bzl_library(
+    name = "toolchain",
+    srcs = ["toolchain.bzl"],
+    visibility = ["//visibility:public"],
 )
