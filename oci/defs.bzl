@@ -4,8 +4,8 @@ load(
     "//oci/private:image.bzl",
     _oci_image = "oci_image",
     _oci_image_index = "oci_image_index",
-    _oci_image_layer = "oci_image_layer",
 )
+load("//oci/private:oci_image_layer.bzl", _oci_image_layer = "oci_image_layer")
 load("//oci/private:oci_image_layout.bzl", _oci_image_layout = "oci_image_layout")
 load("//oci/private:push.bzl", _oci_push = "oci_push")
 
