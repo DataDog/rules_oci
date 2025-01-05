@@ -1,9 +1,6 @@
 """ debug_flag """
 
-DebugInfo = provider(
-    "DebugInfo",
-    fields = ["debug"],
-)
+load(":providers.bzl", "DebugInfo")
 
 def _debug_flag_impl(ctx):
     return [DebugInfo(debug = ctx.build_setting_value)]

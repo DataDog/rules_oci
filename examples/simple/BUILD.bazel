@@ -1,0 +1,43 @@
+load("@bazel_skylib//rules:write_file.bzl", "write_file")
+load("//oci:defs.bzl", "oci_image", "oci_image_index", "oci_image_layer")
+
+write_file(
+    name = "hello.txt.write_file",
+    out = "hello.txt",
+    content = ["Hello, World!"],
+)
+
+oci_image_layer(
+    name = "layer-hello.txt",
+    file_map = {
+        ":hello.txt": "/hello.txt",
+    },
+)
+
+[
+    oci_image(
+        name = "image.{}".format(arch),
+        annotations = {
+            "foo": "bar",
+        },
+        arch = arch,
+        base = "@ubuntu_noble//image",
+        layers = [":layer-hello.txt"],
+        os = "linux",
+    )
+    for arch in [
+        "amd64",
+        "arm64",
+    ]
+]
+
+oci_image_index(
+    name = "image!",
+    annotations = {
+        "baz": "qux",
+    },
+    manifests = [
+        ":image.amd64",
+        ":image.arm64",
+    ],
+)

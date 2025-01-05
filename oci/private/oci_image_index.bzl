@@ -1,7 +1,40 @@
 """ oci_image_index """
 
 load("//oci:providers.bzl", "OCIDescriptor", "OCILayout")
-load(":common.bzl", "get_descriptor_file")
+load(":common.bzl", "MEDIA_TYPE_OCI_INDEX", "get_or_make_descriptor_file")
+load(":oci_image_dir.bzl", "oci_image_dir")
+
+def oci_image_index(
+        *,
+        name,
+        manifests,
+        annotations = None,
+        gzip = True,
+        **kwargs):
+    """Creates a "multi-arch"" OCI image
+
+    Also creates targets for an OCI Layout directory and a .tar.gz file
+
+    Args:
+        name: A unique name for the rule
+        manifests: A list of oci_image labels
+        annotations: A dictionary of annotations to add to the index
+        gzip: If true, creates a tar.gz file. If false, creates a tar file
+        **kwargs: Additional arguments to pass to the underlying rules, e.g.
+          tags or visibility
+    """
+    _oci_image_index(
+        name = name,
+        annotations = annotations,
+        manifests = manifests,
+        **kwargs
+    )
+
+    oci_image_dir(
+        image = name,
+        gzip = gzip,
+        **kwargs
+    )
 
 def _impl(ctx):
     layout_files = depset(None, transitive = [m[OCILayout].files for m in ctx.attr.manifests])
@@ -12,7 +45,11 @@ def _impl(ctx):
 
     desc_files = []
     for manifest in ctx.attr.manifests:
-        desc_files.append(get_descriptor_file(ctx, manifest[OCIDescriptor]))
+        desc_file = get_or_make_descriptor_file(
+            ctx,
+            descriptor_provider = manifest[OCIDescriptor],
+        )
+        desc_files.append(desc_file)
 
     outputs = [
         index_file,
@@ -38,6 +75,7 @@ def _impl(ctx):
     return [
         OCIDescriptor(
             descriptor_file = index_desc_file,
+            media_type = MEDIA_TYPE_OCI_INDEX,
         ),
         OCILayout(
             blob_index = layout_file,
@@ -48,7 +86,7 @@ def _impl(ctx):
         ),
     ]
 
-oci_image_index = rule(
+_oci_image_index = rule(
     implementation = _impl,
     doc = """
     """,

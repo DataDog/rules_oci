@@ -6,3 +6,5 @@ bazel-testlogs
 bin/ocitool-*
 
 node_modules
+
+target

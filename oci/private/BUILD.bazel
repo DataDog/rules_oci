@@ -14,5 +14,5 @@ pkg_files(
         "*.bazel",
     ]),
     prefix = "oci/private",
-    visibility = ["//release:__subpackages__"],
+    visibility = ["//:__subpackages__"],
 )

@@ -1,10 +1,65 @@
 """ oci_image """
 
+load("@rules_pkg//pkg:mappings.bzl", "pkg_files")
+load("@rules_pkg//pkg:pkg.bzl", "pkg_tar")
 load("//oci:providers.bzl", "OCIDescriptor", "OCILayout")
-load(":common.bzl", "get_descriptor_file")
+load(":common.bzl", "MEDIA_TYPE_OCI_MANIFEST", "get_or_make_descriptor_file")
+load(":oci_image_dir.bzl", "oci_image_dir")
+
+def oci_image(
+        name,
+        base,  # label
+        annotations = None,  # dict[str, str] | None
+        arch = None,  # str | None
+        entrypoint = None,  # list[str] | None
+        env = None,  # dict[str, str] | None
+        gzip = True,  # bool
+        labels = None,  # dict[str, str] | None
+        layers = None,  # list[label] | None
+        os = None,  # str | None
+        **kwargs):
+    """Creates a "single-arch"" OCI image
+
+    Also creates targets for an OCI Layout directory and a .tar.gz file
+
+    Args:
+        name: A unique name for the rule
+        base: A label of an oci_image or oci_image_index
+        annotations: A dictionary of annotations to add to the image
+        arch: The architecture of the image
+        entrypoint: A list of entrypoints for the image
+        env: A list of environment variables to add to the image
+        gzip: If true, creates a tar.gz file. If false, creates a tar file
+        labels: A dictionary of labels to add to the image
+        layers: A list of oci_image_layer labels
+        os: The operating system of the image
+        **kwargs: Additional arguments to pass to the underlying rules, e.g.
+          tags or visibility
+    """
+    _oci_image(
+        name = name,
+        base = base,
+        annotations = annotations,
+        arch = arch,
+        entrypoint = entrypoint,
+        env = env,
+        labels = labels,
+        layers = layers,
+        os = os,
+        **kwargs
+    )
+
+    oci_image_dir(
+        image = name,
+        gzip = gzip,
+        **kwargs
+    )
 
 def _impl(ctx):
-    base_desc = get_descriptor_file(ctx, ctx.attr.base[OCIDescriptor])
+    base_desc = get_or_make_descriptor_file(
+        ctx,
+        descriptor_provider = ctx.attr.base[OCIDescriptor],
+    )
     base_layout = ctx.attr.base[OCILayout]
 
     manifest_desc_file = ctx.actions.declare_file("{}.manifest.descriptor.json".format(ctx.label.name))
@@ -28,7 +83,13 @@ def _impl(ctx):
     # used as labels
     labels = ctx.attr.labels or ctx.attr.annotations
 
-    layer_descriptor_files = [get_descriptor_file(ctx, f[OCIDescriptor]) for f in ctx.attr.layers]
+    layer_descriptor_files = [
+        get_or_make_descriptor_file(
+            ctx,
+            descriptor_provider = f[OCIDescriptor],
+        )
+        for f in ctx.attr.layers
+    ]
     layer_and_descriptor_paths = zip(
         [f.path for f in ctx.files.layers],
         [f.path for f in layer_descriptor_files],
@@ -75,6 +136,7 @@ def _impl(ctx):
     return [
         OCIDescriptor(
             descriptor_file = manifest_desc_file,
+            media_type = MEDIA_TYPE_OCI_MANIFEST,
         ),
         OCILayout(
             blob_index = layout_file,
@@ -94,53 +156,22 @@ def _impl(ctx):
         ),
     ]
 
-oci_image = rule(
+_oci_image = rule(
     implementation = _impl,
-    doc = """Creates a new image manifest and config by appending the `layers` to an existing image
-    manifest and config defined by `base`.  If `base` is an image index, then `os` and `arch` will
-    be used to extract the image manifest.""",
     attrs = {
         "base": attr.label(
-            doc = """A base image, as defined by oci_pull or oci_image""",
             mandatory = True,
-            providers = [
-                OCIDescriptor,
-                OCILayout,
-            ],
+            providers = [OCIDescriptor, OCILayout],
         ),
-        "entrypoint": attr.string_list(
-            doc = """A list of entrypoints for the image; these will be inserted into the generated
-            OCI image config""",
-        ),
-        "os": attr.string(
-            doc = "Used to extract a manifest from base if base is an index",
-        ),
-        "arch": attr.string(
-            doc = "Used to extract a manifest from base if base is an index",
-        ),
-        "env": attr.string_list(
-            doc = """Entries are in the format of `VARNAME=VARVALUE`. These values act as defaults and
-            are merged with any specified when creating a container.""",
-        ),
+        "entrypoint": attr.string_list(),
+        "os": attr.string(),
+        "arch": attr.string(),
+        "env": attr.string_list(),
         "layers": attr.label_list(
-            doc = "A list of layers defined by oci_image_layer",
-            providers = [
-                OCIDescriptor,
-            ],
+            providers = [OCIDescriptor],
         ),
-        "annotations": attr.string_dict(
-            doc = """[OCI Annotations](https://github.com/opencontainers/image-spec/blob/main/annotations.md)
-            to add to the manifest.""",
-        ),
-        "labels": attr.string_dict(
-            doc = """labels that will be applied to the image configuration, as defined in
-            [the OCI config](https://github.com/opencontainers/image-spec/blob/main/config.md#properties).
-            These behave the same way as
-            [docker LABEL](https://docs.docker.com/engine/reference/builder/#label);
-            in particular, labels from the base image are inherited.  An empty value for a label
-            will cause that label to be deleted.  For backwards compatibility, if this is not set,
-            then the value of annotations will be used instead.""",
-        ),
+        "annotations": attr.string_dict(),
+        "labels": attr.string_dict(),
         "_ocitool": attr.label(
             allow_single_file = True,
             cfg = "exec",

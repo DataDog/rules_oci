@@ -1,11 +1,13 @@
 """ download utilities """
 
 load("@bazel_skylib//lib:versions.bzl", "versions")
-
-MEDIA_TYPE_DOCKER_INDEX = "application/vnd.docker.distribution.manifest.list.v2+json"
-MEDIA_TYPE_DOCKER_MANIFEST = "application/vnd.docker.distribution.manifest.v2+json"
-MEDIA_TYPE_OCI_INDEX = "application/vnd.oci.image.index.v1+json"
-MEDIA_TYPE_OCI_MANIFEST = "application/vnd.oci.image.manifest.v1+json"
+load(
+    "//oci/private:common.bzl",
+    "MEDIA_TYPE_DOCKER_INDEX",
+    "MEDIA_TYPE_DOCKER_MANIFEST",
+    "MEDIA_TYPE_OCI_INDEX",
+    "MEDIA_TYPE_OCI_MANIFEST",
+)
 
 _RESOURCE_BLOB = "blobs"
 _RESOURCE_INDEX_OR_MANIFEST = "manifests"

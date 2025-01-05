@@ -6,3 +6,9 @@ test:ci --keep_going
 # Only show failing test targets to avoid scrolling past a long list of
 # successful tests in order to see error logs.
 test:ci --test_summary=terse
+
+build --aspects=@rules_rust//rust:defs.bzl%rust_clippy_aspect
+build --output_groups=+clippy_checks
+
+build --aspects=@rules_rust//rust:defs.bzl%rustfmt_aspect
+build --output_groups=+rustfmt_checks
