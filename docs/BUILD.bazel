@@ -11,8 +11,8 @@ stardoc_with_diff_test(
 )
 
 stardoc_with_diff_test(
-    name = "repositories",
-    bzl_library_target = "//oci:repositories",
+    name = "pull",
+    bzl_library_target = "//oci/repositories:pull",
 )
 
 update_docs()

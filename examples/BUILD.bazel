@@ -1,0 +1,15 @@
+load("@bazel_gazelle//:def.bzl", "DEFAULT_LANGUAGES", "gazelle", "gazelle_binary")
+
+# gazelle:prefix github.com/DataDog/rules_oci/examples
+# gazelle:go_naming_convention go_default_library
+# gazelle:lang go
+
+gazelle(
+    name = "gazelle",
+    gazelle = ":gazelle-binary",
+)
+
+gazelle_binary(
+    name = "gazelle-binary",
+    languages = DEFAULT_LANGUAGES,
+)

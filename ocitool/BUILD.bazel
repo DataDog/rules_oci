@@ -1,4 +1,4 @@
-load("@crate_index//:defs.bzl", "all_crate_deps")
+load("@com_github_datadog_rules_oci_crate_index//:defs.bzl", "all_crate_deps")
 load(
     "@rules_rust//rust:defs.bzl",
     "rust_binary",
@@ -12,6 +12,7 @@ exports_files(["Cargo.toml"])
 rust_binary(
     name = "ocitool",
     srcs = glob(["src/**/*.rs"]),
+    edition = "2021",
     visibility = ["//visibility:public"],
     deps = all_crate_deps(normal = True),
 )

@@ -124,10 +124,9 @@ exports_files(
         rctx.path("image/BUILD.bazel"),
         content = """
 load(
-    "@com_github_datadog_rules_oci//oci/private/repositories:oci_pulled_image.bzl",
+    "@com_github_datadog_rules_oci//oci/private:oci_pulled_image.bzl",
     "oci_pulled_image",
 )
-load("@rules_pkg//pkg:pkg.bzl", "pkg_tar")
 
 oci_pulled_image(
     name = "image",
@@ -135,19 +134,6 @@ oci_pulled_image(
     blobs = [
 {blobs}
     ],
-    visibility = ["//visibility:public"],
-)
-
-pkg_tar(
-    name = "tar",
-    srcs = [
-        "//:index.json",
-        "//:oci-layout",
-        "//blobs/sha256:blobs",
-    ],
-    extension = "tar.gz",
-    package_file_name = "image.tar.gz",
-    tags = ["manual"],
     visibility = ["//visibility:public"],
 )
 """.strip().format(
@@ -162,17 +148,8 @@ pkg_tar(
     rctx.file(
         rctx.path("blobs/sha256/BUILD.bazel"),
         content = """
-load("@rules_pkg//pkg:mappings.bzl", "pkg_files")
-
 exports_files(
     glob(["**/*"]),
-    visibility = ["//:__subpackages__"],
-)
-
-pkg_files(
-    name = "blobs",
-    srcs = glob(["**/*"]),
-    prefix = "blobs/sha256",
     visibility = ["//:__subpackages__"],
 )
 """.strip(),

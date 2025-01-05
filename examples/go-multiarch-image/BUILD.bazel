@@ -1,10 +1,4 @@
-load("@bazel_skylib//rules:write_file.bzl", "write_file")
-load(
-    "@com_github_datadog_rules_oci//oci:defs.bzl",
-    "oci_push",
-)
 load("@io_bazel_rules_go//go:def.bzl", "go_binary", "go_library")
-load(":go.bzl", "go_multiarch_image")
 
 go_library(
     name = "go_default_library",
@@ -17,22 +11,4 @@ go_binary(
     name = "go-multiarch-image",
     embed = [":go_default_library"],
     visibility = ["//visibility:public"],
-)
-
-go_multiarch_image(
-    name = "image",
-    archs = [
-        "amd64",
-        "arm64",
-    ],
-    base = "@ubuntu_noble//image",
-    embed = [":go_default_library"],
-    visibility = ["//visibility:public"],
-)
-
-oci_push(
-    name = "push",
-    manifest = ":image",
-    registry = "ghcr.io",
-    repository = "datadog/rules_oci/hello-world",
 )

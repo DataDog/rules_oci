@@ -1,0 +1,16 @@
+diff --git a/gazelle/bzl/gazelle.go b/gazelle/bzl/gazelle.go
+index 94c32e9..7a59714 100644
+--- a/gazelle/bzl/gazelle.go
++++ b/gazelle/bzl/gazelle.go
+@@ -152,6 +152,11 @@ func (*bzlLibraryLang) Resolve(c *config.Config, ix *resolve.RuleIndex, rc *repo
+ 
+ 	deps := make([]string, 0, len(imports))
+ 	for _, imp := range imports {
++		if l, ok := resolve.FindRuleWithOverride(c, resolve.ImportSpec{Lang: languageName, Imp: imp}, languageName); ok {
++			depLabel := l.Rel(from.Repo, from.Pkg)
++			deps = append(deps, depLabel.String())
++			continue
++		}
+ 		impLabel, err := label.Parse(imp)
+ 		if err != nil {
+ 			log.Printf("%s: import of %q is invalid: %v", from.String(), imp, err)

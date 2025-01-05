@@ -1,7 +1,5 @@
 """ oci_image """
 
-load("@rules_pkg//pkg:mappings.bzl", "pkg_files")
-load("@rules_pkg//pkg:pkg.bzl", "pkg_tar")
 load("//oci:providers.bzl", "OCIDescriptor", "OCILayout")
 load(":common.bzl", "MEDIA_TYPE_OCI_MANIFEST", "get_or_make_descriptor_file")
 load(":oci_image_dir.bzl", "oci_image_dir")

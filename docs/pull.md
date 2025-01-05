@@ -1,6 +1,6 @@
 <!-- Generated with Stardoc: http://skydoc.bazel.build -->
 
-public repository rules
+oci_pull
 
 <a id="oci_pull"></a>
 

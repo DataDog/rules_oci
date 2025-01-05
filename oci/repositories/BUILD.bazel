@@ -1,0 +1,59 @@
+load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
+load("@rules_pkg//pkg:mappings.bzl", "pkg_files")
+
+exports_files(
+    glob([
+        "*.bazel",
+        "*.bzl",
+    ]),
+    visibility = ["//:__subpackages__"],
+)
+
+pkg_files(
+    name = "files",
+    srcs = glob([
+        "*.bzl",
+        "*.bazel",
+    ]),
+    prefix = "oci/repositories",
+    visibility = ["//:__subpackages__"],
+)
+
+bzl_library(
+    name = "01_direct_dependencies",
+    srcs = ["01_direct_dependencies.bzl"],
+    visibility = ["//visibility:public"],
+    deps = [
+        "@bazel_tools//tools/build_defs/repo:http.bzl",
+        "@bazel_tools//tools/build_defs/repo:utils.bzl",
+    ],
+)
+
+bzl_library(
+    name = "02_toolchains",
+    srcs = ["02_toolchains.bzl"],
+    visibility = ["//visibility:public"],
+    deps = [
+        "@aspect_bazel_lib//lib:repositories",
+        "@bazel_gazelle//:deps",
+        "@io_bazel_rules_go//go:deps",
+        "@rules_rust//rust:repositories.bzl",
+    ],
+)
+
+bzl_library(
+    name = "03_third_party_go_and_rust_libraries",
+    srcs = ["03_third_party_go_and_rust_libraries.bzl"],
+    visibility = ["//visibility:public"],
+    deps = [
+        "@com_github_datadog_rules_oci//oci/private/repositories:go_repositories",
+        "@com_github_datadog_rules_oci_crate_index//:srcs",
+    ],
+)
+
+bzl_library(
+    name = "pull",
+    srcs = ["pull.bzl"],
+    visibility = ["//visibility:public"],
+    deps = ["//oci/private/repositories:oci_pull"],
+)

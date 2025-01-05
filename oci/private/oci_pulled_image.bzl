@@ -5,8 +5,14 @@ load(
     "OCIDescriptor",
     "OCILayout",
 )
-load("//oci/private:common.bzl", "MEDIA_TYPE_OCI_INDEX")
-load("//oci/private:oci_image_dir.bzl", "oci_image_dir")
+load(
+    "@com_github_datadog_rules_oci//oci/private:common.bzl",
+    "MEDIA_TYPE_OCI_INDEX",
+)
+load(
+    "@com_github_datadog_rules_oci//oci/private:oci_image_dir.bzl",
+    "oci_image_dir",
+)
 
 _COREUTILS_TOOLCHAIN = "@aspect_bazel_lib//lib:coreutils_toolchain_type"
 

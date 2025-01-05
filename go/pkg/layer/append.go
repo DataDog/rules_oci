@@ -165,7 +165,5 @@ func AppendLayers(
 		return ocispec.Descriptor{}, ocispec.Descriptor{}, err
 	}
 
-	fmt.Printf("Created new manifest %+v\n", newManifest)
-
 	return newManifest, newConfig, nil
 }

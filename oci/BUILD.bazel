@@ -2,10 +2,23 @@ load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
 load("@rules_pkg//pkg:mappings.bzl", "pkg_files")
 load("//oci/private:debug_flag.bzl", "debug_flag")
 
-# gazelle:lang go,starlark
+# gazelle:lang starlark
+# gazelle:resolve starlark starlark @com_github_datadog_rules_oci_crate_index//:defs.bzl @com_github_datadog_rules_oci_crate_index//:srcs
+# gazelle:resolve starlark starlark @rules_pkg//pkg:mappings.bzl @rules_pkg//pkg:bzl_srcs
+# gazelle:resolve starlark starlark @rules_pkg//pkg:pkg.bzl @rules_pkg//pkg:bzl_srcs
+# gazelle:resolve starlark starlark @rules_rust//rust:repositories.bzl @rules_rust//rust:repositories.bzl
+
+# TODO: Delete once CNAB tools stops needing this
+toolchain_type(
+    name = "toolchain",
+    visibility = ["//visibility:public"],
+)
 
 exports_files(
-    glob(["*.bzl"]),
+    glob([
+        "*.bazel",
+        "*.bzl",
+    ]),
     visibility = ["//:__subpackages__"],
 )
 
@@ -13,48 +26,6 @@ debug_flag(
     name = "debug",
     build_setting_default = False,
     visibility = ["//visibility:public"],
-)
-
-bzl_library(
-    name = "defs",
-    srcs = ["defs.bzl"],
-    visibility = ["//visibility:public"],
-    deps = [
-        "//oci:providers.bzl",
-        "//oci/private:common.bzl",
-        "//oci/private:debug_flag.bzl",
-        "//oci/private:oci_image.bzl",
-        "//oci/private:oci_image_dir.bzl",
-        "//oci/private:oci_image_index.bzl",
-        "//oci/private:oci_image_layer.bzl",
-        "//oci/private:oci_image_load.bzl",
-        "//oci/private:oci_push.bzl",
-        "//oci/private:providers.bzl",
-        "//oci/private/repositories:authn.bzl",
-        "//oci/private/repositories:download.bzl",
-        "//oci/private/repositories:oci_pull.bzl",
-        "@aspect_bazel_lib//lib:base64",
-        "@aspect_bazel_lib//lib:paths",
-        "@aspect_bazel_lib//lib:repo_utils",
-        "@aspect_bazel_lib//lib:stamping",
-        "@bazel_skylib//lib:versions",
-        "@rules_pkg//pkg:bzl_srcs",
-    ],
-)
-
-bzl_library(
-    name = "repositories",
-    srcs = ["repositories.bzl"],
-    visibility = ["//visibility:public"],
-    deps = [
-        "//oci/private:common.bzl",
-        "//oci/private/repositories:authn.bzl",
-        "//oci/private/repositories:download.bzl",
-        "//oci/private/repositories:oci_pull.bzl",
-        "@aspect_bazel_lib//lib:base64",
-        "@aspect_bazel_lib//lib:repo_utils",
-        "@bazel_skylib//lib:versions",
-    ],
 )
 
 pkg_files(
@@ -68,13 +39,19 @@ pkg_files(
 )
 
 bzl_library(
-    name = "providers",
-    srcs = ["providers.bzl"],
+    name = "defs",
+    srcs = ["defs.bzl"],
     visibility = ["//visibility:public"],
+    deps = [
+        "//oci/private:oci_image",
+        "//oci/private:oci_image_index",
+        "//oci/private:oci_image_layer",
+        "//oci/private:oci_push",
+    ],
 )
 
 bzl_library(
-    name = "toolchain",
-    srcs = ["toolchain.bzl"],
+    name = "providers",
+    srcs = ["providers.bzl"],
     visibility = ["//visibility:public"],
 )
