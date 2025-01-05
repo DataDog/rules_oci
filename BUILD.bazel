@@ -1,5 +1,6 @@
 load("@gazelle//:def.bzl", "DEFAULT_LANGUAGES", "gazelle", "gazelle_binary")
 load("@npm//:defs.bzl", "npm_link_all_packages")
+load("@rules_pkg//pkg:pkg.bzl", "pkg_tar")
 
 # gazelle:prefix github.com/DataDog/rules_oci
 # gazelle:go_naming_convention go_default_library
@@ -29,6 +30,17 @@ gazelle_binary(
 alias(
     name = "go",
     actual = "@io_bazel_rules_go//go",
+)
+
+pkg_tar(
+    name = "release",
+    srcs = [
+        "//oci:files",
+        "//oci/private:files",
+        "//oci/private/repositories:files",
+    ],
+    empty_files = ["BUILD.bazel"],
+    extension = "tar.gz",
 )
 
 exports_files(

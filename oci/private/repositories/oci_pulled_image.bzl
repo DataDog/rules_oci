@@ -1,7 +1,12 @@
 """ oci_pulled_image """
 
-load("@com_github_datadog_rules_oci//oci:providers.bzl", "OCIDescriptor", "OCILayout")
-load(":download.bzl", "MEDIA_TYPE_OCI_INDEX")
+load(
+    "@com_github_datadog_rules_oci//oci:providers.bzl",
+    "OCIDescriptor",
+    "OCILayout",
+)
+load("//oci/private:common.bzl", "MEDIA_TYPE_OCI_INDEX")
+load("//oci/private:oci_image_dir.bzl", "oci_image_dir")
 
 _COREUTILS_TOOLCHAIN = "@aspect_bazel_lib//lib:coreutils_toolchain_type"
 
@@ -23,6 +28,11 @@ def oci_pulled_image(
         name = name,
         index = index,
         blobs = blobs,
+        **kwargs
+    )
+
+    oci_image_dir(
+        image = name,
         **kwargs
     )
 

@@ -1,12 +1,15 @@
 """ oci_pull """
 
-load(":authn.bzl", _authn = "authn")
 load(
-    ":download.bzl",
+    "//oci/private:common.bzl",
     "MEDIA_TYPE_DOCKER_INDEX",
     "MEDIA_TYPE_DOCKER_MANIFEST",
     "MEDIA_TYPE_OCI_INDEX",
     "MEDIA_TYPE_OCI_MANIFEST",
+)
+load(":authn.bzl", _authn = "authn")
+load(
+    ":download.bzl",
     "download_blob",
     "download_index_or_manifest",
 )

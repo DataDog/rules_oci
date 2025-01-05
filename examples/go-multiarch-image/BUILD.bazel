@@ -1,10 +1,6 @@
 load("@bazel_skylib//rules:write_file.bzl", "write_file")
 load(
     "@com_github_datadog_rules_oci//oci:defs.bzl",
-    "oci_image",
-    "oci_image_index",
-    "oci_image_layer",
-    "oci_image_layout",
     "oci_push",
 )
 load("@io_bazel_rules_go//go:def.bzl", "go_binary", "go_library")
@@ -15,6 +11,12 @@ go_library(
     srcs = ["main.go"],
     importpath = "github.com/DataDog/rules_oci/examples/go-multiarch-image",
     visibility = ["//visibility:private"],
+)
+
+go_binary(
+    name = "go-multiarch-image",
+    embed = [":go_default_library"],
+    visibility = ["//visibility:public"],
 )
 
 go_multiarch_image(
@@ -33,61 +35,4 @@ oci_push(
     manifest = ":image",
     registry = "ghcr.io",
     repository = "datadog/rules_oci/hello-world",
-)
-
-# Add a layer
-
-write_file(
-    name = "hello.txt.write_file",
-    out = "hello.txt",
-    content = ["Hello, World!"],
-)
-
-oci_image_layer(
-    name = "layer-hello.txt",
-    file_map = {
-        ":hello.txt": "/hello.txt",
-    },
-)
-
-_ARCHS = [
-    "amd64",
-    "arm64",
-]
-
-[
-    oci_image(
-        name = "image2.{}".format(arch),
-        arch = arch,
-        base = ":image",
-        layers = [":layer-hello.txt"],
-        os = "linux",
-    )
-    for arch in _ARCHS
-]
-
-oci_image_index(
-    name = "image2",
-    manifests = [
-        ":image2.{}".format(arch)
-        for arch in _ARCHS
-    ],
-)
-
-oci_image_layout(
-    name = "image2.dir",
-    image_index = ":image2",
-)
-
-oci_push(
-    name = "push2",
-    manifest = ":image2",
-    registry = "ghcr.io",
-    repository = "datadog/rules_oci/hello-world2",
-)
-
-go_binary(
-    name = "go-multiarch-image",
-    embed = [":go_default_library"],
-    visibility = ["//visibility:public"],
 )

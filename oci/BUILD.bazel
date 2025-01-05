@@ -24,17 +24,19 @@ bzl_library(
         "//oci/private:common.bzl",
         "//oci/private:debug_flag.bzl",
         "//oci/private:oci_image.bzl",
+        "//oci/private:oci_image_dir.bzl",
         "//oci/private:oci_image_index.bzl",
         "//oci/private:oci_image_layer.bzl",
-        "//oci/private:oci_image_layout.bzl",
+        "//oci/private:oci_image_load.bzl",
         "//oci/private:oci_push.bzl",
+        "//oci/private:providers.bzl",
         "//oci/private/repositories:authn.bzl",
         "//oci/private/repositories:download.bzl",
         "//oci/private/repositories:oci_pull.bzl",
         "@aspect_bazel_lib//lib:base64",
+        "@aspect_bazel_lib//lib:paths",
         "@aspect_bazel_lib//lib:repo_utils",
         "@aspect_bazel_lib//lib:stamping",
-        "@bazel_skylib//lib:paths",
         "@bazel_skylib//lib:versions",
         "@rules_pkg//pkg:bzl_srcs",
     ],
@@ -45,6 +47,7 @@ bzl_library(
     srcs = ["repositories.bzl"],
     visibility = ["//visibility:public"],
     deps = [
+        "//oci/private:common.bzl",
         "//oci/private/repositories:authn.bzl",
         "//oci/private/repositories:download.bzl",
         "//oci/private/repositories:oci_pull.bzl",
@@ -61,7 +64,7 @@ pkg_files(
         "*.bazel",
     ]),
     prefix = "oci",
-    visibility = ["//release:__subpackages__"],
+    visibility = ["//:__subpackages__"],
 )
 
 bzl_library(

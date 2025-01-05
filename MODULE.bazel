@@ -3,8 +3,8 @@ module(
     repo_name = "com_github_datadog_rules_oci",
 )
 
-bazel_dep(name = "aspect_rules_js", version = "2.1.2")
 bazel_dep(name = "aspect_bazel_lib", version = "2.7.3")
+bazel_dep(name = "aspect_rules_js", version = "2.1.2")
 bazel_dep(name = "aspect_rules_lint", version = "1.0.8")
 bazel_dep(name = "bazel_skylib", version = "1.6.1")
 bazel_dep(name = "gazelle", version = "0.38.0")

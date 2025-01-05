@@ -7,10 +7,11 @@ public providers
 ## OCIDescriptor
 
 <pre>
-OCIDescriptor(<a href="#OCIDescriptor-file">file</a>, <a href="#OCIDescriptor-descriptor_file">descriptor_file</a>, <a href="#OCIDescriptor-media_type">media_type</a>, <a href="#OCIDescriptor-size">size</a>, <a href="#OCIDescriptor-urls">urls</a>, <a href="#OCIDescriptor-digest">digest</a>, <a href="#OCIDescriptor-annotations">annotations</a>)
+OCIDescriptor(<a href="#OCIDescriptor-file">file</a>, <a href="#OCIDescriptor-descriptor_file">descriptor_file</a>, <a href="#OCIDescriptor-artifact_type">artifact_type</a>, <a href="#OCIDescriptor-data">data</a>, <a href="#OCIDescriptor-annotations">annotations</a>, <a href="#OCIDescriptor-digest">digest</a>, <a href="#OCIDescriptor-media_type">media_type</a>, <a href="#OCIDescriptor-size">size</a>,
+              <a href="#OCIDescriptor-urls">urls</a>)
 </pre>
 
-
+An OCI descriptor. See https://github.com/opencontainers/image-spec/blob/main/descriptor.md
 
 **FIELDS**
 
@@ -19,11 +20,13 @@ OCIDescriptor(<a href="#OCIDescriptor-file">file</a>, <a href="#OCIDescriptor-de
 | :------------- | :------------- |
 | <a id="OCIDescriptor-file"></a>file |  A file object of the content this descriptor describes    |
 | <a id="OCIDescriptor-descriptor_file"></a>descriptor_file |  A file object with the information in this provider    |
-| <a id="OCIDescriptor-media_type"></a>media_type |  The MIME media type of the file    |
-| <a id="OCIDescriptor-size"></a>size |  The size in bytes of the file    |
-| <a id="OCIDescriptor-urls"></a>urls |  Additional URLs where you can find the content of file    |
-| <a id="OCIDescriptor-digest"></a>digest |  A digest, including the algorithm, of the file    |
-| <a id="OCIDescriptor-annotations"></a>annotations |  String map of aribtrary metadata    |
+| <a id="OCIDescriptor-artifact_type"></a>artifact_type |  Optional. The type of an artifact when the descriptor points to an artifact    |
+| <a id="OCIDescriptor-data"></a>data |  Optional. An embedded representation of the referenced content    |
+| <a id="OCIDescriptor-annotations"></a>annotations |  Optional. Arbitrary metadata for this descriptor    |
+| <a id="OCIDescriptor-digest"></a>digest |  Required. The digest of the targeted content    |
+| <a id="OCIDescriptor-media_type"></a>media_type |  Required. The media type of the referenced content    |
+| <a id="OCIDescriptor-size"></a>size |  Required. The size, in bytes, of the raw content    |
+| <a id="OCIDescriptor-urls"></a>urls |  Optional. A list of URIs from which this object MAY be downloaded    |
 
 
 <a id="OCILayout"></a>

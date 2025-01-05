@@ -2,7 +2,7 @@
 
 load("@aspect_bazel_lib//lib:stamping.bzl", "STAMP_ATTRS", "maybe_stamp")
 load("//oci:providers.bzl", "OCIDescriptor", "OCILayout", "OCIReferenceInfo")
-load(":debug_flag.bzl", "DebugInfo")
+load(":providers.bzl", "DebugInfo")
 
 def _impl(ctx):
     layout = ctx.attr.manifest[OCILayout]

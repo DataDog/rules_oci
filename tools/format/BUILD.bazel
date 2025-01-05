@@ -18,6 +18,7 @@ format_multirun(
     name = "format",
     go = "@go_sdk//:bin/gofmt",
     markdown = ":prettier",
+    rust = "@rules_rust//tools/upstream_wrapper:rustfmt",
     starlark = "@buildifier_prebuilt//:buildifier",
     yaml = "@aspect_rules_lint//format:yamlfmt",
 )

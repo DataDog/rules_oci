@@ -94,14 +94,12 @@ base images.
 
 ### Developing
 
-#### Run the tests
-
-Run `bazel test //...`
-
-#### Update the docs
-
-Run `bzl run //docs:update`
-
-#### Update go dependencies
-
-Run `bzl run //:go -- get DEPENDENCY`
+| action                   | command                               |
+| ------------------------ | ------------------------------------- |
+| Run the tests            | `just test`                           |
+| Run the formatter        | `just format`                         |
+| Run gazelle              | `just gazelle`                        |
+| Update the docs          | `just update-docs`                    |
+| Update go dependencies   | `bazel run //:go -- get <DEPENDENCY>` |
+| Update rust dependencies | `just update-crates`                  |
+| Publish a new release    | `just release`                        |

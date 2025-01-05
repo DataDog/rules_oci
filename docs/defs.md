@@ -2,54 +2,6 @@
 
 public rules
 
-<a id="oci_image"></a>
-
-## oci_image
-
-<pre>
-oci_image(<a href="#oci_image-name">name</a>, <a href="#oci_image-annotations">annotations</a>, <a href="#oci_image-arch">arch</a>, <a href="#oci_image-base">base</a>, <a href="#oci_image-entrypoint">entrypoint</a>, <a href="#oci_image-env">env</a>, <a href="#oci_image-labels">labels</a>, <a href="#oci_image-layers">layers</a>, <a href="#oci_image-os">os</a>)
-</pre>
-
-Creates a new image manifest and config by appending the `layers` to an existing image
-manifest and config defined by `base`.  If `base` is an image index, then `os` and `arch` will
-be used to extract the image manifest.
-
-**ATTRIBUTES**
-
-
-| Name  | Description | Type | Mandatory | Default |
-| :------------- | :------------- | :------------- | :------------- | :------------- |
-| <a id="oci_image-name"></a>name |  A unique name for this target.   | <a href="https://bazel.build/concepts/labels#target-names">Name</a> | required |  |
-| <a id="oci_image-annotations"></a>annotations |  [OCI Annotations](https://github.com/opencontainers/image-spec/blob/main/annotations.md) to add to the manifest.   | <a href="https://bazel.build/rules/lib/dict">Dictionary: String -> String</a> | optional |  `{}`  |
-| <a id="oci_image-arch"></a>arch |  Used to extract a manifest from base if base is an index   | String | optional |  `""`  |
-| <a id="oci_image-base"></a>base |  A base image, as defined by oci_pull or oci_image   | <a href="https://bazel.build/concepts/labels">Label</a> | required |  |
-| <a id="oci_image-entrypoint"></a>entrypoint |  A list of entrypoints for the image; these will be inserted into the generated OCI image config   | List of strings | optional |  `[]`  |
-| <a id="oci_image-env"></a>env |  Entries are in the format of `VARNAME=VARVALUE`. These values act as defaults and are merged with any specified when creating a container.   | List of strings | optional |  `[]`  |
-| <a id="oci_image-labels"></a>labels |  labels that will be applied to the image configuration, as defined in [the OCI config](https://github.com/opencontainers/image-spec/blob/main/config.md#properties). These behave the same way as [docker LABEL](https://docs.docker.com/engine/reference/builder/#label); in particular, labels from the base image are inherited.  An empty value for a label will cause that label to be deleted.  For backwards compatibility, if this is not set, then the value of annotations will be used instead.   | <a href="https://bazel.build/rules/lib/dict">Dictionary: String -> String</a> | optional |  `{}`  |
-| <a id="oci_image-layers"></a>layers |  A list of layers defined by oci_image_layer   | <a href="https://bazel.build/concepts/labels">List of labels</a> | optional |  `[]`  |
-| <a id="oci_image-os"></a>os |  Used to extract a manifest from base if base is an index   | String | optional |  `""`  |
-
-
-<a id="oci_image_index"></a>
-
-## oci_image_index
-
-<pre>
-oci_image_index(<a href="#oci_image_index-name">name</a>, <a href="#oci_image_index-annotations">annotations</a>, <a href="#oci_image_index-manifests">manifests</a>)
-</pre>
-
-
-
-**ATTRIBUTES**
-
-
-| Name  | Description | Type | Mandatory | Default |
-| :------------- | :------------- | :------------- | :------------- | :------------- |
-| <a id="oci_image_index-name"></a>name |  A unique name for this target.   | <a href="https://bazel.build/concepts/labels#target-names">Name</a> | required |  |
-| <a id="oci_image_index-annotations"></a>annotations |  -   | <a href="https://bazel.build/rules/lib/dict">Dictionary: String -> String</a> | optional |  `{}`  |
-| <a id="oci_image_index-manifests"></a>manifests |  -   | <a href="https://bazel.build/concepts/labels">List of labels</a> | optional |  `[]`  |
-
-
 <a id="oci_push"></a>
 
 ## oci_push
@@ -75,6 +27,62 @@ Pushes a manifest or a list of manifests to an OCI registry.
 | <a id="oci_push-x_meta_headers"></a>x_meta_headers |  (optional) A list of key/values to to be sent to the registry as headers with an X-Meta- prefix.   | <a href="https://bazel.build/rules/lib/dict">Dictionary: String -> String</a> | optional |  `{}`  |
 
 
+<a id="oci_image"></a>
+
+## oci_image
+
+<pre>
+oci_image(<a href="#oci_image-name">name</a>, <a href="#oci_image-base">base</a>, <a href="#oci_image-annotations">annotations</a>, <a href="#oci_image-arch">arch</a>, <a href="#oci_image-entrypoint">entrypoint</a>, <a href="#oci_image-env">env</a>, <a href="#oci_image-gzip">gzip</a>, <a href="#oci_image-labels">labels</a>, <a href="#oci_image-layers">layers</a>, <a href="#oci_image-os">os</a>, <a href="#oci_image-kwargs">kwargs</a>)
+</pre>
+
+Creates a "single-arch"" OCI image
+
+Also creates targets for an OCI Layout directory and a .tar.gz file
+
+
+**PARAMETERS**
+
+
+| Name  | Description | Default Value |
+| :------------- | :------------- | :------------- |
+| <a id="oci_image-name"></a>name |  A unique name for the rule   |  none |
+| <a id="oci_image-base"></a>base |  A label of an oci_image or oci_image_index   |  none |
+| <a id="oci_image-annotations"></a>annotations |  A dictionary of annotations to add to the image   |  `None` |
+| <a id="oci_image-arch"></a>arch |  The architecture of the image   |  `None` |
+| <a id="oci_image-entrypoint"></a>entrypoint |  A list of entrypoints for the image   |  `None` |
+| <a id="oci_image-env"></a>env |  A list of environment variables to add to the image   |  `None` |
+| <a id="oci_image-gzip"></a>gzip |  If true, creates a tar.gz file. If false, creates a tar file   |  `True` |
+| <a id="oci_image-labels"></a>labels |  A dictionary of labels to add to the image   |  `None` |
+| <a id="oci_image-layers"></a>layers |  A list of oci_image_layer labels   |  `None` |
+| <a id="oci_image-os"></a>os |  The operating system of the image   |  `None` |
+| <a id="oci_image-kwargs"></a>kwargs |  Additional arguments to pass to the underlying rules, e.g. tags or visibility   |  none |
+
+
+<a id="oci_image_index"></a>
+
+## oci_image_index
+
+<pre>
+oci_image_index(<a href="#oci_image_index-name">name</a>, <a href="#oci_image_index-manifests">manifests</a>, <a href="#oci_image_index-annotations">annotations</a>, <a href="#oci_image_index-gzip">gzip</a>, <a href="#oci_image_index-kwargs">kwargs</a>)
+</pre>
+
+Creates a "multi-arch"" OCI image
+
+Also creates targets for an OCI Layout directory and a .tar.gz file
+
+
+**PARAMETERS**
+
+
+| Name  | Description | Default Value |
+| :------------- | :------------- | :------------- |
+| <a id="oci_image_index-name"></a>name |  A unique name for the rule   |  none |
+| <a id="oci_image_index-manifests"></a>manifests |  A list of oci_image labels   |  none |
+| <a id="oci_image_index-annotations"></a>annotations |  A dictionary of annotations to add to the index   |  `None` |
+| <a id="oci_image_index-gzip"></a>gzip |  If true, creates a tar.gz file. If false, creates a tar file   |  `True` |
+| <a id="oci_image_index-kwargs"></a>kwargs |  Additional arguments to pass to the underlying rules, e.g. tags or visibility   |  none |
+
+
 <a id="oci_image_layer"></a>
 
 ## oci_image_layer
@@ -96,31 +104,6 @@ oci_image_layer
 | <a id="oci_image_layer-files"></a>files |  List of files to include under `directory`   |  `None` |
 | <a id="oci_image_layer-symlinks"></a>symlinks |  Dictionary of symlink -> target entries to place in the tarball   |  `None` |
 | <a id="oci_image_layer-kwargs"></a>kwargs |  Additional arguments to pass to the rule, e.g. `tags` or `visibility`   |  none |
-
-
-<a id="oci_image_layout"></a>
-
-## oci_image_layout
-
-<pre>
-oci_image_layout(<a href="#oci_image_layout-name">name</a>, <a href="#oci_image_layout-image_index">image_index</a>, <a href="#oci_image_layout-gzip">gzip</a>, <a href="#oci_image_layout-kwargs">kwargs</a>)
-</pre>
-
-Creates targets for an OCI Image Layout directory and a tar file
-
-See https://github.com/opencontainers/image-spec/blob/main/image-layout.md
-for the specification of the OCI Image Format directory.
-
-
-**PARAMETERS**
-
-
-| Name  | Description | Default Value |
-| :------------- | :------------- | :------------- |
-| <a id="oci_image_layout-name"></a>name |  A unique name for the rule   |  none |
-| <a id="oci_image_layout-image_index"></a>image_index |  An oci_image_index label   |  none |
-| <a id="oci_image_layout-gzip"></a>gzip |  If true, creates a tar.gz file. If false, creates a tar file   |  `True` |
-| <a id="oci_image_layout-kwargs"></a>kwargs |  Additional arguments to pass to the underlying rules, e.g. tags or visibility   |  none |
 
 
 <a id="oci_pull"></a>

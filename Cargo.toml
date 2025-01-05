@@ -1,0 +1,19 @@
+[workspace]
+resolver = "2"
+
+members = [
+    "ocitool",
+]
+
+[workspace.dependencies]
+anyhow = "1.0.95"
+clap = { version = "4.5.23", features = ["derive"] }
+colored = "2.2.0"
+fs-err = "3.0.0"
+hex = "0.4.3"
+oci-spec = "0.7.1"
+serde = { version = "1.0.217", features = ["derive"] }
+serde_json = "1.0.134"
+sha2 = "0.10.8"
+tracing = { version = "0.1.41", features = ["log"] }
+tracing-subscriber = { version = "0.3.19", features = ["chrono", "env-filter", "json"] }
