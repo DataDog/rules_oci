@@ -8,6 +8,7 @@ use colored::Colorize as _;
 use fs_err as fs;
 use oci_spec::image::{Digest, Platform};
 
+/// Load an OCI image into the local docker daemon and retags it with the provided repository name
 pub(crate) fn oci_load(
     platforms_path: PathBuf,
     repository: String,

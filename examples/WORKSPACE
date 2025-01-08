@@ -1,0 +1,64 @@
+workspace(name = "examples")
+
+load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
+
+################################################################################
+# rules_go
+################################################################################
+
+http_archive(
+    name = "io_bazel_rules_go",
+    sha256 = "f74c98d6df55217a36859c74b460e774abc0410a47cc100d822be34d5f990f16",
+    urls = [
+        "https://mirror.bazel.build/github.com/bazelbuild/rules_go/releases/download/v0.47.1/rules_go-v0.47.1.zip",
+        "https://github.com/bazelbuild/rules_go/releases/download/v0.47.1/rules_go-v0.47.1.zip",
+    ],
+)
+
+load("@io_bazel_rules_go//go:deps.bzl", "go_register_toolchains", "go_rules_dependencies")
+
+go_rules_dependencies()
+
+go_register_toolchains(version = "1.22.5")
+
+################################################################################
+# rules_oci
+################################################################################
+
+# Note: In this example, we use local_repository here, but in a real project,
+# you'll want to use http_archive to fetch the rules_oci repository
+local_repository(
+    name = "com_github_datadog_rules_oci",
+    path = "..",
+)
+
+load("@com_github_datadog_rules_oci//oci/repositories:01_direct_dependencies.bzl", "rules_oci_direct_dependencies")
+
+rules_oci_direct_dependencies()
+
+load("@com_github_datadog_rules_oci//oci/repositories:02_toolchains.bzl", "rules_oci_toolchains")
+
+rules_oci_toolchains(
+    # Only set this if you have not already registered a go toolchain
+    register_go_toolchain_version = None,
+
+    # Only set this if you have not already registered a rust toolchain
+    register_rust_toolchain_version = "1.82.0",
+)
+
+load(
+    "@com_github_datadog_rules_oci//oci/repositories:03_third_party_go_and_rust_libraries.bzl",
+    "rules_oci_third_party_go_and_rust_libraries",
+)
+
+rules_oci_third_party_go_and_rust_libraries()
+
+load("@com_github_datadog_rules_oci//oci/repositories:pull.bzl", "oci_pull")
+
+oci_pull(
+    name = "ubuntu",
+    # "noble" tag as of 2024-12-30
+    digest = "sha256:80dd3c3b9c6cecb9f1667e9290b3bc61b78c2678c02cbdae5f0fea92cc6734ab",
+    registry = "mirror.gcr.io",
+    repository = "library/ubuntu",
+)

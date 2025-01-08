@@ -1,9 +1,5 @@
+load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
 load("@rules_pkg//pkg:mappings.bzl", "pkg_files")
-
-exports_files(
-    glob(["*.bzl"]),
-    visibility = ["//oci:__subpackages__"],
-)
 
 pkg_files(
     name = "files",
@@ -13,4 +9,42 @@ pkg_files(
     ]),
     prefix = "oci/private/repositories",
     visibility = ["//:__subpackages__"],
+)
+
+bzl_library(
+    name = "authn",
+    srcs = ["authn.bzl"],
+    visibility = ["//oci:__subpackages__"],
+    deps = [
+        "@aspect_bazel_lib//lib:base64",
+        "@aspect_bazel_lib//lib:repo_utils",
+    ],
+)
+
+bzl_library(
+    name = "download",
+    srcs = ["download.bzl"],
+    visibility = ["//oci:__subpackages__"],
+    deps = [
+        "//oci/private:common",
+        "@bazel_skylib//lib:versions",
+    ],
+)
+
+bzl_library(
+    name = "go_repositories",
+    srcs = ["go_repositories.bzl"],
+    visibility = ["//oci:__subpackages__"],
+    deps = ["@bazel_gazelle//:deps"],
+)
+
+bzl_library(
+    name = "oci_pull",
+    srcs = ["oci_pull.bzl"],
+    visibility = ["//oci:__subpackages__"],
+    deps = [
+        ":authn",
+        ":download",
+        "//oci/private:common",
+    ],
 )

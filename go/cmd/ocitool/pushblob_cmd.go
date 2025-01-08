@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"os"
 
 	"github.com/DataDog/rules_oci/go/pkg/ociutil"
 
@@ -11,9 +10,6 @@ import (
 
 func PushBlobCmd(c *cli.Context) error {
 	resolver := ociutil.DefaultResolver()
-
-	fmt.Printf("Pushing blob %v to %v\n", c.String("file"), c.String("ref"))
-	os.Exit(0)
 
 	desc, err := resolver.PushBlob(c.Context, c.String("file"), c.String("ref"), "")
 	if err != nil {

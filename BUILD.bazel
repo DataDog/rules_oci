@@ -1,4 +1,4 @@
-load("@gazelle//:def.bzl", "DEFAULT_LANGUAGES", "gazelle", "gazelle_binary")
+load("@bazel_gazelle//:def.bzl", "DEFAULT_LANGUAGES", "gazelle", "gazelle_binary")
 load("@npm//:defs.bzl", "npm_link_all_packages")
 load("@rules_pkg//pkg:pkg.bzl", "pkg_tar")
 
@@ -20,6 +20,17 @@ gazelle(
     gazelle = ":gazelle-binary",
 )
 
+gazelle(
+    name = "gazelle-update-repos",
+    args = [
+        "-build_file_proto_mode=disable",
+        "-from_file=go.mod",
+        "-prune=true",
+        "-to_macro=oci/private/repositories/go_repositories.bzl%go_repositories",
+    ],
+    command = "update-repos",
+)
+
 gazelle_binary(
     name = "gazelle-binary",
     languages = DEFAULT_LANGUAGES + [
@@ -38,6 +49,7 @@ pkg_tar(
         "//oci:files",
         "//oci/private:files",
         "//oci/private/repositories:files",
+        "//oci/repositories:files",
     ],
     empty_files = ["BUILD.bazel"],
     extension = "tar.gz",

@@ -29,7 +29,7 @@ rust_register_toolchains(
 load("@rules_rust//crate_universe:defs.bzl", "crates_repository")
 
 crates_repository(
-    name = "crate_index",
+    name = "com_github_datadog_rules_oci_crate_index",
     cargo_lockfile = "//:Cargo.lock",
     lockfile = "//:cargo-bazel-lock.json",
     manifests = [
@@ -39,6 +39,6 @@ crates_repository(
     rust_version = _RUSTC_VERSION,
 )
 
-load("@crate_index//:defs.bzl", "crate_repositories")
+load("@com_github_datadog_rules_oci_crate_index//:defs.bzl", "crate_repositories")
 
 crate_repositories()

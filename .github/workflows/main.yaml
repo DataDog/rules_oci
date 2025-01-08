@@ -4,11 +4,15 @@ on:
     branches: [main]
   pull_request:
   workflow_dispatch:
+env:
+  CI: 1
 jobs:
   ci:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
       - uses: bazelbuild/setup-bazelisk@v1
-      - run: bazel test --config=ci //...
-      - run: bazel run //:gazelle -- -mode diff || exit 1
+      - uses: extractions/setup-just@6e1de3cc407de738551abd6c0923bd5ed5608042
+        with:
+          just-version: "1.38.0"
+      - run: just test

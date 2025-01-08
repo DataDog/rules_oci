@@ -25,8 +25,8 @@ def oci_image_layer(
     files = files or []
     symlinks = symlinks or {}
 
-    if len(files) == 0 and len(file_map) == 0:
-        fail("At least one of `files` or `file_map` must be provided")
+    if len(files) == 0 and len(file_map) == 0 and len(symlinks) == 0:
+        fail("At least one of `files`, `file_map`, or `symlinks` must be provided")
 
     _oci_image_layer(
         name = name,

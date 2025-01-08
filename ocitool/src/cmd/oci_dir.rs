@@ -16,6 +16,8 @@ use crate::cmd::oci_dir::descriptor::DescriptorExt as _;
 use crate::cmd::oci_dir::digest::DigestExt as _;
 use crate::utils;
 
+/// Creates an OCI layout directory from the provided index or manifest descriptor, as well as the
+/// provided files, and writes it to the provided output directory
 pub(crate) fn oci_dir(
     descriptor_path: PathBuf,
     files: Vec<PathBuf>,
@@ -136,7 +138,7 @@ pub(crate) fn oci_dir(
 
 fn write_manifest_and_associated_config_and_associated_layers_to_blobs_directory(
     files_map: &HashMap<Digest, PathBuf>,
-    manifest_descriptor: &oci_spec::image::Descriptor,
+    manifest_descriptor: &Descriptor,
     out_dir: &Path,
     out_platforms: &mut HashMap<Digest, Platform>,
 ) -> Result<(), anyhow::Error> {
