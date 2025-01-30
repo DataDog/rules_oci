@@ -13,14 +13,20 @@ oci_local_toolchain(
 
 buildifier(
     name = "buildifier",
-    exclude_patterns = ["./.git/*"],
+    exclude_patterns = [
+        "./.git/*",
+        "./.ijwb/*",
+    ],
     lint_mode = "warn",
     mode = "fix",
 )
 
 buildifier_test(
     name = "buildifier_test",
-    exclude_patterns = ["./.git/*"],
+    exclude_patterns = [
+        "./.git/*",
+        "./.ijwb/*",
+    ],
     lint_mode = "warn",
     no_sandbox = True,
     workspace = "//:WORKSPACE",

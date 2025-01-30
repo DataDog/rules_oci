@@ -37,11 +37,22 @@ bzl_library(
     srcs = ["defs.bzl"],
     visibility = ["//visibility:public"],
     deps = [
+        ":config",
         ":image",
         ":layer",
         ":oci_image_layout",
         ":pull",
         ":push",
+    ],
+)
+
+bzl_library(
+    name = "config",
+    srcs = ["config.bzl"],
+    visibility = ["//visibility:public"],
+    deps = [
+        "@com_github_datadog_rules_oci//oci:image",
+        "@com_github_datadog_rules_oci//oci:providers",
     ],
 )
 

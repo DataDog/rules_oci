@@ -233,6 +233,27 @@ as described in https://github.com/opencontainers/image-spec/blob/main/image-lay
 			},
 		},
 		{
+			Name:        "config",
+			Description: "Fetch the config of an image based on the given input layout.",
+			Action:      ConfigCmd,
+			Flags: []cli.Flag{
+				&cli.StringFlag{
+					Name:     "base",
+					Required: true,
+				},
+				&cli.StringFlag{
+					Name: "os",
+				},
+				&cli.StringFlag{
+					Name: "arch",
+				},
+				&cli.StringFlag{
+					Name:     "out-config",
+					Required: true,
+				},
+			},
+		},
+		{
 			Name:   "push-blob",
 			Hidden: true,
 			Action: PushBlobCmd,
