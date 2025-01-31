@@ -38,6 +38,7 @@ bzl_library(
     visibility = ["//visibility:public"],
     deps = [
         ":image",
+        ":layer",
         ":oci_image_layout",
         ":pull",
         ":push",
@@ -90,6 +91,13 @@ bzl_library(
     name = "debug_flag",
     srcs = ["debug_flag.bzl"],
     visibility = ["//visibility:public"],
+)
+
+bzl_library(
+    name = "layer",
+    srcs = ["layer.bzl"],
+    visibility = ["//visibility:public"],
+    deps = ["@com_github_datadog_rules_oci//oci:providers"],
 )
 
 bzl_library(

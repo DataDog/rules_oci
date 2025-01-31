@@ -21,62 +21,6 @@ def get_descriptor_file(ctx, desc):
 
     return out
 
-def _oci_image_layer_impl(ctx):
-    toolchain = ctx.toolchains["@com_github_datadog_rules_oci//oci:toolchain"]
-
-    descriptor_file = ctx.actions.declare_file("{}.descriptor.json".format(ctx.label.name))
-
-    ctx.actions.run(
-        executable = toolchain.sdk.ocitool,
-        arguments = [
-                        "create-layer",
-                        "--out={}".format(ctx.outputs.layer.path),
-                        "--outd={}".format(descriptor_file.path),
-                        "--dir={}".format(ctx.attr.directory),
-                        "--bazel-label={}".format(ctx.label),
-                    ] +
-                    ["--file={}".format(f.path) for f in ctx.files.files] +
-                    ["--symlink={}={}".format(k, v) for k, v in ctx.attr.symlinks.items()] +
-                    ["--file-map={}={}".format(k.files.to_list()[0].path, v) for k, v in ctx.attr.file_map.items()],
-        inputs = ctx.files.files + ctx.files.file_map,
-        outputs = [
-            descriptor_file,
-            ctx.outputs.layer,
-        ],
-    )
-
-    return [
-        OCIDescriptor(
-            descriptor_file = descriptor_file,
-            file = ctx.outputs.layer,
-        ),
-    ]
-
-oci_image_layer = rule(
-    implementation = _oci_image_layer_impl,
-    doc = "Create a tarball and an OCI descriptor for it",
-    attrs = {
-        "files": attr.label_list(
-            doc = "List of files to include under `directory`",
-            allow_files = True,
-        ),
-        "directory": attr.string(
-            doc = "Directory in the tarball to place the `files`",
-        ),
-        "symlinks": attr.string_dict(
-            doc = "Dictionary of symlink -> target entries to place in the tarball",
-        ),
-        "file_map": attr.label_keyed_string_dict(
-            doc = "Dictionary of file -> file location in tarball",
-            allow_files = True,
-        ),
-    },
-    toolchains = ["@com_github_datadog_rules_oci//oci:toolchain"],
-    outputs = {
-        "layer": "%{name}-layer.tar.gz",
-    },
-)
-
 def _oci_image_index_impl(ctx):
     toolchain = ctx.toolchains["@com_github_datadog_rules_oci//oci:toolchain"]
 
