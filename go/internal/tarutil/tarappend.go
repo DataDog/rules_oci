@@ -9,7 +9,14 @@ import (
 
 // AppendFileToTarWriter appends a file (given as a filepath) to a tarfile
 // through the tarfile interface.
-func AppendFileToTarWriter(filePath string, loc string, tw *tar.Writer) error {
+func AppendFileToTarWriter(
+	filePath string,
+	loc string,
+	mode int64,
+	uname,
+	gname string,
+	tw *tar.Writer,
+) error {
 	f, err := os.Open(filePath)
 	if err != nil {
 		return err
@@ -26,9 +33,12 @@ func AppendFileToTarWriter(filePath string, loc string, tw *tar.Writer) error {
 		return err
 	}
 
-	hdr.ChangeTime = time.Time{}
-	hdr.ModTime = time.Time{}
 	hdr.AccessTime = time.Time{}
+	hdr.ChangeTime = time.Time{}
+	hdr.Gname = gname
+	hdr.ModTime = time.Time{}
+	hdr.Mode = mode
+	hdr.Uname = uname
 
 	hdr.Name = loc
 

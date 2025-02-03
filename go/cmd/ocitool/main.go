@@ -70,6 +70,14 @@ var app = &cli.App{
 					Name:  "file-map",
 					Value: &flagutil.KeyValueFlag{},
 				},
+				&cli.GenericFlag{
+					Name:  "owner-map",
+					Value: &flagutil.KeyValueFlag{},
+				},
+				&cli.GenericFlag{
+					Name:  "mode-map",
+					Value: &flagutil.KeyValueFlag{},
+				},
 			},
 		},
 		{
