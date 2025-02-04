@@ -19,7 +19,18 @@ import (
 // use that.
 const AnnotationArtifactDescription = "org.opencontainers.artifact.created"
 
-func AppendLayers(ctx context.Context, store content.Store, baseManifestDesc ocispec.Descriptor, layers []ocispec.Descriptor, annotations map[string]string, labels map[string]string, env []string, created time.Time, entrypoint []string) (ocispec.Descriptor, ocispec.Descriptor, error) {
+func AppendLayers(
+	ctx context.Context,
+	store content.Store,
+	baseManifestDesc ocispec.Descriptor,
+	layers []ocispec.Descriptor,
+	annotations map[string]string,
+	labels map[string]string,
+	env []string,
+	created time.Time,
+	entrypoint []string,
+	platform ocispec.Platform,
+) (ocispec.Descriptor, ocispec.Descriptor, error) {
 	if annotations == nil {
 		annotations = make(map[string]string)
 	}
@@ -128,14 +139,28 @@ func AppendLayers(ctx context.Context, store content.Store, baseManifestDesc oci
 	imageConfig.Config.Entrypoint = entrypoint
 	imageConfig.Config.Env = append(imageConfig.Config.Env, env...)
 
-	newConfig, err := ociutil.IngestorJSONEncode(ctx, store, ocispec.MediaTypeImageConfig, imageConfig)
+	newConfig, err := ociutil.IngestorJSONEncode(
+		/* context     */ ctx,
+		/* ingestor    */ store,
+		/* annotations */ nil,
+		/* media type  */ ocispec.MediaTypeImageConfig,
+		/* interface   */ imageConfig,
+		/* platform    */ nil,
+	)
 	if err != nil {
 		return ocispec.Descriptor{}, ocispec.Descriptor{}, err
 	}
 
 	manifest.Config = newConfig
 
-	newManifest, err := ociutil.IngestorJSONEncode(ctx, store, ocispec.MediaTypeImageManifest, manifest)
+	newManifest, err := ociutil.IngestorJSONEncode(
+		/* context     */ ctx,
+		/* ingestor    */ store,
+		/* annotations */ manifest.Annotations,
+		/* media type  */ ocispec.MediaTypeImageManifest,
+		/* interface   */ manifest,
+		/* platform    */ &platform,
+	)
 	if err != nil {
 		return ocispec.Descriptor{}, ocispec.Descriptor{}, err
 	}
