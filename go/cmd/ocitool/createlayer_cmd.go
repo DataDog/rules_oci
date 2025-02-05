@@ -24,15 +24,12 @@ import (
 func CreateLayerCmd(c *cli.Context) error {
 	config, err := parseConfig(c)
 	if err != nil {
-		return fmt.Errorf("problem parsing config: %w", err)
+		return fmt.Errorf("error parsing config: %w", err)
 	}
-
-	dir := config.Directory
-	files := config.Files
 
 	out, err := os.Create(config.OutputLayer)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to create file at %s: %w", config.OutputLayer, err)
 	}
 
 	digester := digest.SHA256.Digester()
@@ -44,15 +41,28 @@ func CreateLayerCmd(c *cli.Context) error {
 	tw := tar.NewWriter(gw)
 	defer tw.Close()
 
-	for _, filePath := range files {
-		storePath := filepath.Join(dir, filepath.Base(filePath))
+	for _, hostPath := range config.Files {
+		tarPath := filepath.Join(
+			config.Directory,
+			filepath.Base(hostPath),
+		)
+
+		tarUid, err := config.uid(tarPath)
+		if err != nil {
+			return err
+		}
+
+		tarGid, err := config.gid(tarPath)
+		if err != nil {
+			return err
+		}
 
 		err = tarutil.AppendFileToTarWriter(
-			/* filePath */ filePath,
-			/* loc      */ storePath,
-			/* mode     */ config.mode(storePath),
-			/* uname    */ config.uname(storePath),
-			/* gname    */ config.gname(storePath),
+			/* hostPath */ hostPath,
+			/* tarPath  */ tarPath,
+			/* tarMode  */ config.mode(tarPath),
+			/* tarUid   */ tarUid,
+			/* tarGid   */ tarGid,
 			/* tw       */ tw,
 		)
 
@@ -61,34 +71,53 @@ func CreateLayerCmd(c *cli.Context) error {
 		}
 	}
 
-	for filePath, storePath := range config.FileMapping {
+	for hostPath, tarPath := range config.FileMapping {
+		tarUid, err := config.uid(tarPath)
+		if err != nil {
+			return err
+		}
+
+		tarGid, err := config.gid(tarPath)
+		if err != nil {
+			return err
+		}
+
 		err = tarutil.AppendFileToTarWriter(
-			/* filePath */ filePath,
-			/* loc      */ storePath,
-			/* mode     */ config.mode(storePath),
-			/* uname    */ config.uname(storePath),
-			/* gname    */ config.gname(storePath),
+			/* hostPath */ hostPath,
+			/* tarPath  */ tarPath,
+			/* tarMode  */ config.mode(tarPath),
+			/* tarUid   */ tarUid,
+			/* tarGid   */ tarGid,
 			/* tw       */ tw,
 		)
-
 		if err != nil {
 			return err
 		}
 	}
 
-	for k, v := range config.SymlinkMapping {
-		header := &tar.Header{
-			Typeflag: tar.TypeSymlink,
-			Name:     k,
-			Linkname: v,
-			Mode:     config.mode(k),
-			Uname:    config.uname(k),
-			Gname:    config.gname(k),
-		}
-		err = tw.WriteHeader(header)
+	for tarPath, tarTarget := range config.SymlinkMapping {
+		tarUid, err := config.uid(tarPath)
 		if err != nil {
-			return fmt.Errorf("failed to create symlink: %w", err)
+			return err
 		}
+
+		tarGid, err := config.gid(tarPath)
+		if err != nil {
+			return err
+		}
+
+		err = tarutil.AppendSymlinkToTarWriter(
+			/* tarPath   */ tarPath,
+			/* tarTarget */ tarTarget,
+			/* tarMode   */ config.mode(tarPath),
+			/* tarUid    */ tarUid,
+			/* tarGid    */ tarGid,
+			/* tw        */ tw,
+		)
+		if err != nil {
+			return err
+		}
+
 	}
 
 	// Need to flush before we count bytes and digest, might as well close since
@@ -97,9 +126,9 @@ func CreateLayerCmd(c *cli.Context) error {
 	gw.Close()
 
 	desc := ocispec.Descriptor{
+		Digest:    digester.Digest(),
 		MediaType: ocispec.MediaTypeImageLayerGzip,
 		Size:      int64(wc.Count()),
-		Digest:    digester.Digest(),
 	}
 
 	bazelLabel := config.BazelLabel
@@ -176,28 +205,38 @@ func parseConfig(c *cli.Context) (*createLayerConfig, error) {
 	return &config, nil
 }
 
-func (c *createLayerConfig) mode(path string) int64 {
-	if i, exists := c.ModeMapping[path]; exists {
+func (c *createLayerConfig) mode(tarPath string) int64 {
+	if i, exists := c.ModeMapping[tarPath]; exists {
 		return i
 	}
 	return 0
 }
 
-func (c *createLayerConfig) uname(path string) string {
-	if s, exists := c.OwnerMapping[path]; exists {
-		uname := strings.SplitN(s, ":", 2)[0]
-		return uname
+func (c *createLayerConfig) uid(tarPath string) (*int, error) {
+	if s, exists := c.OwnerMapping[tarPath]; exists {
+		s := strings.SplitN(s, ":", 2)[0]
+		n, err := strconv.ParseInt(s, 0, 64)
+		if err != nil {
+			return nil, fmt.Errorf("error parsing uid %s: %w", s, err)
+		}
+		i := int(n)
+		return &i, nil
 	}
-	return ""
+	return nil, nil
 }
 
-func (c *createLayerConfig) gname(path string) string {
-	if s, exists := c.OwnerMapping[path]; exists {
+func (c *createLayerConfig) gid(tarPath string) (*int, error) {
+	if s, exists := c.OwnerMapping[tarPath]; exists {
 		parts := strings.SplitN(s, ":", 2)
 		if len(parts) > 1 {
-			gname := parts[1]
-			return gname
+			s := parts[1]
+			n, err := strconv.ParseInt(s, 0, 64)
+			if err != nil {
+				return nil, fmt.Errorf("error parsing gid %s: %w", s, err)
+			}
+			i := int(n)
+			return &i, nil
 		}
 	}
-	return ""
+	return nil, nil
 }

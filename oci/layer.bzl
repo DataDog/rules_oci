@@ -19,8 +19,8 @@ def oci_image_layer(
         directory: Directory in the tarball to place the `files`
         files: List of files to include under `directory`
         file_map: Dictionary of file -> file location in tarball
-        mode_map: Dictionary of file location in tarball -> mode int (e.g. 0x755)
-        owner_map: Dictionary of file location in tarball -> ownership string (e.g. 'root:root')
+        mode_map: Dictionary of file location in tarball -> mode int (e.g. 0o755)
+        owner_map: Dictionary of file location in tarball -> owner:group string (e.g. '501:501')
         symlinks: Dictionary of symlink -> target entries to place in the tarball
         **kwargs: Additional arguments to pass to the rule, e.g. tags or visibility
     """

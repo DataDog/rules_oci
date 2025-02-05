@@ -176,6 +176,7 @@ func AppendLayersCmd(c *cli.Context) error {
 		c.StringSlice("env"),
 		createdTimestamp,
 		entrypoint,
+		targetPlatform,
 	)
 	if err != nil {
 		return err

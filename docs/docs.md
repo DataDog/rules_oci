@@ -119,8 +119,8 @@ Creates a tarball and an OCI descriptor for it
 | <a id="oci_image_layer-directory"></a>directory |  Directory in the tarball to place the `files`   |  `None` |
 | <a id="oci_image_layer-files"></a>files |  List of files to include under `directory`   |  `None` |
 | <a id="oci_image_layer-file_map"></a>file_map |  Dictionary of file -> file location in tarball   |  `None` |
-| <a id="oci_image_layer-mode_map"></a>mode_map |  Dictionary of file location in tarball -> mode int (e.g. 0x755)   |  `None` |
-| <a id="oci_image_layer-owner_map"></a>owner_map |  Dictionary of file location in tarball -> ownership string (e.g. 'root:root')   |  `None` |
+| <a id="oci_image_layer-mode_map"></a>mode_map |  Dictionary of file location in tarball -> mode int (e.g. 0o755)   |  `None` |
+| <a id="oci_image_layer-owner_map"></a>owner_map |  Dictionary of file location in tarball -> owner:group string (e.g. '501:501')   |  `None` |
 | <a id="oci_image_layer-symlinks"></a>symlinks |  Dictionary of symlink -> target entries to place in the tarball   |  `None` |
 | <a id="oci_image_layer-kwargs"></a>kwargs |  Additional arguments to pass to the rule, e.g. tags or visibility   |  none |
 
