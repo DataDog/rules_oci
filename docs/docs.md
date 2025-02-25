@@ -7,7 +7,7 @@ public API
 ## oci_image
 
 <pre>
-oci_image(<a href="#oci_image-name">name</a>, <a href="#oci_image-annotations">annotations</a>, <a href="#oci_image-arch">arch</a>, <a href="#oci_image-base">base</a>, <a href="#oci_image-entrypoint">entrypoint</a>, <a href="#oci_image-env">env</a>, <a href="#oci_image-labels">labels</a>, <a href="#oci_image-layers">layers</a>, <a href="#oci_image-os">os</a>)
+oci_image(<a href="#oci_image-name">name</a>, <a href="#oci_image-annotations">annotations</a>, <a href="#oci_image-arch">arch</a>, <a href="#oci_image-base">base</a>, <a href="#oci_image-entrypoint">entrypoint</a>, <a href="#oci_image-env">env</a>, <a href="#oci_image-labels">labels</a>, <a href="#oci_image-layers">layers</a>, <a href="#oci_image-os">os</a>, <a href="#oci_image-stamp">stamp</a>)
 </pre>
 
 Creates a new image manifest and config by appending the `layers` to an existing image
@@ -28,6 +28,7 @@ be used to extract the image manifest.
 | <a id="oci_image-labels"></a>labels |  labels that will be applied to the image configuration, as defined in [the OCI config](https://github.com/opencontainers/image-spec/blob/main/config.md#properties). These behave the same way as [docker LABEL](https://docs.docker.com/engine/reference/builder/#label); in particular, labels from the base image are inherited.  An empty value for a label will cause that label to be deleted.  For backwards compatibility, if this is not set, then the value of annotations will be used instead.   | <a href="https://bazel.build/rules/lib/dict">Dictionary: String -> String</a> | optional |  `{}`  |
 | <a id="oci_image-layers"></a>layers |  A list of layers defined by oci_image_layer   | <a href="https://bazel.build/concepts/labels">List of labels</a> | optional |  `[]`  |
 | <a id="oci_image-os"></a>os |  Used to extract a manifest from base if base is an index   | String | optional |  `""`  |
+| <a id="oci_image-stamp"></a>stamp |  Whether to encode build information into the output. Possible values:<br><br>- `stamp = 1`: Always stamp the build information into the output, even in     [--nostamp](https://docs.bazel.build/versions/main/user-manual.html#flag--stamp) builds.     This setting should be avoided, since it is non-deterministic.     It potentially causes remote cache misses for the target and     any downstream actions that depend on the result. - `stamp = 0`: Never stamp, instead replace build information by constant values.     This gives good build result caching. - `stamp = -1`: Embedding of build information is controlled by the     [--[no]stamp](https://docs.bazel.build/versions/main/user-manual.html#flag--stamp) flag.     Stamped targets are not rebuilt unless their dependencies change.   | Integer | optional |  `-1`  |
 
 
 <a id="oci_image_config"></a>

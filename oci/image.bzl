@@ -1,5 +1,6 @@
 """ image """
 
+load("@aspect_bazel_lib//lib:stamping.bzl", "STAMP_ATTRS", "maybe_stamp")
 load("@com_github_datadog_rules_oci//oci:providers.bzl", "OCIDescriptor", "OCILayout")
 
 # buildifier: disable=function-docstring
@@ -118,12 +119,15 @@ def _oci_image_impl(ctx):
         [f.path for f in layer_descriptor_files],
     )
 
+    stamp_args = []
+    if maybe_stamp(ctx):
+        stamp_args.append("--bazel-version-file={}".format(ctx.version_file.path))
+
     ctx.actions.run(
         executable = toolchain.sdk.ocitool,
         arguments = [
                         "--layout={}".format(base_layout.blob_index.path),
                         "append-layers",
-                        "--bazel-version-file={}".format(ctx.version_file.path),
                         "--base={}".format(base_desc.path),
                         "--os={}".format(ctx.attr.os),
                         "--arch={}".format(ctx.attr.arch),
@@ -139,7 +143,8 @@ def _oci_image_impl(ctx):
                     ] +
                     ["--annotations={}={}".format(k, v) for k, v in annotations.items()] +
                     ["--labels={}={}".format(k, v) for k, v in labels.items()] +
-                    ["--env={}".format(env) for env in ctx.attr.env],
+                    ["--env={}".format(env) for env in ctx.attr.env] +
+                    stamp_args,
         inputs = [
                      ctx.version_file,
                      base_desc,
@@ -183,7 +188,7 @@ oci_image = rule(
     doc = """Creates a new image manifest and config by appending the `layers` to an existing image
     manifest and config defined by `base`.  If `base` is an image index, then `os` and `arch` will
     be used to extract the image manifest.""",
-    attrs = {
+    attrs = dict({
         "base": attr.label(
             doc = """A base image, as defined by oci_pull or oci_image""",
             mandatory = True,
@@ -225,7 +230,7 @@ oci_image = rule(
             will cause that label to be deleted.  For backwards compatibility, if this is not set,
             then the value of annotations will be used instead.""",
         ),
-    },
+    }, **STAMP_ATTRS),
     toolchains = ["@com_github_datadog_rules_oci//oci:toolchain"],
     provides = [OCIDescriptor, OCILayout],
 )
