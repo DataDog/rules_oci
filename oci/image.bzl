@@ -227,4 +227,5 @@ oci_image = rule(
         ),
     },
     toolchains = ["@com_github_datadog_rules_oci//oci:toolchain"],
+    provides = [OCIDescriptor, OCILayout],
 )

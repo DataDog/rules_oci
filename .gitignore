@@ -4,3 +4,5 @@ bazel-rules_oci
 bazel-testlogs
 
 bin/ocitool-*
+
+.ijwb

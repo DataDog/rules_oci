@@ -30,6 +30,27 @@ be used to extract the image manifest.
 | <a id="oci_image-os"></a>os |  Used to extract a manifest from base if base is an index   | String | optional |  `""`  |
 
 
+<a id="oci_image_config"></a>
+
+## oci_image_config
+
+<pre>
+oci_image_config(<a href="#oci_image_config-name">name</a>, <a href="#oci_image_config-arch">arch</a>, <a href="#oci_image_config-image">image</a>, <a href="#oci_image_config-os">os</a>)
+</pre>
+
+
+
+**ATTRIBUTES**
+
+
+| Name  | Description | Type | Mandatory | Default |
+| :------------- | :------------- | :------------- | :------------- | :------------- |
+| <a id="oci_image_config-name"></a>name |  A unique name for this target.   | <a href="https://bazel.build/concepts/labels#target-names">Name</a> | required |  |
+| <a id="oci_image_config-arch"></a>arch |  Used to extract config from image if image is an index   | String | optional |  `""`  |
+| <a id="oci_image_config-image"></a>image |  -   | <a href="https://bazel.build/concepts/labels">Label</a> | required |  |
+| <a id="oci_image_config-os"></a>os |  Used to extract config from image if image is an index   | String | optional |  `""`  |
+
+
 <a id="oci_image_index"></a>
 
 ## oci_image_index
@@ -98,6 +119,38 @@ Pushes a manifest or a list of manifests to an OCI registry.
 | <a id="oci_push-stamp"></a>stamp |  Whether to encode build information into the output. Possible values:<br><br>- `stamp = 1`: Always stamp the build information into the output, even in     [--nostamp](https://docs.bazel.build/versions/main/user-manual.html#flag--stamp) builds.     This setting should be avoided, since it is non-deterministic.     It potentially causes remote cache misses for the target and     any downstream actions that depend on the result. - `stamp = 0`: Never stamp, instead replace build information by constant values.     This gives good build result caching. - `stamp = -1`: Embedding of build information is controlled by the     [--[no]stamp](https://docs.bazel.build/versions/main/user-manual.html#flag--stamp) flag.     Stamped targets are not rebuilt unless their dependencies change.   | Integer | optional |  `-1`  |
 | <a id="oci_push-tag"></a>tag |  (optional) A tag to include in the target reference. This will not be included on child images.<br><br>Subject to [$(location)](https://bazel.build/reference/be/make-variables#predefined_label_variables) and ["Make variable"](https://bazel.build/reference/be/make-variabmes) substitution.<br><br>**Stamping**<br><br>You can use values produced by the workspace status command in your tag. To do this write a script that prints key-value pairs separated by spaces, e.g.<br><br><pre><code class="language-sh">#!/usr/bin/env bash&#10;echo "STABLE_KEY1 VALUE1"&#10;echo "STABLE_KEY2 VALUE2"</code></pre><br><br>You can reference these keys in `tag` using curly braces,<br><br><pre><code class="language-python">oci_push(&#10;    name = "push",&#10;    tag = "v1.0-{STABLE_KEY1}",&#10;)</code></pre>   | String | optional |  `""`  |
 | <a id="oci_push-x_meta_headers"></a>x_meta_headers |  (optional) A list of key/values to to be sent to the registry as headers with an X-Meta- prefix.   | <a href="https://bazel.build/rules/lib/dict">Dictionary: String -> String</a> | optional |  `{}`  |
+
+
+<a id="generate_config_file_action"></a>
+
+## generate_config_file_action
+
+<pre>
+generate_config_file_action(<a href="#generate_config_file_action-ctx">ctx</a>, <a href="#generate_config_file_action-config_file">config_file</a>, <a href="#generate_config_file_action-image">image</a>, <a href="#generate_config_file_action-os">os</a>, <a href="#generate_config_file_action-arch">arch</a>)
+</pre>
+
+Generates a run action with that extracts an image's config file.
+
+In order to use this action, the calling rule _must_ register
+`@com_github_datadog_rules_oci//oci:toolchain` and the image
+must provide the `OCIDescriptor` and `OCILayout`  (this should
+not be an issue when using the `oci_image` rule).
+
+
+**PARAMETERS**
+
+
+| Name  | Description | Default Value |
+| :------------- | :------------- | :------------- |
+| <a id="generate_config_file_action-ctx"></a>ctx |  The current rules context   |  none |
+| <a id="generate_config_file_action-config_file"></a>config_file |  The file to write the config to   |  none |
+| <a id="generate_config_file_action-image"></a>image |  The image to extract the config from.   |  none |
+| <a id="generate_config_file_action-os"></a>os |  The os to extract the config for   |  none |
+| <a id="generate_config_file_action-arch"></a>arch |  The arch to extract the config for   |  none |
+
+**RETURNS**
+
+The config file named after the rule, os, and arch
 
 
 <a id="oci_image_layer"></a>
