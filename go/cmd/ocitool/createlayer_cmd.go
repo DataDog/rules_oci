@@ -9,6 +9,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"slices"
 	"strconv"
 	"strings"
 
@@ -41,6 +42,7 @@ func CreateLayerCmd(c *cli.Context) error {
 	tw := tar.NewWriter(gw)
 	defer tw.Close()
 
+	slices.Sort(config.Files)
 	for _, hostPath := range config.Files {
 		tarPath := filepath.Join(
 			config.Directory,
@@ -71,7 +73,14 @@ func CreateLayerCmd(c *cli.Context) error {
 		}
 	}
 
-	for hostPath, tarPath := range config.FileMapping {
+	hostPaths := make([]string, 0, len(config.FileMapping))
+	for hostPath := range config.FileMapping {
+		hostPaths = append(hostPaths, hostPath)
+	}
+	slices.Sort(hostPaths)
+
+	for _, hostPath := range hostPaths {
+		tarPath := config.FileMapping[hostPath]
 		tarUid, err := config.uid(tarPath)
 		if err != nil {
 			return err
@@ -95,7 +104,14 @@ func CreateLayerCmd(c *cli.Context) error {
 		}
 	}
 
-	for tarPath, tarTarget := range config.SymlinkMapping {
+	tarPaths := make([]string, 0, len(config.SymlinkMapping))
+	for tarPath := range config.SymlinkMapping {
+		tarPaths = append(tarPaths, tarPath)
+	}
+	slices.Sort(tarPaths)
+
+	for _, tarPath := range tarPaths {
+		tarTarget := config.SymlinkMapping[tarPath]
 		tarUid, err := config.uid(tarPath)
 		if err != nil {
 			return err
