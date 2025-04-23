@@ -1,7 +1,11 @@
 package main
 
 import (
+	"context"
+	"errors"
 	"fmt"
+	"math/rand"
+	"time"
 
 	"github.com/DataDog/rules_oci/go/internal/flagutil"
 	"github.com/DataDog/rules_oci/go/pkg/ociutil"
@@ -10,6 +14,58 @@ import (
 	"github.com/containerd/containerd/images"
 	"github.com/urfave/cli/v2"
 )
+
+// calcDelayForNextRetry calculates the delay to wait for a given retry attempt _after_ the current attempt.
+func calcDelayForNextRetry(currentAttempt int, initialDelay time.Duration, maxJitter time.Duration) time.Duration {
+	currentAttempt++
+	delay := time.Duration(currentAttempt) * initialDelay
+
+	var jitter time.Duration
+	if maxJitter > 0 {
+		jitter = time.Duration(rand.Int63n(int64(maxJitter)))
+	}
+
+	return delay + jitter
+}
+
+type RetryConfig struct {
+	maxAttempts  int
+	initialDelay time.Duration
+	maxJitter    time.Duration
+}
+
+// Retry retries a function until it succeeds or the context is done.
+func Retry(ctx context.Context, config RetryConfig, fn func() error) error {
+	ticker := time.NewTicker(0)
+	defer ticker.Stop()
+
+	var errs []error
+
+loop:
+	for attempt := range config.maxAttempts {
+		err := fn()
+		if err == nil {
+			return nil
+		}
+		errs = append(errs, err)
+
+		// on the last attempt we return the error right away rather than waiting to return
+		if attempt == config.maxAttempts-1 {
+			break
+		}
+
+		delay := calcDelayForNextRetry(attempt, config.initialDelay, config.maxJitter)
+		ticker.Reset(delay)
+		select {
+		case <-ctx.Done():
+			errs = append(errs, ctx.Err())
+			break loop
+		case <-ticker.C:
+		}
+	}
+
+	return errors.Join(errs...)
+}
 
 func PushCmd(c *cli.Context) error {
 	localProviders, err := LoadLocalProviders(c.StringSlice("layout"), c.String("layout-relative"))
@@ -70,7 +126,14 @@ func PushCmd(c *cli.Context) error {
 	}
 
 	// push the parent last (in case of image index)
-	err = ociutil.CopyContent(c.Context, allProviders, regIng, baseDesc)
+	rcfg := RetryConfig{
+		maxAttempts:  5,
+		initialDelay: 1 * time.Second,
+		maxJitter:    1 * time.Second,
+	}
+	err = Retry(c.Context, rcfg, func() error {
+		return ociutil.CopyContent(c.Context, allProviders, regIng, baseDesc)
+	})
 	if err != nil {
 		return fmt.Errorf("failed to push parent content to registry: %w", err)
 	}
