@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - uses: bazelbuild/setup-bazelisk@v1
+      - uses: bazelbuild/setup-bazelisk@v3
 
       # Setup Credential Helper to authenticate to Github Container Registry
       - run: echo '{"credHelpers":{"ghcr.io":"ghcr"}}' > ~/.docker/config.json
