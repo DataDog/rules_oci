@@ -28,6 +28,7 @@ use_repo(
     "com_github_mitchellh_go_homedir",
     "com_github_opencontainers_go_digest",
     "com_github_opencontainers_image_spec",
+    "com_github_sethvargo_go_retry",
     "com_github_sirupsen_logrus",
     "com_github_stretchr_testify",
     "com_github_urfave_cli_v2",

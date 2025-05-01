@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"net/http"
 	"os"
 
@@ -18,6 +19,7 @@ import (
 	"github.com/containerd/containerd/remotes/docker"
 	"github.com/opencontainers/go-digest"
 	ocispec "github.com/opencontainers/image-spec/specs-go/v1"
+	retry "github.com/sethvargo/go-retry"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -154,7 +156,6 @@ func (resolver Resolver) PushBlob(ctx context.Context, path, ref, mediaType stri
 // repository. `containerd` has some nice facilities to walk descriptors.
 // https://github.com/opencontainers/distribution-spec/blob/main/spec.md#mounting-a-blob-from-another-repository
 func (resolver Resolver) PushImageIndexShallow(ctx context.Context, idx ocispec.Index, ref string) (ocispec.Descriptor, error) {
-
 	pusher, err := resolver.Pusher(ctx, ref)
 	if err != nil {
 		return ocispec.Descriptor{}, err
@@ -245,17 +246,6 @@ func CopyContent(ctx context.Context, from content.Provider, to content.Ingester
 	// If we're talking to an OCI registry we can take some shortcuts by
 	// checking for the existence of the blob.
 	if reg, ok := to.(RepositoryIngester); ok {
-
-		// First check if it exists in the repository we're pushing to (always fails, because the
-		// only implementation of RepositoryIngester (ociutil.dockerRegPusher) doesn't implement
-		// Contains).
-		err := reg.Contains(ctx, desc.Digest)
-		if err == nil {
-			logCtx.Debugf("skipped copy, already exist")
-			return nil
-		}
-		logCtx.WithError(err).Debug("blob doesn't exist")
-
 		// If we know which repo the blob is from (see layers.AppendLayers for how
 		// AnnotationBaseImageName is set in layer descriptors; otherwise, the presence of this
 		// annotation may not mean that that a descriptor is _from_ an image, rather it means it
@@ -289,18 +279,97 @@ func CopyContent(ctx context.Context, from content.Provider, to content.Ingester
 		ref = refAnno
 	}
 
-	cw, err := to.Writer(ctx, content.WithRef(ref), content.WithDescriptor(desc))
-	if errors.Is(err, errdefs.ErrAlreadyExists) {
-		return nil
-	} else if err != nil {
-		return fmt.Errorf("failed to write content to ingestor: %w", err)
+	// Actually do the copying
+	src := content.NewReader(reader)
+	dst := to
+	if _, ok := dst.(RepositoryIngester); ok {
+		// If we're copying to a repository, do it with retries
+		// Note: As of 2025-05-01, `dockerRegPusher`` is the only implementor of `RepositoryIngester`
+		if err := copyContentWithRetries(ctx, src, dst, desc, ref); err != nil {
+			return err
+		}
+	} else {
+		// If we're copying to something else (e.g. the filesystem, a tarball, etc.), don't bother with retries
+		if err := copyContent(ctx, src, dst, desc, ref); err != nil {
+			return err
+		}
 	}
 
-	err = content.Copy(ctx, cw, content.NewReader(reader), desc.Size, desc.Digest)
+	return nil
+}
+
+func copyContent(
+	ctx context.Context,
+	src io.Reader,
+	dst content.Ingester,
+	desc ocispec.Descriptor,
+	ref string,
+) error {
+	wrapErr := func(err error) error {
+		return fmt.Errorf(
+			"failed to copy content with digest %q to ingestor: %w",
+			desc.Digest.String(),
+			err,
+		)
+	}
+
+	writer, err := dst.Writer(
+		ctx,
+		content.WithDescriptor(desc),
+		content.WithRef(ref),
+	)
 	if errors.Is(err, errdefs.ErrAlreadyExists) {
 		return nil
-	} else if err != nil {
-		return fmt.Errorf("failed to copy content from provider to ingestor: %w", err)
+	}
+	if err != nil {
+		return wrapErr(err)
+	}
+
+	err = content.Copy(
+		ctx,
+		writer,
+		src,
+		desc.Size,
+		desc.Digest,
+	)
+	if errors.Is(err, errdefs.ErrAlreadyExists) {
+		return nil
+	}
+	if err != nil {
+		return wrapErr(err)
+	}
+
+	return nil
+}
+
+func copyContentWithRetries(
+	ctx context.Context,
+	src io.Reader,
+	dst content.Ingester,
+	desc ocispec.Descriptor,
+	ref string,
+) error {
+	var attempt uint64 = 0
+	err := retry.Do(
+		ctx,
+		retryBackoffStrategy,
+		func(ctx context.Context) error {
+			attempt++
+			if err := copyContent(ctx, src, dst, desc, ref); err != nil {
+				fmt.Fprintf(
+					os.Stderr,
+					"attempt %d/%d failed: %v\n",
+					attempt,
+					retryMaxAttempts,
+					err,
+				)
+				return err
+			}
+			return nil
+		},
+	)
+	if err != nil {
+		return err
 	}
 
 	return nil
