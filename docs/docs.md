@@ -7,6 +7,8 @@ public API
 ## oci_image
 
 <pre>
+load("@rules_oci//oci:defs.bzl", "oci_image")
+
 oci_image(<a href="#oci_image-name">name</a>, <a href="#oci_image-annotations">annotations</a>, <a href="#oci_image-arch">arch</a>, <a href="#oci_image-base">base</a>, <a href="#oci_image-entrypoint">entrypoint</a>, <a href="#oci_image-env">env</a>, <a href="#oci_image-labels">labels</a>, <a href="#oci_image-layers">layers</a>, <a href="#oci_image-os">os</a>, <a href="#oci_image-stamp">stamp</a>)
 </pre>
 
@@ -36,6 +38,8 @@ be used to extract the image manifest.
 ## oci_image_config
 
 <pre>
+load("@rules_oci//oci:defs.bzl", "oci_image_config")
+
 oci_image_config(<a href="#oci_image_config-name">name</a>, <a href="#oci_image_config-arch">arch</a>, <a href="#oci_image_config-image">image</a>, <a href="#oci_image_config-os">os</a>)
 </pre>
 
@@ -57,6 +61,8 @@ oci_image_config(<a href="#oci_image_config-name">name</a>, <a href="#oci_image_
 ## oci_image_index
 
 <pre>
+load("@rules_oci//oci:defs.bzl", "oci_image_index")
+
 oci_image_index(<a href="#oci_image_index-name">name</a>, <a href="#oci_image_index-annotations">annotations</a>, <a href="#oci_image_index-manifests">manifests</a>)
 </pre>
 
@@ -77,6 +83,8 @@ oci_image_index(<a href="#oci_image_index-name">name</a>, <a href="#oci_image_in
 ## oci_image_layout
 
 <pre>
+load("@rules_oci//oci:defs.bzl", "oci_image_layout")
+
 oci_image_layout(<a href="#oci_image_layout-name">name</a>, <a href="#oci_image_layout-manifest">manifest</a>)
 </pre>
 
@@ -102,6 +110,8 @@ will fail.
 ## oci_push
 
 <pre>
+load("@rules_oci//oci:defs.bzl", "oci_push")
+
 oci_push(<a href="#oci_push-name">name</a>, <a href="#oci_push-headers">headers</a>, <a href="#oci_push-manifest">manifest</a>, <a href="#oci_push-registry">registry</a>, <a href="#oci_push-repository">repository</a>, <a href="#oci_push-stamp">stamp</a>, <a href="#oci_push-tag">tag</a>, <a href="#oci_push-x_meta_headers">x_meta_headers</a>)
 </pre>
 
@@ -127,6 +137,8 @@ Pushes a manifest or a list of manifests to an OCI registry.
 ## generate_config_file_action
 
 <pre>
+load("@rules_oci//oci:defs.bzl", "generate_config_file_action")
+
 generate_config_file_action(<a href="#generate_config_file_action-ctx">ctx</a>, <a href="#generate_config_file_action-config_file">config_file</a>, <a href="#generate_config_file_action-image">image</a>, <a href="#generate_config_file_action-os">os</a>, <a href="#generate_config_file_action-arch">arch</a>)
 </pre>
 
@@ -159,6 +171,8 @@ The config file named after the rule, os, and arch
 ## oci_image_layer
 
 <pre>
+load("@rules_oci//oci:defs.bzl", "oci_image_layer")
+
 oci_image_layer(<a href="#oci_image_layer-name">name</a>, <a href="#oci_image_layer-directory">directory</a>, <a href="#oci_image_layer-files">files</a>, <a href="#oci_image_layer-file_map">file_map</a>, <a href="#oci_image_layer-mode_map">mode_map</a>, <a href="#oci_image_layer-owner_map">owner_map</a>, <a href="#oci_image_layer-symlinks">symlinks</a>, <a href="#oci_image_layer-kwargs">kwargs</a>)
 </pre>
 
@@ -184,6 +198,8 @@ Creates a tarball and an OCI descriptor for it
 ## oci_pull
 
 <pre>
+load("@rules_oci//oci:defs.bzl", "oci_pull")
+
 oci_pull(<a href="#oci_pull-name">name</a>, <a href="#oci_pull-debug">debug</a>, <a href="#oci_pull-digest">digest</a>, <a href="#oci_pull-registry">registry</a>, <a href="#oci_pull-repo_mapping">repo_mapping</a>, <a href="#oci_pull-repository">repository</a>, <a href="#oci_pull-shallow">shallow</a>)
 </pre>
 
@@ -203,6 +219,7 @@ oci_pull(<a href="#oci_pull-name">name</a>, <a href="#oci_pull-debug">debug</a>,
 **ENVIRONMENT VARIABLES**
 
 This repository rule depends on the following environment variables:
+
 * `OCI_CACHE_DIR`
 
 
