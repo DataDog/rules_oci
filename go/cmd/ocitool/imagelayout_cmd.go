@@ -98,7 +98,7 @@ func CreateOciImageLayoutCmd(c *cli.Context) error {
 	}
 
 	// copy the parent last (in case of image index)
-	err = ociutil.CopyContent(c.Context, multiProvider, &ociIngester, baseDesc)
+	err = ociutil.CopyContentWithRetries(c.Context, multiProvider, &ociIngester, baseDesc)
 	if err != nil {
 		return fmt.Errorf("failed to copy parent content to OCI Image Layout: %w", err)
 	}

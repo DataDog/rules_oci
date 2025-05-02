@@ -8,8 +8,10 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/DataDog/rules_oci/go/pkg/credhelper"
+	"github.com/sethvargo/go-retry"
 
 	"github.com/containerd/containerd/content"
 	"github.com/containerd/containerd/errdefs"
@@ -304,4 +306,17 @@ func CopyContent(ctx context.Context, from content.Provider, to content.Ingester
 	}
 
 	return nil
+}
+
+func CopyContentWithRetries(ctx context.Context, from content.Provider, to content.Ingester, desc ocispec.Descriptor) error {
+	attempt := 0
+	const maxRetries uint64 = 2
+	return retry.Do(ctx, retry.WithMaxRetries(maxRetries, retry.NewFibonacci(1*time.Second)), func(_ context.Context) error {
+		attempt++
+		err := CopyContent(ctx, from, to, desc)
+		if err != nil {
+			fmt.Printf("Attempt %d of %d failed: %v\n", attempt, maxRetries+1, err)
+		}
+		return err
+	})
 }

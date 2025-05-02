@@ -70,7 +70,7 @@ func PushCmd(c *cli.Context) error {
 	}
 
 	// push the parent last (in case of image index)
-	err = ociutil.CopyContent(c.Context, allProviders, regIng, baseDesc)
+	err = ociutil.CopyContentWithRetries(c.Context, allProviders, regIng, baseDesc)
 	if err != nil {
 		return fmt.Errorf("failed to push parent content to registry: %w", err)
 	}

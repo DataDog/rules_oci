@@ -14,7 +14,7 @@ import (
 // ingestor
 func CopyContentHandler(handler images.HandlerFunc, from content.Provider, to content.Ingester) images.HandlerFunc {
 	return func(ctx context.Context, desc ocispec.Descriptor) ([]ocispec.Descriptor, error) {
-		err := CopyContent(ctx, from, to, desc)
+		err := CopyContentWithRetries(ctx, from, to, desc)
 		if err != nil {
 			return nil, err
 		}
@@ -46,7 +46,7 @@ func copyContentFromHandler(ctx context.Context, handler images.HandlerFunc, fro
 		return err
 	}
 
-	err = CopyContent(ctx, from, to, desc)
+	err = CopyContentWithRetries(ctx, from, to, desc)
 	if err != nil {
 		return err
 	}
