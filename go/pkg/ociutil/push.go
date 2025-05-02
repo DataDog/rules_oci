@@ -19,7 +19,6 @@ import (
 	"github.com/containerd/containerd/remotes/docker"
 	"github.com/opencontainers/go-digest"
 	ocispec "github.com/opencontainers/image-spec/specs-go/v1"
-	retry "github.com/sethvargo/go-retry"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -349,28 +348,14 @@ func copyContentWithRetries(
 	desc ocispec.Descriptor,
 	ref string,
 ) error {
-	var attempt uint64 = 0
-	err := retry.Do(
+	return RetryOnFailure(
 		ctx,
-		retryBackoffStrategy,
 		func(ctx context.Context) error {
-			attempt++
 			if err := copyContent(ctx, src, dst, desc, ref); err != nil {
-				fmt.Fprintf(
-					os.Stderr,
-					"attempt %d/%d failed: %v\n",
-					attempt,
-					retryMaxAttempts,
-					err,
-				)
-				return err
+				msg := "failed to copy content"
+				return fmt.Errorf("%s: %w", msg, err)
 			}
 			return nil
 		},
 	)
-	if err != nil {
-		return err
-	}
-
-	return nil
 }

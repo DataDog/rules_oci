@@ -1,23 +1,46 @@
 package ociutil
 
 import (
+	"context"
+	"fmt"
+	"os"
 	"time"
 
 	retry "github.com/sethvargo/go-retry"
 )
 
-// retry backoff strategy for http requests
-var retryBackoffStrategy retry.Backoff
+// retry max retries for http requests
+const retryMaxRetries = 2
 
 // retry max attempts for http requests
 const retryMaxAttempts = retryMaxRetries + 1
 
-// retry max retries for http requests
-const retryMaxRetries = 2
-
-func init() {
+func RetryOnFailure(
+	ctx context.Context,
+	fn retry.RetryFunc,
+) error {
 	b := retry.NewFibonacci(1 * time.Second)
 	b = retry.WithJitterPercent(20, b)
 	b = retry.WithMaxRetries(retryMaxRetries, b)
-	retryBackoffStrategy = b
+
+	attempt := 0
+
+	return retry.Do(
+		ctx,
+		b,
+		func(_ context.Context) error {
+			attempt++
+			if err := fn(ctx); err != nil {
+				fmt.Fprintf(
+					os.Stderr,
+					"failed attempt %d/%d: %v\n",
+					attempt,
+					retryMaxAttempts,
+					err,
+				)
+				return err
+			}
+			return nil
+		},
+	)
 }

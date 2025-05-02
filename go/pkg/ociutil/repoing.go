@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"os"
 	"time"
 
 	"github.com/containerd/containerd/content"
@@ -15,7 +14,6 @@ import (
 	"github.com/containerd/containerd/remotes/docker"
 	"github.com/opencontainers/go-digest"
 	ocispec "github.com/opencontainers/image-spec/specs-go/v1"
-	retry "github.com/sethvargo/go-retry"
 )
 
 var (
@@ -94,24 +92,9 @@ func (p *dockerRegPusher) Writer(ctx context.Context, opts ...content.WriterOpt)
 }
 
 func (d *dockerRegPusher) Mount(ctx context.Context, from string, digest digest.Digest) error {
-	var attempt uint64 = 0
-	err := retry.Do(
+	return RetryOnFailure(
 		ctx,
-		retryBackoffStrategy,
 		func(ctx context.Context) error {
-			wrapErr := func(attempt uint64, msg string, err error) error {
-				fmt.Fprintf(
-					os.Stderr,
-					"failed attempt %d/%d: %s: %v\n",
-					attempt,
-					retryMaxAttempts,
-					msg,
-					err,
-				)
-				return fmt.Errorf("%s: %w", msg, err)
-			}
-
-			attempt++
 
 			c := &http.Client{Timeout: 60 * time.Second}
 
@@ -126,21 +109,21 @@ func (d *dockerRegPusher) Mount(ctx context.Context, from string, digest digest.
 			r, err := http.NewRequestWithContext(ctx, http.MethodPost, url, nil)
 			if err != nil {
 				msg := fmt.Sprintf("failed to create request to %q", url)
-				return wrapErr(attempt, msg, err)
+				return fmt.Errorf("%s: %w", msg, err)
 			}
 
 			if d.registry.Authorizer != nil {
 				err = d.registry.Authorizer.Authorize(ctx, r)
 				if err != nil {
 					msg := fmt.Sprintf("failed to authorize request to %q", url)
-					return wrapErr(attempt, msg, err)
+					return fmt.Errorf("%s: %w", msg, err)
 				}
 			}
 
 			resp, err := c.Do(r)
 			if err != nil {
 				msg := fmt.Sprintf("failed to create request to %q", url)
-				return wrapErr(attempt, msg, err)
+				return fmt.Errorf("%s: %w", msg, err)
 			}
 			defer resp.Body.Close()
 
@@ -155,7 +138,7 @@ func (d *dockerRegPusher) Mount(ctx context.Context, from string, digest digest.
 					url,
 					resp.StatusCode,
 				)
-				return wrapErr(attempt, msg, err)
+				return fmt.Errorf("%s: %w", msg, err)
 			}
 
 			msg := fmt.Sprintf(
@@ -164,11 +147,7 @@ func (d *dockerRegPusher) Mount(ctx context.Context, from string, digest digest.
 				resp.StatusCode,
 			)
 			err = errors.New(string(body))
-			return wrapErr(attempt, msg, err)
+			return fmt.Errorf("%s: %w", msg, err)
 		},
 	)
-	if err != nil {
-		return err
-	}
-	return nil
 }
