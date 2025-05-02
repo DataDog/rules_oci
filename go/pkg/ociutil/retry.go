@@ -2,8 +2,7 @@ package ociutil
 
 import (
 	"context"
-	"fmt"
-	"os"
+	"log"
 	"time"
 
 	retry "github.com/sethvargo/go-retry"
@@ -17,7 +16,7 @@ const retryMaxAttempts = retryMaxRetries + 1
 
 func RetryOnFailure(
 	ctx context.Context,
-	fn retry.RetryFunc,
+	fn func(ctx context.Context) error,
 ) error {
 	b := retry.NewFibonacci(1 * time.Second)
 	b = retry.WithJitterPercent(20, b)
@@ -28,12 +27,11 @@ func RetryOnFailure(
 	return retry.Do(
 		ctx,
 		b,
-		func(_ context.Context) error {
+		func(ctx context.Context) error {
 			attempt++
 			if err := fn(ctx); err != nil {
-				fmt.Fprintf(
-					os.Stderr,
-					"failed attempt %d/%d: %v\n",
+				log.Printf(
+					"failed retry attempt %d/%d: %v",
 					attempt,
 					retryMaxAttempts,
 					err,

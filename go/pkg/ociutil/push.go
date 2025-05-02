@@ -352,8 +352,11 @@ func copyContentWithRetries(
 		ctx,
 		func(ctx context.Context) error {
 			if err := copyContent(ctx, src, dst, desc, ref); err != nil {
-				msg := "failed to copy content"
-				return fmt.Errorf("%s: %w", msg, err)
+				return fmt.Errorf(
+					"failed to copy content with digest %q to ingestor: %w",
+					desc.Digest.String(),
+					err,
+				)
 			}
 			return nil
 		},

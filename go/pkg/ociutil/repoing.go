@@ -2,7 +2,6 @@ package ociutil
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -95,7 +94,6 @@ func (d *dockerRegPusher) Mount(ctx context.Context, from string, digest digest.
 	return RetryOnFailure(
 		ctx,
 		func(ctx context.Context) error {
-
 			c := &http.Client{Timeout: 60 * time.Second}
 
 			// https://github.com/opencontainers/distribution-spec/blob/main/spec.md#mounting-a-blob-from-another-repository
@@ -108,22 +106,19 @@ func (d *dockerRegPusher) Mount(ctx context.Context, from string, digest digest.
 			)
 			r, err := http.NewRequestWithContext(ctx, http.MethodPost, url, nil)
 			if err != nil {
-				msg := fmt.Sprintf("failed to create request to %q", url)
-				return fmt.Errorf("%s: %w", msg, err)
+				return fmt.Errorf("failed to create request to %q: %w", url, err)
 			}
 
 			if d.registry.Authorizer != nil {
 				err = d.registry.Authorizer.Authorize(ctx, r)
 				if err != nil {
-					msg := fmt.Sprintf("failed to authorize request to %q", url)
-					return fmt.Errorf("%s: %w", msg, err)
+					return fmt.Errorf("failed to authorize request to %q: %w", url, err)
 				}
 			}
 
 			resp, err := c.Do(r)
 			if err != nil {
-				msg := fmt.Sprintf("failed to create request to %q", url)
-				return fmt.Errorf("%s: %w", msg, err)
+				return fmt.Errorf("failed to do request to %q: %w", url, err)
 			}
 			defer resp.Body.Close()
 
@@ -133,21 +128,20 @@ func (d *dockerRegPusher) Mount(ctx context.Context, from string, digest digest.
 
 			body, err := io.ReadAll(resp.Body)
 			if err != nil {
-				msg := fmt.Sprintf(
-					"invalid status code received from %q (%d): unable to read body",
+				return fmt.Errorf(
+					"invalid status code received from %q (%d): unable to read body: %w",
 					url,
 					resp.StatusCode,
+					err,
 				)
-				return fmt.Errorf("%s: %w", msg, err)
 			}
 
-			msg := fmt.Sprintf(
-				"invalid status code received from %q (%d)",
+			return fmt.Errorf(
+				"invalid status code received from %q (%d): %s",
 				url,
 				resp.StatusCode,
+				string(body),
 			)
-			err = errors.New(string(body))
-			return fmt.Errorf("%s: %w", msg, err)
 		},
 	)
 }
