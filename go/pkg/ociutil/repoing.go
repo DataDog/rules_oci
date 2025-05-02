@@ -3,7 +3,7 @@ package ociutil
 import (
 	"context"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"time"
 
@@ -22,7 +22,6 @@ var (
 )
 
 type RepositoryIngester interface {
-	Contains(ctx context.Context, dgst digest.Digest) error
 	Mount(ctx context.Context, from string, dgst digest.Digest) error
 }
 
@@ -91,50 +90,58 @@ func (p *dockerRegPusher) Writer(ctx context.Context, opts ...content.WriterOpt)
 	return nil, errdefs.ErrNotImplemented
 }
 
-func (p *dockerRegPusher) Contains(ctx context.Context, dgst digest.Digest) error {
-	return fmt.Errorf("contains not implemented")
-}
+func (d *dockerRegPusher) Mount(ctx context.Context, from string, digest digest.Digest) error {
+	return RetryOnFailure(
+		ctx,
+		func(ctx context.Context) error {
+			c := &http.Client{Timeout: 60 * time.Second}
 
-func (d *dockerRegPusher) Mount(ctx context.Context, from string, dgst digest.Digest) error {
-	hc := &http.Client{Timeout: 60 * time.Second}
+			// https://github.com/opencontainers/distribution-spec/blob/main/spec.md#mounting-a-blob-from-another-repository
+			url := fmt.Sprintf(
+				"https://%s/v2/%s/blobs/uploads/?mount=%s&from=%s",
+				d.registryName,
+				d.repo,
+				digest.String(),
+				from,
+			)
+			r, err := http.NewRequestWithContext(ctx, http.MethodPost, url, nil)
+			if err != nil {
+				return fmt.Errorf("failed to create request to %q: %w", url, err)
+			}
 
-	// https://github.com/opencontainers/distribution-spec/blob/main/spec.md#mounting-a-blob-from-another-repository
-	mountURL := fmt.Sprintf("https://%s/v2/%s/blobs/uploads/?mount=%s&from=%s", d.registryName, d.repo, dgst.String(), from)
-	r, err := http.NewRequestWithContext(ctx, http.MethodPost, mountURL, nil)
-	if err != nil {
-		return fmt.Errorf("unable to create mount http request: %w", err)
-	}
+			if d.registry.Authorizer != nil {
+				err = d.registry.Authorizer.Authorize(ctx, r)
+				if err != nil {
+					return fmt.Errorf("failed to authorize request to %q: %w", url, err)
+				}
+			}
 
-	if d.registry.Authorizer != nil {
-		err = d.registry.Authorizer.Authorize(ctx, r)
-		if err != nil {
-			return fmt.Errorf("couldn't authorize mount request: %w", err)
-		}
-	}
+			resp, err := c.Do(r)
+			if err != nil {
+				return fmt.Errorf("failed to do request to %q: %w", url, err)
+			}
+			defer resp.Body.Close()
 
-	resp, err := hc.Do(r)
-	if err != nil {
-		return fmt.Errorf("unable to make mount request: %w", err)
-	}
-	err = func() error {
-		defer resp.Body.Close()
+			if resp.StatusCode == http.StatusCreated {
+				return nil
+			}
 
-		if resp.StatusCode == http.StatusCreated {
-			return nil
-		}
+			body, err := io.ReadAll(resp.Body)
+			if err != nil {
+				return fmt.Errorf(
+					"invalid status code received from %q (%d): unable to read body: %w",
+					url,
+					resp.StatusCode,
+					err,
+				)
+			}
 
-		body, err := ioutil.ReadAll(resp.Body)
-		if err != nil {
-			return fmt.Errorf("invalid status code from %q: %d. unable to read body: %w",
-				mountURL, resp.StatusCode, err)
-		}
-
-		return fmt.Errorf("invalid status code from %q (%d): %s",
-			mountURL, resp.StatusCode, string(body))
-	}()
-	if err != nil {
-		return err
-	}
-
-	return nil
+			return fmt.Errorf(
+				"invalid status code received from %q (%d): %s",
+				url,
+				resp.StatusCode,
+				string(body),
+			)
+		},
+	)
 }
