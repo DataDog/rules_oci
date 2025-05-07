@@ -1,4 +1,4 @@
-load("@rules_go//go:def.bzl", "go_library")
+load("@rules_go//go:def.bzl", "go_library", "go_test")
 
 go_library(
     name = "go_default_library",
@@ -42,4 +42,10 @@ go_library(
         "@gazelle//rule:go_default_library",
         "@land_oras_oras_go//pkg/oras:go_default_library",
     ],
+)
+
+go_test(
+    name = "go_default_test",
+    srcs = ["retry_test.go"],
+    embed = [":go_default_library"],
 )
