@@ -36,7 +36,7 @@ func RetryOnFailure(
 					retryMaxAttempts,
 					err,
 				)
-				return err
+				return retry.RetryableError(err)
 			}
 			return nil
 		},
