@@ -57,6 +57,7 @@ def _impl(ctx):
                     ["--owner-map={}={}".format(k, v) for k, v in ctx.attr.owner_map.items()] +
                     ["--symlink={}={}".format(k, v) for k, v in ctx.attr.symlinks.items()],
         inputs = ctx.files.files + ctx.files.file_map,
+        mnemonic = "OCIImageCreateLayer",
         outputs = [
             descriptor_file,
             ctx.outputs.layer,

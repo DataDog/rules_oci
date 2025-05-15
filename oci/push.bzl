@@ -42,6 +42,7 @@ def _oci_push_impl(ctx):
             outputs = [
                 tag_file,
             ],
+            mnemonic = "OCIPushStamp",
             arguments = [args],
             command = """#!/usr/bin/env bash
 scratch=$(cat $1)
@@ -71,6 +72,7 @@ done
             "--desc={desc}".format(desc = ctx.attr.manifest[OCIDescriptor].descriptor_file.path),
             "--out={out}".format(out = digest_file.path),
         ],
+        mnemonic = "OCIPushDigest",
         inputs = [
             ctx.attr.manifest[OCIDescriptor].descriptor_file,
         ],

@@ -52,6 +52,7 @@ def _oci_image_index_impl(ctx):
                     ] +
                     ["--desc={}".format(d.path) for d in desc_files] +
                     ["--annotations={}={}".format(k, v) for k, v in ctx.attr.annotations.items()],
+        mnemonic = "OCImageCreateIndex",
         inputs = desc_files + layout_files.to_list(),
         outputs = outputs,
     )
@@ -153,6 +154,7 @@ def _oci_image_impl(ctx):
                  ] + ctx.files.layers +
                  layer_descriptor_files +
                  base_layout.files.to_list(),
+        mnemonic = "OCIImageAppendLayers",
         outputs = [
             manifest_file,
             config_file,

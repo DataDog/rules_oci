@@ -36,6 +36,7 @@ def generate_config_file_action(ctx, config_file, image, os, arch):
             "--arch={}".format(arch),
             "--out-config={}".format(config_file.path),
         ],
+        mnemonic = "OCIImageConfig",
         inputs = [
             base_desc,
             base_layout.blob_index,
