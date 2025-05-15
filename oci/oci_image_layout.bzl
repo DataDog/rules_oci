@@ -39,6 +39,7 @@ def _oci_image_layout_impl(ctx):
         outputs = [
             out_dir,
         ],
+        mnemonic = "OCIImageCreateLayout",
         use_default_shell_env = True,
     )
 
