@@ -216,14 +216,18 @@ func (resolver Resolver) MarshalAndPushContent(ctx context.Context, ref string, 
 		}
 		return desc, fmt.Errorf("unable to build pusher writer: %w", err)
 	}
+
+	defer func() {
+		if err := w.Close(); err != nil {
+			log.Errorf("Unable to close writer: %v", err)
+		}
+	}()
+
 	_, err = w.Write(contents)
 	if err != nil {
 		return desc, fmt.Errorf("unable to push image: %w", err)
 	}
-	err = w.Close()
-	if err != nil {
-		return desc, fmt.Errorf("unable to close writer: %w", err)
-	}
+
 	log.Debug("contents pushed")
 
 	err = w.Commit(ctx, desc.Size, desc.Digest)
