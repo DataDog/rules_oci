@@ -133,6 +133,10 @@ done
             digest = digest_file,
             tag_file = tag_file,
         ),
+        OutputGroupInfo(
+            digest_file = depset([digest_file]),
+            tag_file = depset([tag_file]),
+        ),
     ]
 
 oci_push = rule(
