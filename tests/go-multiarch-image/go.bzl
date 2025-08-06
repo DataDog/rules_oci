@@ -2,7 +2,7 @@
 load("@com_github_datadog_rules_oci//oci:defs.bzl", "oci_image", "oci_image_index", "oci_image_layer")
 load("@rules_go//go:def.bzl", "go_binary")
 
-def go_multiarch_image(name, base, archs, binary_name = "", binary_dir = "/app", **kwargs):
+def go_multiarch_image(name, base, archs, binary_name = "", binary_dir = "/app", compression_method = "gzip", **kwargs):
     # buildifier: disable=function-docstring-args
     """
     Create a multiarch image from a go library.
@@ -38,6 +38,7 @@ def go_multiarch_image(name, base, archs, binary_name = "", binary_dir = "/app",
             file_map = {
                 go_binary_name: "{}/{}".format(binary_dir, binary_name),
             },
+            compression_method = compression_method,
         )
 
         image_name = "{name}.{os}-{arch}-image".format(name = name, os = os, arch = arch)

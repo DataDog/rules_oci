@@ -4,7 +4,9 @@ import (
 	"compress/gzip"
 	"context"
 	"fmt"
+	"io"
 
+	"github.com/DataDog/zstd"
 	"github.com/containerd/containerd/content"
 	"github.com/opencontainers/go-digest"
 	ocispec "github.com/opencontainers/image-spec/specs-go/v1"
@@ -14,23 +16,28 @@ import (
 // image config. If a layer is uncompressed, the diff ID is simply the digest but if the
 // layer is compressed, we must uncompress the file and acquire the digest.
 func GetLayerDiffID(ctx context.Context, store content.Store, desc ocispec.Descriptor) (digest.Digest, error) {
+	if desc.MediaType != ocispec.MediaTypeImageLayerGzip && desc.MediaType != ocispec.MediaTypeImageLayerZstd {
+		return desc.Digest, nil
+	}
+
+	r, err := store.ReaderAt(ctx, desc)
+	if err != nil {
+		return "", fmt.Errorf("failed to get reader for layer: %w", err)
+	}
+	defer r.Close()
+
+	var cr io.Reader
 	switch desc.MediaType {
 	case ocispec.MediaTypeImageLayerGzip:
-		r, err := store.ReaderAt(ctx, desc)
-		if err != nil {
-			return "", fmt.Errorf("failed to get reader for layer: %w", err)
-		}
-		defer r.Close()
-
-		gr, err := gzip.NewReader(&readerAtReader{ReaderAt: r})
+		cr, err = gzip.NewReader(&readerAtReader{ReaderAt: r})
 		if err != nil {
 			return "", fmt.Errorf("failed to get gzip reader for layer: %w", err)
 		}
-
-		return digest.SHA256.FromReader(gr)
-	default:
-		return desc.Digest, nil
+	case ocispec.MediaTypeImageLayerZstd:
+		cr = zstd.NewReader(&readerAtReader{ReaderAt: r})
 	}
+
+	return digest.SHA256.FromReader(cr)
 }
 
 type readerAtReader struct {

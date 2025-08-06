@@ -31,6 +31,7 @@ go_library(
         "@com_github_containerd_containerd//images:go_default_library",
         "@com_github_containerd_containerd//platforms:go_default_library",
         "@com_github_containerd_log//:go_default_library",
+        "@com_github_datadog_zstd//:go_default_library",
         "@com_github_opencontainers_go_digest//:go_default_library",
         "@com_github_opencontainers_image_spec//specs-go:go_default_library",
         "@com_github_opencontainers_image_spec//specs-go/v1:go_default_library",

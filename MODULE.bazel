@@ -24,6 +24,7 @@ use_repo(
     "com_github_blakesmith_ar",
     "com_github_containerd_containerd",
     "com_github_containerd_log",
+    "com_github_datadog_zstd",
     "com_github_docker_docker_credential_helpers",
     "com_github_mitchellh_go_homedir",
     "com_github_opencontainers_go_digest",
@@ -55,4 +56,14 @@ oci_pull(
 
 register_toolchains(
     "@com_github_datadog_rules_oci//:oci_local_toolchain",
+)
+
+bazel_dep(name = "hermetic_cc_toolchain", version = "3.1.0")
+
+toolchains = use_extension("@hermetic_cc_toolchain//toolchain:ext.bzl", "toolchains")
+use_repo(toolchains, "zig_sdk")
+
+register_toolchains(
+    "@zig_sdk//libc_aware/toolchain:linux_amd64_gnu.2.28",
+    "@zig_sdk//libc_aware/toolchain:linux_arm64_gnu.2.28",
 )

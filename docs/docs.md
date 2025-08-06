@@ -173,7 +173,8 @@ The config file named after the rule, os, and arch
 <pre>
 load("@rules_oci//oci:defs.bzl", "oci_image_layer")
 
-oci_image_layer(<a href="#oci_image_layer-name">name</a>, <a href="#oci_image_layer-directory">directory</a>, <a href="#oci_image_layer-files">files</a>, <a href="#oci_image_layer-file_map">file_map</a>, <a href="#oci_image_layer-mode_map">mode_map</a>, <a href="#oci_image_layer-owner_map">owner_map</a>, <a href="#oci_image_layer-symlinks">symlinks</a>, <a href="#oci_image_layer-kwargs">kwargs</a>)
+oci_image_layer(<a href="#oci_image_layer-name">name</a>, <a href="#oci_image_layer-directory">directory</a>, <a href="#oci_image_layer-files">files</a>, <a href="#oci_image_layer-file_map">file_map</a>, <a href="#oci_image_layer-mode_map">mode_map</a>, <a href="#oci_image_layer-owner_map">owner_map</a>, <a href="#oci_image_layer-symlinks">symlinks</a>, <a href="#oci_image_layer-compression_method">compression_method</a>,
+                <a href="#oci_image_layer-kwargs">kwargs</a>)
 </pre>
 
 Creates a tarball and an OCI descriptor for it
@@ -190,6 +191,7 @@ Creates a tarball and an OCI descriptor for it
 | <a id="oci_image_layer-mode_map"></a>mode_map |  Dictionary of file location in tarball -> mode int (e.g. 0o755)   |  `None` |
 | <a id="oci_image_layer-owner_map"></a>owner_map |  Dictionary of file location in tarball -> owner:group string (e.g. '501:501')   |  `None` |
 | <a id="oci_image_layer-symlinks"></a>symlinks |  Dictionary of symlink -> target entries to place in the tarball   |  `None` |
+| <a id="oci_image_layer-compression_method"></a>compression_method |  A string, currently supports "gzip" and "zstd", defaults to "gzip"   |  `"gzip"` |
 | <a id="oci_image_layer-kwargs"></a>kwargs |  Additional arguments to pass to the rule, e.g. tags or visibility   |  none |
 
 

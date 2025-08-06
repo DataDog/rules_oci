@@ -2,32 +2,32 @@
 
 load("@rules_go//go:def.bzl", "go_binary")
 load("@rules_pkg//pkg:pkg.bzl", "pkg_tar")
+load(":with_platform.bzl", "with_platform")
 
-DEFAULT_GOOSS = ["linux", "darwin"]
-DEFAULT_GOARCHS = ["amd64", "arm64"]
+DEFAULT_OSES = ["linux", "darwin"]
+DEFAULT_ARCHS = ["amd64", "arm64"]
 
 # buildifier: disable=function-docstring
-def go_binary_multi(name, embed, gooss = DEFAULT_GOOSS, goarchs = DEFAULT_GOARCHS, **kwargs):
+def go_binary_multi(name, embed, oses = DEFAULT_OSES, archs = DEFAULT_ARCHS, **kwargs):
     if "goos" in kwargs or "goarch" in kwargs:
         fail("go_binary_multi does not allow goos or goarch in kwargs")
 
     go_binary(
         name = name,
         embed = embed,
+        tags = ["manual"],
         **kwargs
     )
 
     all_binaries = []
-    for goos in gooss:
-        for goarch in goarchs:
-            bin_name = "{}-{}-{}".format(name, goos, goarch)
-            go_binary(
+    for os in oses:
+        for arch in archs:
+            bin_name = "{}-{}-{}".format(name, os, arch)
+            with_platform(
                 name = bin_name,
-                embed = embed,
-                goos = goos,
-                goarch = goarch,
-                tags = ["manual"],
-                **kwargs
+                arch = arch,
+                os = os,
+                src = name,
             )
             all_binaries.append(bin_name)
 

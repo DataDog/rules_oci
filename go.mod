@@ -5,6 +5,7 @@ go 1.22.9
 toolchain go1.24.2
 
 require (
+	github.com/DataDog/zstd v1.5.7
 	github.com/bazelbuild/bazel-gazelle v0.43.0
 	github.com/blakesmith/ar v0.0.0-20190502131153-809d4375e1fb
 	github.com/containerd/containerd v1.7.20
