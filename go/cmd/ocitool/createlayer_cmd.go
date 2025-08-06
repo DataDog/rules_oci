@@ -17,6 +17,7 @@ import (
 	"github.com/DataDog/rules_oci/go/internal/tarutil"
 	"github.com/DataDog/rules_oci/go/pkg/layer"
 	"github.com/DataDog/rules_oci/go/pkg/ociutil"
+	"github.com/DataDog/zstd"
 	"github.com/opencontainers/go-digest"
 	ocispec "github.com/opencontainers/image-spec/specs-go/v1"
 	"github.com/urfave/cli/v2"
@@ -32,14 +33,36 @@ func CreateLayerCmd(c *cli.Context) error {
 	if err != nil {
 		return fmt.Errorf("failed to create file at %s: %w", config.OutputLayer, err)
 	}
+	defer out.Close()
 
 	digester := digest.SHA256.Digester()
 	wc := ociutil.NewWriterCounter(io.MultiWriter(out, digester.Hash()))
-	gw := gzip.NewWriter(wc)
-	gw.Name = path.Base(out.Name())
-	defer gw.Close()
 
-	tw := tar.NewWriter(gw)
+	var compressWriter io.Writer
+	var compressCloser io.Closer
+	var mediaType string
+	switch config.CompressionMethod {
+	case "gzip":
+		gzipWriter := gzip.NewWriter(wc)
+		gzipWriter.Name = path.Base(out.Name())
+		compressWriter = gzipWriter
+		compressCloser = gzipWriter
+		mediaType = ocispec.MediaTypeImageLayerGzip
+	case "zstd":
+		zstdWriter := zstd.NewWriter(wc)
+		compressWriter = zstdWriter
+		compressCloser = zstdWriter
+		mediaType = ocispec.MediaTypeImageLayerZstd
+	default:
+		return fmt.Errorf("uknown compress method %s", config.CompressionMethod)
+	}
+	defer func() {
+		if compressCloser != nil {
+			compressCloser.Close()
+		}
+	}()
+
+	tw := tar.NewWriter(compressWriter)
 	defer tw.Close()
 
 	slices.Sort(config.Files)
@@ -136,14 +159,14 @@ func CreateLayerCmd(c *cli.Context) error {
 
 	}
 
-	// Need to flush before we count bytes and digest, might as well close since
-	// it's not needed anymore.
+	// Need to flush before we count bytes and digest
 	tw.Close()
-	gw.Close()
+	compressCloser.Close()
+	compressCloser = nil
 
 	desc := ocispec.Descriptor{
 		Digest:    digester.Digest(),
-		MediaType: ocispec.MediaTypeImageLayerGzip,
+		MediaType: mediaType,
 		Size:      int64(wc.Count()),
 	}
 
@@ -164,15 +187,16 @@ func CreateLayerCmd(c *cli.Context) error {
 }
 
 type createLayerConfig struct {
-	BazelLabel     string            `json:"bazel-label" toml:"bazel-label" yaml:"bazel-label"`
-	Descriptor     string            `json:"outd" toml:"outd" yaml:"outd"`
-	Directory      string            `json:"dir" toml:"dir" yaml:"dir"`
-	FileMapping    map[string]string `json:"file-map" toml:"file-map" yaml:"file-map"`
-	Files          []string          `json:"file" toml:"file" yaml:"file"`
-	ModeMapping    map[string]int64  `json:"mode-map" toml:"mode-map" yaml:"mode-map"`
-	OutputLayer    string            `json:"out" toml:"out" yaml:"out"`
-	OwnerMapping   map[string]string `json:"owner-map" toml:"owner-map" yaml:"owner-map"`
-	SymlinkMapping map[string]string `json:"symlink" toml:"symlink" yaml:"symlink"`
+	BazelLabel        string            `json:"bazel-label" toml:"bazel-label" yaml:"bazel-label"`
+	Descriptor        string            `json:"outd" toml:"outd" yaml:"outd"`
+	Directory         string            `json:"dir" toml:"dir" yaml:"dir"`
+	FileMapping       map[string]string `json:"file-map" toml:"file-map" yaml:"file-map"`
+	Files             []string          `json:"file" toml:"file" yaml:"file"`
+	ModeMapping       map[string]int64  `json:"mode-map" toml:"mode-map" yaml:"mode-map"`
+	OutputLayer       string            `json:"out" toml:"out" yaml:"out"`
+	OwnerMapping      map[string]string `json:"owner-map" toml:"owner-map" yaml:"owner-map"`
+	SymlinkMapping    map[string]string `json:"symlink" toml:"symlink" yaml:"symlink"`
+	CompressionMethod string            `json:"compression-method" toml:"compression-method" yaml:"compression-method"`
 }
 
 func newCreateLayerConfig(c *cli.Context) (*createLayerConfig, error) {
@@ -184,16 +208,23 @@ func newCreateLayerConfig(c *cli.Context) (*createLayerConfig, error) {
 		}
 		modeMapping[path] = mode
 	}
+
+	compressionMethod := c.String("compression-method")
+	if compressionMethod == "" {
+		compressionMethod = "gzip"
+	}
+
 	return &createLayerConfig{
-		BazelLabel:     c.String("bazel-label"),
-		Descriptor:     c.String("outd"),
-		Directory:      c.String("dir"),
-		FileMapping:    c.Generic("file-map").(*flagutil.KeyValueFlag).Map,
-		Files:          c.StringSlice("file"),
-		ModeMapping:    modeMapping,
-		OutputLayer:    c.String("out"),
-		OwnerMapping:   c.Generic("owner-map").(*flagutil.KeyValueFlag).Map,
-		SymlinkMapping: c.Generic("symlink").(*flagutil.KeyValueFlag).Map,
+		BazelLabel:        c.String("bazel-label"),
+		Descriptor:        c.String("outd"),
+		Directory:         c.String("dir"),
+		FileMapping:       c.Generic("file-map").(*flagutil.KeyValueFlag).Map,
+		Files:             c.StringSlice("file"),
+		ModeMapping:       modeMapping,
+		OutputLayer:       c.String("out"),
+		OwnerMapping:      c.Generic("owner-map").(*flagutil.KeyValueFlag).Map,
+		SymlinkMapping:    c.Generic("symlink").(*flagutil.KeyValueFlag).Map,
+		CompressionMethod: compressionMethod,
 	}, nil
 }
 

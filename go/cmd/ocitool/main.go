@@ -78,6 +78,9 @@ var app = &cli.App{
 					Name:  "mode-map",
 					Value: &flagutil.KeyValueFlag{},
 				},
+				&cli.StringFlag{
+					Name: "compression-method",
+				},
 			},
 		},
 		{

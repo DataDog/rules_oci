@@ -27,6 +27,18 @@ go_multiarch_image(
     visibility = ["//visibility:public"],
 )
 
+go_multiarch_image(
+    name = "zstd-image",
+    archs = [
+        "amd64",
+        "arm64",
+    ],
+    base = "@ubuntu_focal//image",
+    compression_method = "zstd",
+    embed = [":go_default_library"],
+    visibility = ["//visibility:public"],
+)
+
 oci_push(
     name = "push",
     manifest = ":image",
