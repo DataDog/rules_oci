@@ -120,6 +120,14 @@ def _oci_image_impl(ctx):
         [f.path for f in layer_descriptor_files],
     )
 
+    tars = []
+    for tar in ctx.attr.tars:
+        tmp = tar.files.to_list()
+        if len(tmp) != 1:
+            fail("tar must contain exactly one file")
+        tar = tmp[0]
+        tars.append(tar)
+
     stamp_args = []
     if maybe_stamp(ctx):
         stamp_args.append("--bazel-version-file={}".format(ctx.version_file.path))
@@ -142,6 +150,7 @@ def _oci_image_impl(ctx):
                         "--layer={}={}".format(layer, descriptor)
                         for layer, descriptor in layer_and_descriptor_paths
                     ] +
+                    ["--tar={}".format(tar.path) for tar in tars] +
                     ["--annotations={}={}".format(k, v) for k, v in annotations.items()] +
                     ["--labels={}={}".format(k, v) for k, v in labels.items()] +
                     ["--env={}".format(env) for env in ctx.attr.env] +
@@ -153,7 +162,8 @@ def _oci_image_impl(ctx):
                      entrypoint_config_file,
                  ] + ctx.files.layers +
                  layer_descriptor_files +
-                 base_layout.files.to_list(),
+                 base_layout.files.to_list() +
+                 tars,
         mnemonic = "OCIImageAppendLayers",
         outputs = [
             manifest_file,
@@ -170,7 +180,7 @@ def _oci_image_impl(ctx):
         OCILayout(
             blob_index = layout_file,
             files = depset(
-                ctx.files.layers + [manifest_file, config_file, layout_file],
+                ctx.files.layers + ctx.files.tars + [manifest_file, config_file, layout_file],
                 transitive = [base_layout.files],
             ),
         ),
@@ -218,6 +228,10 @@ oci_image = rule(
             providers = [
                 OCIDescriptor,
             ],
+        ),
+        "tars": attr.label_list(
+            doc = "A list of tars to add as layers",
+            allow_files = [".tar", ".tar.gz", ".tgz", ".tar.zst"],
         ),
         "annotations": attr.string_dict(
             doc = """[OCI Annotations](https://github.com/opencontainers/image-spec/blob/main/annotations.md)

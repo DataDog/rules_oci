@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"crypto/sha256"
 	"fmt"
 	"io"
 	"os"
@@ -131,13 +132,64 @@ func AppendLayersCmd(c *cli.Context) error {
 
 	log.WithField("base_desc", baseManifestDesc).Debugf("using as base")
 
+	tarPaths := c.StringSlice("tar")
+	tarDescriptors := []ocispec.Descriptor{}
+	for _, tarPath := range tarPaths {
+		// Determine compression type of tarball
+		compression, err := ociutil.DetectCompression(tarPath)
+		if err != nil {
+			return fmt.Errorf("failed to determine compression type for %s: %w", tarPath, err)
+		}
+
+		// Determine media type of tarball
+		var mediaType string
+		switch compression {
+		case ociutil.CompressionGzip:
+			mediaType = ocispec.MediaTypeImageLayerGzip
+		case ociutil.CompressionZstd:
+			mediaType = ocispec.MediaTypeImageLayerZstd
+		case ociutil.CompressionNone:
+			mediaType = ocispec.MediaTypeImageLayer
+		}
+
+		// Compute the sha256 of the tarball
+		f, err := os.Open(tarPath)
+		if err != nil {
+			return fmt.Errorf("failed to open %s: %w", tarPath, err)
+		}
+		defer f.Close()
+
+		hasher := sha256.New()
+		wc := ociutil.NewWriterCounter(hasher)
+		if _, err := io.Copy(wc, f); err != nil {
+			return fmt.Errorf("failed to read %s: %w", tarPath, err)
+		}
+
+		hash := hasher.Sum(nil)
+
+		s := fmt.Sprintf("sha256:%x", hash)
+		d, err := digest.Parse(s)
+		if err != nil {
+			return fmt.Errorf("failed to parse '%s' into a valid Digest: %w", s, err)
+		}
+
+		// Create descriptor
+		desc := ocispec.Descriptor{
+			Digest:    d,
+			MediaType: mediaType,
+			Size:      int64(wc.Count()),
+		}
+
+		tarDescriptors = append(tarDescriptors, desc)
+	}
+
 	layerAndDescriptorPaths := c.Generic("layer").(*flagutil.KeyValueFlag).List
 
 	layerProvider := &blob.Index{
 		Blobs: make(map[digest.Digest]string),
 	}
 
-	layerDescs := make([]ocispec.Descriptor, 0, len(layerAndDescriptorPaths))
+	layerDescs := []ocispec.Descriptor{}
 	for _, layerAndDescriptorPath := range layerAndDescriptorPaths {
 		layerDesc, err := ociutil.ReadDescriptorFromFile(layerAndDescriptorPath.Value)
 		if err != nil {
@@ -146,6 +198,13 @@ func AppendLayersCmd(c *cli.Context) error {
 
 		layerProvider.Blobs[layerDesc.Digest] = layerAndDescriptorPath.Key
 		layerDescs = append(layerDescs, layerDesc)
+	}
+
+	// Treat raw tar files as if they were any other layer
+	for i, tarPath := range tarPaths {
+		tarDesc := tarDescriptors[i]
+		layerProvider.Blobs[tarDesc.Digest] = tarPath
+		layerDescs = append(layerDescs, tarDesc)
 	}
 
 	var entrypoint []string
@@ -161,8 +220,6 @@ func AppendLayersCmd(c *cli.Context) error {
 
 		entrypoint = entrypointStruct.Entrypoint
 	}
-
-	log.Debugf("created descriptors for layers(n=%v): %#v", len(layerAndDescriptorPaths), layerDescs)
 
 	outIngestor := layer.NewAppendIngester(c.String("out-manifest"), c.String("out-config"))
 
