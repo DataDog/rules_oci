@@ -98,6 +98,9 @@ var app = &cli.App{
 					Name:  "layer",
 					Value: &flagutil.KeyValueFlag{},
 				},
+				&cli.StringSliceFlag{
+					Name: "tar",
+				},
 				&cli.StringFlag{
 					Name: "outd",
 				},
