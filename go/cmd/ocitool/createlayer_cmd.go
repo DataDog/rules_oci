@@ -90,7 +90,6 @@ func CreateLayerCmd(c *cli.Context) error {
 			/* tarGid   */ tarGid,
 			/* tw       */ tw,
 		)
-
 		if err != nil {
 			return err
 		}
@@ -114,15 +113,45 @@ func CreateLayerCmd(c *cli.Context) error {
 			return err
 		}
 
-		err = tarutil.AppendFileToTarWriter(
+		tarMode := config.mode(tarPath)
+
+		// Handle broken symlinks
+
+		hostPathIsBrokenSymlink, err := isBrokenSymlink(hostPath)
+		if err != nil {
+			return err
+		}
+
+		if hostPathIsBrokenSymlink {
+			tarTarget, err := os.Readlink(hostPath)
+			if err != nil {
+				return fmt.Errorf("error reading symlink %s: %w", hostPath, err)
+			}
+
+			if err := tarutil.AppendSymlinkToTarWriter(
+				/* tarPath   */ tarPath,
+				/* tarTarget */ tarTarget,
+				/* tarMode   */ tarMode,
+				/* tarUid    */ tarUid,
+				/* tarGid    */ tarGid,
+				/* tw        */ tw,
+			); err != nil {
+				return err
+			}
+
+			continue
+		}
+
+		// Handle all other files
+
+		if err := tarutil.AppendFileToTarWriter(
 			/* hostPath */ hostPath,
 			/* tarPath  */ tarPath,
 			/* tarMode  */ config.mode(tarPath),
 			/* tarUid   */ tarUid,
 			/* tarGid   */ tarGid,
 			/* tw       */ tw,
-		)
-		if err != nil {
+		); err != nil {
 			return err
 		}
 	}
@@ -286,4 +315,27 @@ func (c *createLayerConfig) gid(tarPath string) (*int, error) {
 		}
 	}
 	return nil, nil
+}
+
+func isBrokenSymlink(path string) (bool, error) {
+	info, err := os.Lstat(path)
+	if err != nil {
+		return false, fmt.Errorf("could not lstat %s: %w", path, err)
+	}
+
+	isSymlink := info.Mode()&os.ModeSymlink != 0
+	if !isSymlink {
+		return false, nil
+	}
+
+	// TODO: What about symlinks to symlinks?
+	_, err = os.Stat(path)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return true, nil
+		}
+		return false, fmt.Errorf("could not stat %s: %w", path, err)
+	}
+
+	return false, nil
 }
