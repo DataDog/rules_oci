@@ -207,18 +207,16 @@ func AppendLayersCmd(c *cli.Context) error {
 		layerDescs = append(layerDescs, tarDesc)
 	}
 
-	var entrypoint []string
-	if entrypoint_file := c.String("entrypoint"); entrypoint_file != "" {
+	var entrypoint *[]string
+	if entrypointPath := c.String("entrypoint"); entrypointPath != "" {
 		var entrypointStruct struct {
 			Entrypoint []string `json:"entrypoint"`
 		}
-
-		err := jsonutil.DecodeFromFile(entrypoint_file, &entrypointStruct)
+		err := jsonutil.DecodeFromFile(entrypointPath, &entrypointStruct)
 		if err != nil {
 			return fmt.Errorf("failed to read entrypoint config file: %w", err)
 		}
-
-		entrypoint = entrypointStruct.Entrypoint
+		entrypoint = &entrypointStruct.Entrypoint
 	}
 
 	outIngestor := layer.NewAppendIngester(c.String("out-manifest"), c.String("out-config"))

@@ -2,38 +2,6 @@
 
 public API
 
-<a id="oci_image"></a>
-
-## oci_image
-
-<pre>
-load("@rules_oci//oci:defs.bzl", "oci_image")
-
-oci_image(<a href="#oci_image-name">name</a>, <a href="#oci_image-annotations">annotations</a>, <a href="#oci_image-arch">arch</a>, <a href="#oci_image-base">base</a>, <a href="#oci_image-entrypoint">entrypoint</a>, <a href="#oci_image-env">env</a>, <a href="#oci_image-labels">labels</a>, <a href="#oci_image-layers">layers</a>, <a href="#oci_image-os">os</a>, <a href="#oci_image-stamp">stamp</a>, <a href="#oci_image-tars">tars</a>)
-</pre>
-
-Creates a new image manifest and config by appending the `layers` to an existing image
-manifest and config defined by `base`.  If `base` is an image index, then `os` and `arch` will
-be used to extract the image manifest.
-
-**ATTRIBUTES**
-
-
-| Name  | Description | Type | Mandatory | Default |
-| :------------- | :------------- | :------------- | :------------- | :------------- |
-| <a id="oci_image-name"></a>name |  A unique name for this target.   | <a href="https://bazel.build/concepts/labels#target-names">Name</a> | required |  |
-| <a id="oci_image-annotations"></a>annotations |  [OCI Annotations](https://github.com/opencontainers/image-spec/blob/main/annotations.md) to add to the manifest.   | <a href="https://bazel.build/rules/lib/dict">Dictionary: String -> String</a> | optional |  `{}`  |
-| <a id="oci_image-arch"></a>arch |  Used to extract a manifest from base if base is an index   | String | optional |  `""`  |
-| <a id="oci_image-base"></a>base |  A base image, as defined by oci_pull or oci_image   | <a href="https://bazel.build/concepts/labels">Label</a> | required |  |
-| <a id="oci_image-entrypoint"></a>entrypoint |  A list of entrypoints for the image; these will be inserted into the generated OCI image config   | List of strings | optional |  `[]`  |
-| <a id="oci_image-env"></a>env |  Entries are in the format of `VARNAME=VARVALUE`. These values act as defaults and are merged with any specified when creating a container.   | List of strings | optional |  `[]`  |
-| <a id="oci_image-labels"></a>labels |  labels that will be applied to the image configuration, as defined in [the OCI config](https://github.com/opencontainers/image-spec/blob/main/config.md#properties). These behave the same way as [docker LABEL](https://docs.docker.com/engine/reference/builder/#label); in particular, labels from the base image are inherited.  An empty value for a label will cause that label to be deleted.  For backwards compatibility, if this is not set, then the value of annotations will be used instead.   | <a href="https://bazel.build/rules/lib/dict">Dictionary: String -> String</a> | optional |  `{}`  |
-| <a id="oci_image-layers"></a>layers |  A list of layers defined by oci_image_layer   | <a href="https://bazel.build/concepts/labels">List of labels</a> | optional |  `[]`  |
-| <a id="oci_image-os"></a>os |  Used to extract a manifest from base if base is an index   | String | optional |  `""`  |
-| <a id="oci_image-stamp"></a>stamp |  Whether to encode build information into the output. Possible values:<br><br>- `stamp = 1`: Always stamp the build information into the output, even in     [--nostamp](https://docs.bazel.build/versions/main/user-manual.html#flag--stamp) builds.     This setting should be avoided, since it is non-deterministic.     It potentially causes remote cache misses for the target and     any downstream actions that depend on the result. - `stamp = 0`: Never stamp, instead replace build information by constant values.     This gives good build result caching. - `stamp = -1`: Embedding of build information is controlled by the     [--[no]stamp](https://docs.bazel.build/versions/main/user-manual.html#flag--stamp) flag.     Stamped targets are not rebuilt unless their dependencies change.   | Integer | optional |  `-1`  |
-| <a id="oci_image-tars"></a>tars |  A list of tars to add as layers   | <a href="https://bazel.build/concepts/labels">List of labels</a> | optional |  `[]`  |
-
-
 <a id="oci_image_config"></a>
 
 ## oci_image_config
@@ -165,6 +133,41 @@ not be an issue when using the `oci_image` rule).
 **RETURNS**
 
 The config file named after the rule, os, and arch
+
+
+<a id="oci_image"></a>
+
+## oci_image
+
+<pre>
+load("@rules_oci//oci:defs.bzl", "oci_image")
+
+oci_image(<a href="#oci_image-name">name</a>, <a href="#oci_image-base">base</a>, <a href="#oci_image-annotations">annotations</a>, <a href="#oci_image-arch">arch</a>, <a href="#oci_image-entrypoint">entrypoint</a>, <a href="#oci_image-env">env</a>, <a href="#oci_image-labels">labels</a>, <a href="#oci_image-layers">layers</a>, <a href="#oci_image-os">os</a>, <a href="#oci_image-tars">tars</a>, <a href="#oci_image-kwargs">kwargs</a>)
+</pre>
+
+oci_image
+
+Creates a new image manifest and config by appending the `layers` to an
+existing image manifest and config defined by `base`.  If `base` is an image
+index, then `os` and `arch` will be used to extract the image manifest.
+
+
+**PARAMETERS**
+
+
+| Name  | Description | Default Value |
+| :------------- | :------------- | :------------- |
+| <a id="oci_image-name"></a>name |  The name of the rule.   |  none |
+| <a id="oci_image-base"></a>base |  A base image, as defined by oci_pull or oci_image.   |  none |
+| <a id="oci_image-annotations"></a>annotations |  OCI Annotations to add to the manifest.   |  `None` |
+| <a id="oci_image-arch"></a>arch |  Used to extract a manifest from base if base is an index.   |  `None` |
+| <a id="oci_image-entrypoint"></a>entrypoint |  A list of entrypoints for the image; these will be inserted into the generated container configuration.   |  `None` |
+| <a id="oci_image-env"></a>env |  Entries are in the format of `VARNAME=VARVALUE`. These values act as defaults and are merged with any specified when creating a container.   |  `None` |
+| <a id="oci_image-labels"></a>labels |  Labels that will be applied to the image configuration, as defined in the OCI config. These behave the same way as docker LABEL. In particular, labels from the base image are inherited. An empty value for a label will cause that label to be deleted. For backwards compatibility, if this is not set, then the value of annotations will be used instead.   |  `None` |
+| <a id="oci_image-layers"></a>layers |  A list of layers defined by oci_image_layer.   |  `None` |
+| <a id="oci_image-os"></a>os |  Used to extract a manifest from base if base is an index.   |  `None` |
+| <a id="oci_image-tars"></a>tars |  A list of tars to add as layers.   |  `None` |
+| <a id="oci_image-kwargs"></a>kwargs |  Additional keyword arguments, e.g. tags or visibility   |  none |
 
 
 <a id="oci_image_layer"></a>

@@ -28,7 +28,7 @@ func AppendLayers(
 	labels map[string]string,
 	env []string,
 	created time.Time,
-	entrypoint []string,
+	entrypoint *[]string,
 	platform ocispec.Platform,
 ) (ocispec.Descriptor, ocispec.Descriptor, error) {
 	if annotations == nil {
@@ -136,7 +136,9 @@ func AppendLayers(
 	imageConfig.History = append(imageConfig.History, history...)
 
 	imageConfig.Author = "rules_oci"
-	imageConfig.Config.Entrypoint = entrypoint
+	if entrypoint != nil {
+		imageConfig.Config.Entrypoint = *entrypoint
+	}
 	imageConfig.Config.Env = append(imageConfig.Config.Env, env...)
 
 	newConfig, err := ociutil.IngestorJSONEncode(
