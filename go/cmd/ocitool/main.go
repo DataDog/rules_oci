@@ -131,6 +131,9 @@ var app = &cli.App{
 					Name: "out-layout",
 				},
 				&cli.StringFlag{
+					Name: "cmd",
+				},
+				&cli.StringFlag{
 					Name: "entrypoint",
 				},
 			},

@@ -142,7 +142,7 @@ The config file named after the rule, os, and arch
 <pre>
 load("@rules_oci//oci:defs.bzl", "oci_image")
 
-oci_image(<a href="#oci_image-name">name</a>, <a href="#oci_image-base">base</a>, <a href="#oci_image-annotations">annotations</a>, <a href="#oci_image-arch">arch</a>, <a href="#oci_image-entrypoint">entrypoint</a>, <a href="#oci_image-env">env</a>, <a href="#oci_image-labels">labels</a>, <a href="#oci_image-layers">layers</a>, <a href="#oci_image-os">os</a>, <a href="#oci_image-tars">tars</a>, <a href="#oci_image-kwargs">kwargs</a>)
+oci_image(<a href="#oci_image-name">name</a>, <a href="#oci_image-base">base</a>, <a href="#oci_image-annotations">annotations</a>, <a href="#oci_image-arch">arch</a>, <a href="#oci_image-cmd">cmd</a>, <a href="#oci_image-entrypoint">entrypoint</a>, <a href="#oci_image-env">env</a>, <a href="#oci_image-labels">labels</a>, <a href="#oci_image-layers">layers</a>, <a href="#oci_image-os">os</a>, <a href="#oci_image-tars">tars</a>, <a href="#oci_image-kwargs">kwargs</a>)
 </pre>
 
 oci_image
@@ -161,7 +161,8 @@ index, then `os` and `arch` will be used to extract the image manifest.
 | <a id="oci_image-base"></a>base |  A base image, as defined by oci_pull or oci_image.   |  none |
 | <a id="oci_image-annotations"></a>annotations |  OCI Annotations to add to the manifest.   |  `None` |
 | <a id="oci_image-arch"></a>arch |  Used to extract a manifest from base if base is an index.   |  `None` |
-| <a id="oci_image-entrypoint"></a>entrypoint |  A list of entrypoints for the image; these will be inserted into the generated container configuration.   |  `None` |
+| <a id="oci_image-cmd"></a>cmd |  Default arguments to the entrypoint of the container. If an Entrypoint value is not specified, then the first entry of the Cmd array will be interpreted as the executable to run   |  `None` |
+| <a id="oci_image-entrypoint"></a>entrypoint |  A list of arguments to use as the command to execute when the container starts; these will be inserted into the generated OCI image config   |  `None` |
 | <a id="oci_image-env"></a>env |  Entries are in the format of `VARNAME=VARVALUE`. These values act as defaults and are merged with any specified when creating a container.   |  `None` |
 | <a id="oci_image-labels"></a>labels |  Labels that will be applied to the image configuration, as defined in the OCI config. These behave the same way as docker LABEL. In particular, labels from the base image are inherited. An empty value for a label will cause that label to be deleted. For backwards compatibility, if this is not set, then the value of annotations will be used instead.   |  `None` |
 | <a id="oci_image-layers"></a>layers |  A list of layers defined by oci_image_layer.   |  `None` |
