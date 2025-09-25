@@ -207,6 +207,18 @@ func AppendLayersCmd(c *cli.Context) error {
 		layerDescs = append(layerDescs, tarDesc)
 	}
 
+	var cmd *[]string
+	if cmdPath := c.String("cmd"); cmdPath != "" {
+		var cmdStruct struct {
+			Cmd []string `json:"cmd"`
+		}
+		err := jsonutil.DecodeFromFile(cmdPath, &cmdStruct)
+		if err != nil {
+			return fmt.Errorf("failed to read cmd config file: %w", err)
+		}
+		cmd = &cmdStruct.Cmd
+	}
+
 	var entrypoint *[]string
 	if entrypointPath := c.String("entrypoint"); entrypointPath != "" {
 		var entrypointStruct struct {
@@ -230,6 +242,7 @@ func AppendLayersCmd(c *cli.Context) error {
 		c.Generic("labels").(*flagutil.KeyValueFlag).Map,
 		c.StringSlice("env"),
 		createdTimestamp,
+		cmd,
 		entrypoint,
 		targetPlatform,
 	)

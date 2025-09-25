@@ -28,6 +28,7 @@ func AppendLayers(
 	labels map[string]string,
 	env []string,
 	created time.Time,
+	cmd *[]string,
 	entrypoint *[]string,
 	platform ocispec.Platform,
 ) (ocispec.Descriptor, ocispec.Descriptor, error) {
@@ -136,6 +137,9 @@ func AppendLayers(
 	imageConfig.History = append(imageConfig.History, history...)
 
 	imageConfig.Author = "rules_oci"
+	if cmd != nil {
+		imageConfig.Config.Cmd = *cmd
+	}
 	if entrypoint != nil {
 		imageConfig.Config.Entrypoint = *entrypoint
 	}

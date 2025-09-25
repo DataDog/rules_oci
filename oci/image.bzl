@@ -4,16 +4,17 @@ load("@aspect_bazel_lib//lib:stamping.bzl", "STAMP_ATTRS", "maybe_stamp")
 load("@com_github_datadog_rules_oci//oci:providers.bzl", "OCIDescriptor", "OCILayout")
 
 def oci_image(
-        name,
-        base,
-        annotations = None,
-        arch = None,
-        entrypoint = None,
-        env = None,
-        labels = None,
-        layers = None,
-        os = None,
-        tars = None,
+        name,  # type: string
+        base,  # type: Label
+        annotations = None,  # type: list[string] | None
+        arch = None,  # type: string | None
+        cmd = None,  # type: string | list[string] | None
+        entrypoint = None,  # type: string | list[string] | None
+        env = None,  # type: list[string] | None
+        labels = None,  # type: dict[string, string] | None
+        layers = None,  # type: list[Label] | None
+        os = None,  # type: string | None
+        tars = None,  # type: list[Label]
         **kwargs):
     """ oci_image
 
@@ -26,8 +27,12 @@ def oci_image(
         base: A base image, as defined by oci_pull or oci_image.
         annotations: OCI Annotations to add to the manifest.
         arch: Used to extract a manifest from base if base is an index.
-        entrypoint: A list of entrypoints for the image; these will be inserted
-            into the generated container configuration.
+        cmd: Default arguments to the entrypoint of the container. If an
+          Entrypoint value is not specified, then the first entry of the Cmd
+          array will be interpreted as the executable to run
+        entrypoint: A list of arguments to use as the command to execute when
+          the container starts; these will be inserted into the generated OCI
+          image config
         env: Entries are in the format of `VARNAME=VARVALUE`. These values act
             as defaults and are merged with any specified when creating a
             container.
@@ -42,16 +47,18 @@ def oci_image(
         tars: A list of tars to add as layers.
         **kwargs: Additional keyword arguments, e.g. tags or visibility
     """
-    if entrypoint == None:
-        entrypoint_override = False
-    else:
-        entrypoint_override = True
+
+    # Override if non-None
+    cmd_override = (cmd != None)
+    entrypoint_override = (entrypoint != None)
 
     _oci_image(
         name = name,
         base = base,
         annotations = annotations,
         arch = arch,
+        cmd = cmd,
+        cmd_override = cmd_override,
         entrypoint = entrypoint,
         entrypoint_override = entrypoint_override,
         env = env,
@@ -221,6 +228,19 @@ def _oci_image_impl(ctx):
         base_layout.blob_index,
     ] + ctx.files.layers + layer_descriptor_files + base_layout.files.to_list() + tars
 
+    if ctx.attr.cmd_override:
+        cmd_config_file = ctx.actions.declare_file("{}.cmd.config.json".format(ctx.label.name))
+        cmd_config = struct(
+            cmd = ctx.attr.cmd,
+        )
+        ctx.actions.write(
+            output = cmd_config_file,
+            content = json.encode(cmd_config),
+        )
+        arguments.append("--cmd={}".format(cmd_config_file.path))
+        default_info_files.append(cmd_config_file)
+        inputs.append(cmd_config_file)
+
     if ctx.attr.entrypoint_override:
         entrypoint_config_file = ctx.actions.declare_file("{}.entrypoint.config.json".format(ctx.label.name))
         entrypoint_config = struct(
@@ -276,6 +296,8 @@ _oci_image = rule(
             mandatory = True,
             providers = [OCIDescriptor, OCILayout],
         ),
+        "cmd": attr.string_list(),
+        "cmd_override": attr.bool(),
         "entrypoint": attr.string_list(),
         "entrypoint_override": attr.bool(),
         "env": attr.string_list(),
