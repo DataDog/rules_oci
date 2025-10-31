@@ -6,6 +6,7 @@ import (
 	"os"
 	"path/filepath"
 	"slices"
+	"strconv"
 	"sync"
 
 	"github.com/bazelbuild/bazel-gazelle/rule"
@@ -152,16 +153,14 @@ func descriptorListToLabels(desc []ocispec.Descriptor) []string {
 	return layerTargets
 }
 
-var (
-	PublicVisibility = []string{"//visibility:public"}
-)
+var PublicVisibility = []string{"//visibility:public"}
 
 func blobRuleFromDescriptor(desc ocispec.Descriptor) *rule.Rule {
 	r := rule.NewRule("oci_blob", dgstToLabelName(desc.Digest))
 	r.SetAttr("file", desc.Digest.Encoded())
 	r.SetAttr("digest", desc.Digest.String())
 	r.SetAttr("media_type", desc.MediaType)
-	r.SetAttr("size", desc.Size)
+	r.SetAttr("size_", strconv.FormatInt(desc.Size, 10))
 	r.SetAttr("annotations", desc.Annotations)
 	r.SetAttr("urls", desc.URLs)
 	r.SetAttr("visibility", PublicVisibility)
@@ -175,7 +174,7 @@ func imageManifestRule(desc ocispec.Descriptor, manifest ocispec.Manifest) *rule
 	r.SetAttr("descriptor", dgstToLabel(desc.Digest))
 	r.SetAttr("config", dgstToLabel(manifest.Config.Digest))
 	// TODO(griffin) Not handling shallow well
-	//r.SetAttr("layers", descriptorListToLabels(manifest.Layers))
+	// r.SetAttr("layers", descriptorListToLabels(manifest.Layers))
 	r.SetAttr("annotations", manifest.Annotations)
 	r.SetAttr("visibility", PublicVisibility)
 	r.SetAttr("layout", "//:layout")
