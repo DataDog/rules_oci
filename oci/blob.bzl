@@ -6,7 +6,7 @@ def _oci_blob_impl(ctx):
     return [OCIDescriptor(
         file = ctx.file.file,
         media_type = ctx.attr.media_type,
-        size = ctx.attr.size,
+        size = int(ctx.attr.size_),
         urls = ctx.attr.urls,
         digest = ctx.attr.digest,
         annotations = ctx.attr.annotations,
@@ -37,7 +37,9 @@ example 'sha256:abcd...'
 MIME type of blob.
             """,
         ),
-        "size": attr.int(
+        # This cannot be named `size` because bazel forces attrs named `size`
+        # to be attr.int
+        "size_": attr.string(
             doc = """
 Size of content in bytes.
             """,
