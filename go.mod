@@ -1,8 +1,6 @@
 module github.com/DataDog/rules_oci
 
-go 1.22.9
-
-toolchain go1.24.2
+go 1.25.7
 
 require (
 	github.com/DataDog/zstd v1.5.7
