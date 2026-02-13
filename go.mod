@@ -10,7 +10,7 @@ require (
 	github.com/blakesmith/ar v0.0.0-20190502131153-809d4375e1fb
 	github.com/containerd/containerd v1.7.20
 	github.com/containerd/log v0.1.0
-	github.com/docker/docker-credential-helpers v0.8.1
+	github.com/docker/docker-credential-helpers v0.9.5
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/opencontainers/go-digest v1.0.0
 	github.com/opencontainers/image-spec v1.1.0
