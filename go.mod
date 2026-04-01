@@ -1,12 +1,10 @@
 module github.com/DataDog/rules_oci
 
-go 1.22.9
-
-toolchain go1.24.2
+go 1.25.0
 
 require (
 	github.com/DataDog/zstd v1.5.7
-	github.com/bazelbuild/bazel-gazelle v0.43.0
+	github.com/bazelbuild/bazel-gazelle v0.48.0
 	github.com/blakesmith/ar v0.0.0-20190502131153-809d4375e1fb
 	github.com/containerd/containerd v1.7.20
 	github.com/containerd/log v0.1.0
@@ -18,14 +16,14 @@ require (
 	github.com/sirupsen/logrus v1.9.3
 	github.com/stretchr/testify v1.9.0
 	github.com/urfave/cli/v2 v2.27.2
-	golang.org/x/sync v0.11.0
+	golang.org/x/sync v0.20.0
 	oras.land/oras-go v1.2.6
 )
 
 require (
 	github.com/AdaLogics/go-fuzz-headers v0.0.0-20230811130428-ced1acdcaa24 // indirect
 	github.com/Microsoft/hcsshim v0.12.3 // indirect
-	github.com/bazelbuild/buildtools v0.0.0-20240918101019-be1c24cc9a44 // indirect
+	github.com/bazelbuild/buildtools v0.0.0-20250930140053-2eb4fccefb52 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/containerd/errdefs v0.1.0 // indirect
@@ -59,8 +57,8 @@ require (
 	go.opentelemetry.io/otel/trace v1.28.0 // indirect
 	golang.org/x/crypto v0.26.0 // indirect
 	golang.org/x/sys v0.30.0 // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20240814211410-ddb44dafa142 // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20250106144421-5f5ef82da422 // indirect
 	google.golang.org/grpc v1.67.3 // indirect
-	google.golang.org/protobuf v1.34.2 // indirect
+	google.golang.org/protobuf v1.36.3 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
