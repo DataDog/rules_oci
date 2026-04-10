@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"path"
 	"path/filepath"
 	"slices"
 	"strconv"
@@ -44,7 +43,6 @@ func CreateLayerCmd(c *cli.Context) error {
 	switch config.CompressionMethod {
 	case "gzip":
 		gzipWriter := gzip.NewWriter(wc)
-		gzipWriter.Name = path.Base(out.Name())
 		compressWriter = gzipWriter
 		compressCloser = gzipWriter
 		mediaType = ocispec.MediaTypeImageLayerGzip
