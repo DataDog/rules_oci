@@ -99,6 +99,18 @@ func seedAuthHeaders(host docker.RegistryHost) error {
 	return nil
 }
 
+// staticBearerTransport injects a pre-issued Bearer token into every request,
+// bypassing the standard Docker token-exchange flow.
+type staticBearerTransport struct {
+	token string
+}
+
+func (t *staticBearerTransport) RoundTrip(req *http.Request) (*http.Response, error) {
+	clone := req.Clone(req.Context())
+	clone.Header.Set("Authorization", "Bearer "+t.token)
+	return http.DefaultTransport.RoundTrip(clone)
+}
+
 func RegistryHostsFromDockerConfig() docker.RegistryHosts {
 	return func(host string) ([]docker.RegistryHost, error) {
 		// FIXME This should be cached somewhere
@@ -126,14 +138,25 @@ func RegistryHostsFromDockerConfig() docker.RegistryHosts {
 			return []docker.RegistryHost{registryHost}, nil
 		}
 
-		registryHost.Authorizer = docker.NewDockerAuthorizer(docker.WithAuthCreds(func(host string) (string, string, error) {
-			p := helperclient.NewShellProgramFunc(fmt.Sprintf("docker-credential-%s", helperName))
+		p := helperclient.NewShellProgramFunc(fmt.Sprintf("docker-credential-%s", helperName))
+		creds, err := helperclient.Get(p, fmt.Sprintf("%s://%s", registryHost.Scheme, registryHost.Host))
+		if err != nil {
+			return nil, err
+		}
 
-			creds, err := helperclient.Get(p, fmt.Sprintf("%s://%s", registryHost.Scheme, registryHost.Host))
-			if err != nil {
-				return "", "", err
+		if creds.Username == "Bearer" {
+			// The credential helper returned a pre-issued Bearer token (Username=="Bearer",
+			// Secret==<JWT>). Sending this as Basic auth to the token endpoint produces a
+			// 400 Bad Request, so we inject it directly as a static Authorization header
+			// via a custom transport, bypassing the token-exchange flow entirely.
+			registryHost.Client = &http.Client{
+				Transport: &staticBearerTransport{token: creds.Secret},
 			}
+			// Authorizer is nil: seedAuthHeaders is a no-op and no token exchange occurs.
+			return []docker.RegistryHost{registryHost}, nil
+		}
 
+		registryHost.Authorizer = docker.NewDockerAuthorizer(docker.WithAuthCreds(func(host string) (string, string, error) {
 			return creds.Username, creds.Secret, nil
 		}))
 
