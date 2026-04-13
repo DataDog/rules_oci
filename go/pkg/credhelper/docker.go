@@ -99,15 +99,20 @@ func seedAuthHeaders(host docker.RegistryHost) error {
 	return nil
 }
 
-// staticBearerTransport injects a pre-issued Bearer token into every request,
-// bypassing the standard Docker token-exchange flow.
-type staticBearerTransport struct {
+// bearerAuthFixTransport intercepts requests where containerd has set
+// Authorization: Basic base64("Bearer:<JWT>") (from a credential helper returning
+// Username="Bearer") and converts them to Authorization: Bearer <JWT>.
+// This allows the token endpoint to issue a proper scope-specific token, which
+// containerd then uses for all subsequent registry requests (manifests and blobs).
+type bearerAuthFixTransport struct {
 	token string
 }
 
-func (t *staticBearerTransport) RoundTrip(req *http.Request) (*http.Response, error) {
+func (t *bearerAuthFixTransport) RoundTrip(req *http.Request) (*http.Response, error) {
 	clone := req.Clone(req.Context())
-	clone.Header.Set("Authorization", "Bearer "+t.token)
+	if username, _, ok := clone.BasicAuth(); ok && username == "Bearer" {
+		clone.Header.Set("Authorization", "Bearer "+t.token)
+	}
 	return http.DefaultTransport.RoundTrip(clone)
 }
 
@@ -146,13 +151,30 @@ func RegistryHostsFromDockerConfig() docker.RegistryHosts {
 
 		if creds.Username == "Bearer" {
 			// The credential helper returned a pre-issued Bearer token (Username=="Bearer",
-			// Secret==<JWT>). Sending this as Basic auth to the token endpoint produces a
-			// 400 Bad Request, so we inject it directly as a static Authorization header
-			// via a custom transport, bypassing the token-exchange flow entirely.
-			registryHost.Client = &http.Client{
-				Transport: &staticBearerTransport{token: creds.Secret},
+			// Secret==<JWT>). containerd's WithAuthCreds flow would construct
+			// Authorization: Basic base64("Bearer:<JWT>") for the token endpoint, which
+			// the registry rejects with 400 Bad Request.
+			//
+			// Fix: use a custom transport that converts Basic("Bearer", <JWT>) →
+			// Bearer <JWT> on the wire. This lets the token endpoint issue a proper
+			// scope-specific token, which containerd then uses for all registry requests
+			// (manifests and blobs).
+			customClient := &http.Client{
+				Transport: &bearerAuthFixTransport{token: creds.Secret},
 			}
-			// Authorizer is nil: seedAuthHeaders is a no-op and no token exchange occurs.
+			registryHost.Client = customClient
+			registryHost.Authorizer = docker.NewDockerAuthorizer(
+				docker.WithAuthCreds(func(host string) (string, string, error) {
+					return creds.Username, creds.Secret, nil
+				}),
+				docker.WithAuthClient(customClient),
+			)
+
+			err = seedAuthHeaders(registryHost)
+			if err != nil {
+				return nil, err
+			}
+
 			return []docker.RegistryHost{registryHost}, nil
 		}
 
