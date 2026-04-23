@@ -1,8 +1,6 @@
 module github.com/DataDog/rules_oci
 
-go 1.22.9
-
-toolchain go1.24.2
+go 1.25.0
 
 require (
 	github.com/DataDog/zstd v1.5.7
@@ -18,7 +16,7 @@ require (
 	github.com/sirupsen/logrus v1.9.3
 	github.com/stretchr/testify v1.9.0
 	github.com/urfave/cli/v2 v2.27.2
-	golang.org/x/sync v0.11.0
+	golang.org/x/sync v0.20.0
 	oras.land/oras-go v1.2.6
 )
 
