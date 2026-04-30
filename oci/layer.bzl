@@ -77,6 +77,7 @@ def _impl(ctx):
                     ["--symlink={}={}".format(k, v) for k, v in ctx.attr.symlinks.items()],
         inputs = ctx.files.files + ctx.files.file_map,
         mnemonic = "OCIImageCreateLayer",
+        execution_requirements = {"cpu:8": ""} if compression_method == "zstd" else {},
         outputs = [
             descriptor_file,
             output_file,

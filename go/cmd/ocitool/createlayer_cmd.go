@@ -22,6 +22,13 @@ import (
 	"github.com/urfave/cli/v2"
 )
 
+const zstdWorkers = 8
+
+// Noticeably faster (~20-40%) than default '5', with ony ~2% larger resulting image size.
+// And still ~17% smaller image size compared to gzip.
+// See comparison https://datadoghq.atlassian.net/wiki/x/EoN6hwE
+const zstdCompressionLevel = 3
+
 func CreateLayerCmd(c *cli.Context) error {
 	config, err := parseConfig(c)
 	if err != nil {
@@ -37,8 +44,15 @@ func CreateLayerCmd(c *cli.Context) error {
 	digester := digest.SHA256.Digester()
 	wc := ociutil.NewWriterCounter(io.MultiWriter(out, digester.Hash()))
 
+	// flusher drains the compressor's internal buffers between files.
+	// With multi-threaded zstd (workers > 0), Write() is asynchronous and buffers
+	// input until workers process it. Without periodic flushes, memory usage can
+	// grow to the full uncompressed layer size.
+	type flusher interface{ Flush() error }
+
 	var compressWriter io.Writer
 	var compressCloser io.Closer
+	var compressFlusher flusher
 	var mediaType string
 	switch config.CompressionMethod {
 	case "gzip":
@@ -47,9 +61,13 @@ func CreateLayerCmd(c *cli.Context) error {
 		compressCloser = gzipWriter
 		mediaType = ocispec.MediaTypeImageLayerGzip
 	case "zstd":
-		zstdWriter := zstd.NewWriter(wc)
+		zstdWriter := zstd.NewWriterLevel(wc, zstdCompressionLevel)
+		if err := zstdWriter.SetNbWorkers(zstdWorkers); err != nil {
+			return fmt.Errorf("failed to set zstd workers: %w", err)
+		}
 		compressWriter = zstdWriter
 		compressCloser = zstdWriter
+		compressFlusher = zstdWriter
 		mediaType = ocispec.MediaTypeImageLayerZstd
 	default:
 		return fmt.Errorf("uknown compress method %s", config.CompressionMethod)
@@ -90,6 +108,11 @@ func CreateLayerCmd(c *cli.Context) error {
 		)
 		if err != nil {
 			return err
+		}
+		if compressFlusher != nil {
+			if err := compressFlusher.Flush(); err != nil {
+				return fmt.Errorf("failed to flush compressor: %w", err)
+			}
 		}
 	}
 
@@ -151,6 +174,11 @@ func CreateLayerCmd(c *cli.Context) error {
 			/* tw       */ tw,
 		); err != nil {
 			return err
+		}
+		if compressFlusher != nil {
+			if err := compressFlusher.Flush(); err != nil {
+				return fmt.Errorf("failed to flush compressor: %w", err)
+			}
 		}
 	}
 
