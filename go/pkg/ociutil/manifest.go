@@ -3,7 +3,7 @@ package ociutil
 import (
 	"fmt"
 
-	"github.com/containerd/containerd/platforms"
+	"github.com/containerd/containerd/v2/platforms"
 	ocispec "github.com/opencontainers/image-spec/specs-go/v1"
 )
 

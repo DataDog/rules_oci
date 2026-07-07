@@ -3,8 +3,8 @@ package ociutil
 import (
 	"context"
 
-	"github.com/containerd/containerd/content"
-	"github.com/containerd/containerd/errdefs"
+	"github.com/containerd/containerd/v2/content"
+	"github.com/containerd/containerd/v2/errdefs"
 	ocispec "github.com/opencontainers/image-spec/specs-go/v1"
 )
 

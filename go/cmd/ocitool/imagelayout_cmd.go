@@ -8,9 +8,9 @@ import (
 
 	"github.com/DataDog/rules_oci/go/pkg/blob"
 	"github.com/DataDog/rules_oci/go/pkg/ociutil"
-	"github.com/containerd/containerd/images"
+	"github.com/containerd/containerd/v2/images"
 	"github.com/opencontainers/go-digest"
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 )
 
 // Given a slice of layoutFilePaths, where each path contains a file that may
