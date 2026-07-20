@@ -19,7 +19,7 @@ import (
 	"github.com/DataDog/zstd"
 	"github.com/opencontainers/go-digest"
 	ocispec "github.com/opencontainers/image-spec/specs-go/v1"
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 )
 
 const zstdWorkers = 8

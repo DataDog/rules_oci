@@ -9,11 +9,11 @@ import (
 	"github.com/DataDog/rules_oci/go/pkg/ociutil"
 
 	"github.com/bazelbuild/bazel-gazelle/rule"
-	"github.com/containerd/containerd/images"
+	"github.com/containerd/containerd/v2/images"
 	"github.com/opencontainers/go-digest"
 	ocispec "github.com/opencontainers/image-spec/specs-go/v1"
 	log "github.com/sirupsen/logrus"
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 	orascontent "oras.land/oras-go/pkg/content"
 )
 

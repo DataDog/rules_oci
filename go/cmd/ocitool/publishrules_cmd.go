@@ -7,7 +7,7 @@ import (
 
 	ocispecv "github.com/opencontainers/image-spec/specs-go"
 	ocispec "github.com/opencontainers/image-spec/specs-go/v1"
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 )
 
 func PublishRulesCmd(c *cli.Context) error {
