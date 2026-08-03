@@ -4,7 +4,7 @@ import (
 	"github.com/containerd/containerd/content"
 	"github.com/containerd/containerd/remotes"
 	log "github.com/sirupsen/logrus"
-	"oras.land/oras-go/pkg/oras"
+	"oras.land/oras-go/v2/pkg/oras"
 )
 
 func FetchertoProvider(fetcher remotes.Fetcher) content.Provider {
