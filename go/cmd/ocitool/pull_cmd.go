@@ -5,10 +5,10 @@ import (
 
 	"github.com/DataDog/rules_oci/go/pkg/ociutil"
 
-	"github.com/containerd/containerd/images"
+	"github.com/containerd/containerd/v2/images"
 	"github.com/containerd/log"
 	ocispec "github.com/opencontainers/image-spec/specs-go/v1"
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 	orascontent "oras.land/oras-go/pkg/content"
 )
 

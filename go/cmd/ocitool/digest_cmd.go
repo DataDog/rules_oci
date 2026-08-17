@@ -5,7 +5,7 @@ import (
 
 	"github.com/DataDog/rules_oci/go/pkg/ociutil"
 
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 )
 
 func DigestCmd(c *cli.Context) error {

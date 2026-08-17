@@ -16,12 +16,12 @@ import (
 	"github.com/DataDog/rules_oci/go/pkg/layer"
 	"github.com/DataDog/rules_oci/go/pkg/ociutil"
 
-	"github.com/containerd/containerd/images"
-	"github.com/containerd/containerd/platforms"
+	"github.com/containerd/containerd/v2/images"
+	"github.com/containerd/containerd/v2/platforms"
 	"github.com/opencontainers/go-digest"
 	ocispec "github.com/opencontainers/image-spec/specs-go/v1"
 	log "github.com/sirupsen/logrus"
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 )
 
 func loadStamp(r io.Reader) (map[string]string, error) {
