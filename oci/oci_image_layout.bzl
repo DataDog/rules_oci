@@ -17,7 +17,7 @@ def _oci_image_layout_impl(ctx):
     ctx.actions.run(
         executable = toolchain.sdk.ocitool,
         arguments = [
-            "--layout={layout}".format(layout = layout.blob_index.path),
+            "--layout={layout}".format(layout = layout.direct_blob_index.path),
             "--debug={debug}".format(debug = str(ctx.attr._debug[DebugInfo].debug)),
             "create-oci-image-layout",
             # We need to use the directory one level above bazel-out for the
@@ -33,7 +33,7 @@ def _oci_image_layout_impl(ctx):
         ],
         inputs =
             depset(
-                direct = ctx.files.manifest + [layout.blob_index],
+                direct = ctx.files.manifest + [layout.direct_blob_index],
                 transitive = [layout.files],
             ),
         outputs = [

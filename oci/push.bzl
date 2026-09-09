@@ -89,11 +89,16 @@ done
     for k, v in ctx.attr.x_meta_headers.items():
         xheaders = xheaders + " --x_meta_headers={}={}".format(k, v)
 
+    layout_flags = " \\\n        ".join([
+        "--layout {}".format(f.short_path)
+        for f in layout.transitive_blob_indices.to_list()
+    ])
+
     ctx.actions.write(
         content = """#!/usr/bin/env bash
         set -euo pipefail
         {tool}  \\
-        --layout {layout} \\
+        {layout_flags} \\
         --debug={debug} \\
         push \\
         --layout-relative {root} \\
@@ -107,7 +112,7 @@ done
         """.format(
             root = ctx.bin_dir.path,
             tool = toolchain.sdk.ocitool.short_path,
-            layout = layout.blob_index.short_path,
+            layout_flags = layout_flags,
             desc = ctx.attr.manifest[OCIDescriptor].descriptor_file.short_path,
             ref = ref,
             debug = str(ctx.attr._debug[DebugInfo].debug),
@@ -124,7 +129,7 @@ done
         DefaultInfo(
             runfiles = ctx.runfiles(
                 files = layout.files.to_list() +
-                        [toolchain.sdk.ocitool, ctx.attr.manifest[OCIDescriptor].descriptor_file, layout.blob_index, digest_file, tag_file],
+                        [toolchain.sdk.ocitool, ctx.attr.manifest[OCIDescriptor].descriptor_file, digest_file, tag_file],
             ),
         ),
         OCIReferenceInfo(

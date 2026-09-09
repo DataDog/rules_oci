@@ -29,7 +29,7 @@ def generate_config_file_action(ctx, config_file, image, os, arch):
     ctx.actions.run(
         executable = toolchain.sdk.ocitool,
         arguments = [
-            "--layout={}".format(base_layout.blob_index.path),
+            "--layout={}".format(base_layout.direct_blob_index.path),
             "config",
             "--base={}".format(base_desc.path),
             "--os={}".format(os),
@@ -39,7 +39,7 @@ def generate_config_file_action(ctx, config_file, image, os, arch):
         mnemonic = "OCIImageConfig",
         inputs = [
             base_desc,
-            base_layout.blob_index,
+            base_layout.direct_blob_index,
         ] + base_layout.files.to_list(),
         outputs = [
             config_file,
