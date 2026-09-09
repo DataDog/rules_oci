@@ -109,7 +109,7 @@ def _oci_image_index_impl(ctx):
 
     ctx.actions.run(
         executable = toolchain.sdk.ocitool,
-        arguments = ["--layout={}".format(m[OCILayout].blob_index.path) for m in ctx.attr.manifests] +
+        arguments = ["--layout={}".format(m[OCILayout].direct_blob_index.path) for m in ctx.attr.manifests] +
                     [
                         "create-index",
                         "--out-index={}".format(index_file.path),
@@ -128,7 +128,12 @@ def _oci_image_index_impl(ctx):
             descriptor_file = index_desc_file,
         ),
         OCILayout(
-            blob_index = layout_file,
+            direct_blob_index = layout_file,
+            index = index_file,
+            transitive_blob_indices = depset(
+                direct = [layout_file],
+                transitive = [m[OCILayout].transitive_blob_indices for m in ctx.attr.manifests],
+            ),
             files = depset(direct = [index_file, layout_file], transitive = [layout_files]),
         ),
         DefaultInfo(
@@ -189,7 +194,7 @@ def _oci_image_impl(ctx):
         stamp_args.append("--bazel-version-file={}".format(ctx.version_file.path))
 
     arguments = [
-        "--layout={}".format(base_layout.blob_index.path),
+        "--layout={}".format(base_layout.direct_blob_index.path),
         "append-layers",
         "--base={}".format(base_desc.path),
         "--os={}".format(ctx.attr.os),
@@ -225,7 +230,7 @@ def _oci_image_impl(ctx):
     inputs = [
         ctx.version_file,
         base_desc,
-        base_layout.blob_index,
+        base_layout.direct_blob_index,
     ] + ctx.files.layers + layer_descriptor_files + base_layout.files.to_list() + tars
 
     if ctx.attr.cmd_override:
@@ -272,7 +277,12 @@ def _oci_image_impl(ctx):
             descriptor_file = manifest_desc_file,
         ),
         OCILayout(
-            blob_index = layout_file,
+            direct_blob_index = layout_file,
+            index = None,
+            transitive_blob_indices = depset(
+                direct = [layout_file],
+                transitive = [base_layout.transitive_blob_indices],
+            ),
             files = depset(
                 ctx.files.layers + ctx.files.tars + [
                     manifest_file,

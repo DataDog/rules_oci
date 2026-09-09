@@ -15,8 +15,10 @@ OCIReferenceInfo = provider(
 OCILayout = provider(
     "OCI Layout",
     fields = {
-        "blob_index": "",
-        "files": "",
+        "direct_blob_index": "The layout file produced by this rule mapping digest to on-disk path.",
+        "index": "The index JSON file produced by this rule. None for single-platform images.",
+        "transitive_blob_indices": "Depset of all layout files in the transitive base chain, including direct_blob_index.",
+        "files": "Depset of all files (blobs, manifests, configs, layouts) in the transitive base chain.",
     },
 )
 

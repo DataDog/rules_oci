@@ -23,7 +23,9 @@ def _oci_layout_index_impl(ctx):
 
     return [
         OCILayout(
-            blob_index = ctx.outputs.json,
+            direct_blob_index = ctx.outputs.json,
+            index = None,
+            transitive_blob_indices = depset([ctx.outputs.json]),
             files = depset(all_files),
         ),
     ]
