@@ -125,12 +125,14 @@ done
         is_executable = True,
     )
 
+    runfiles = ctx.runfiles(
+        files = [toolchain.sdk.ocitool, ctx.attr.manifest[OCIDescriptor].descriptor_file, digest_file, tag_file],
+        transitive_files = depset(transitive = [layout.files, layout.transitive_blob_indices]),
+    )
+
     return [
         DefaultInfo(
-            runfiles = ctx.runfiles(
-                files = layout.files.to_list() +
-                        [toolchain.sdk.ocitool, ctx.attr.manifest[OCIDescriptor].descriptor_file, digest_file, tag_file],
-            ),
+            runfiles = runfiles,
         ),
         OCIReferenceInfo(
             registry = ctx.attr.registry,
