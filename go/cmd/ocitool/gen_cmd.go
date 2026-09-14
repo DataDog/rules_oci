@@ -14,7 +14,7 @@ import (
 	ocispec "github.com/opencontainers/image-spec/specs-go/v1"
 	log "github.com/sirupsen/logrus"
 	"github.com/urfave/cli/v2"
-	orascontent "oras.land/oras-go/pkg/content"
+	orascontent "oras.land/oras-go/v2/pkg/content"
 )
 
 func GenerateBuildFilesCmd(c *cli.Context) error {
