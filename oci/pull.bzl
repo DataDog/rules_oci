@@ -1,5 +1,7 @@
 """ pull """
 
+load("@package_metadata//:defs.bzl", "package_metadata")
+
 # A directory to store cached OCI artifacts
 # TODO(griffin) currently not used, but going to start depending on this for
 # integration into the bzl wrapper.
@@ -51,6 +53,36 @@ def generate_build_files(rctx, layout_root, digest = ""):
     if res.return_code > 0:
         failout("failed to pull manifest", res)
 
+def _generate_package_metadata(rctx, registry, repository, digest):
+    """Generate a package_metadata BUILD file for the pulled image.
+
+    Args:
+        rctx: repository context
+        registry: OCI registry (e.g., "ghcr.io")
+        repository: OCI repository path (e.g., "datadog/rules_oci/ubuntu")
+        digest: Image digest (e.g., "sha256:...")
+    """
+    # Construct PURL for OCI image
+    # Format: pkg:oci/[name]@[digest]?repository_url=[registry_url]
+    purl = "pkg:oci/{repository}@{digest}?repository_url=https://{registry}".format(
+        repository = repository.replace("/", "%2F"),
+        digest = digest,
+        registry = registry,
+    )
+
+    # Create metadata directory
+    metadata_dir = rctx.path("metadata")
+    rctx.file(metadata_dir.get_child("BUILD.bazel"), content = """# Generated package metadata for pulled OCI image
+
+load("@package_metadata//:defs.bzl", "package_metadata")
+
+package_metadata(
+    name = "metadata",
+    purl = "{purl}",
+    visibility = ["//visibility:public"],
+)
+""".format(purl = purl))
+
 def _oci_pull_impl(rctx):
     pull(
         rctx,
@@ -66,6 +98,20 @@ def _oci_pull_impl(rctx):
         rctx.path("."),
         digest = rctx.attr.digest,
     )
+
+    # Generate package metadata for supply chain tracking
+    _generate_package_metadata(
+        rctx,
+        registry = rctx.attr.registry,
+        repository = rctx.attr.repository,
+        digest = rctx.attr.digest,
+    )
+
+    # Create REPO.bazel to set default package metadata for the entire repository
+    rctx.file("REPO.bazel", content = """# Repository-level configuration for pulled OCI image
+
+repo(default_package_metadata = ["//metadata:metadata"])
+""")
 
 oci_pull = repository_rule(
     implementation = _oci_pull_impl,
