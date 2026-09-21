@@ -3,7 +3,7 @@ package ociutil
 import (
 	"context"
 
-	"github.com/containerd/containerd/content"
+	"github.com/containerd/containerd/v2/content"
 	ocispec "github.com/opencontainers/image-spec/specs-go/v1"
 )
 
