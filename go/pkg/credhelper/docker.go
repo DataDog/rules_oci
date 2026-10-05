@@ -9,8 +9,8 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/containerd/containerd/errdefs"
-	"github.com/containerd/containerd/remotes/docker"
+	"github.com/containerd/containerd/v2/errdefs"
+	"github.com/containerd/containerd/v2/remotes/docker"
 	helperclient "github.com/docker/docker-credential-helpers/client"
 	"github.com/mitchellh/go-homedir"
 	log "github.com/sirupsen/logrus"
