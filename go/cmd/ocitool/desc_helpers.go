@@ -7,7 +7,7 @@ import (
 	"github.com/DataDog/rules_oci/go/pkg/blob"
 	"github.com/DataDog/rules_oci/go/pkg/ociutil"
 
-	"github.com/containerd/containerd/content"
+	"github.com/containerd/containerd/v2/content"
 	ocispec "github.com/opencontainers/image-spec/specs-go/v1"
 )
 
