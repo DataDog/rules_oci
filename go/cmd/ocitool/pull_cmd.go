@@ -9,7 +9,7 @@ import (
 	"github.com/containerd/log"
 	ocispec "github.com/opencontainers/image-spec/specs-go/v1"
 	"github.com/urfave/cli/v2"
-	orascontent "oras.land/oras-go/pkg/content"
+	orascontent "oras.land/oras-go/v2/pkg/content"
 )
 
 func PullCmd(c *cli.Context) error {
