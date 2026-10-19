@@ -1,8 +1,8 @@
 package ociutil
 
 import (
-	"github.com/containerd/containerd/content"
-	"github.com/containerd/containerd/remotes"
+	"github.com/containerd/containerd/v2/content"
+	"github.com/containerd/containerd/v2/remotes"
 	log "github.com/sirupsen/logrus"
 	"oras.land/oras-go/pkg/oras"
 )
