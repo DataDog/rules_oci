@@ -1,3 +1,6 @@
+# Preserve Bazel 7 behavior for optional file globs under Bazel 8.
+common --incompatible_disallow_empty_glob=false
+
 build:ci --verbose_failures --show_timestamps --announce_rc
 build:ci --noshow_progress --noshow_loading_progress --color=yes
 build:ci --define image.tag=ci

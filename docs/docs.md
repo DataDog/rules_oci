@@ -142,7 +142,7 @@ The config file named after the rule, os, and arch
 <pre>
 load("@rules_oci//oci:defs.bzl", "oci_image")
 
-oci_image(<a href="#oci_image-name">name</a>, <a href="#oci_image-base">base</a>, <a href="#oci_image-annotations">annotations</a>, <a href="#oci_image-arch">arch</a>, <a href="#oci_image-cmd">cmd</a>, <a href="#oci_image-entrypoint">entrypoint</a>, <a href="#oci_image-env">env</a>, <a href="#oci_image-labels">labels</a>, <a href="#oci_image-layers">layers</a>, <a href="#oci_image-os">os</a>, <a href="#oci_image-tars">tars</a>, <a href="#oci_image-kwargs">kwargs</a>)
+oci_image(<a href="#oci_image-name">name</a>, <a href="#oci_image-base">base</a>, <a href="#oci_image-annotations">annotations</a>, <a href="#oci_image-arch">arch</a>, <a href="#oci_image-cmd">cmd</a>, <a href="#oci_image-entrypoint">entrypoint</a>, <a href="#oci_image-env">env</a>, <a href="#oci_image-labels">labels</a>, <a href="#oci_image-layers">layers</a>, <a href="#oci_image-os">os</a>, <a href="#oci_image-tars">tars</a>, <a href="#oci_image-kwargs">**kwargs</a>)
 </pre>
 
 oci_image
@@ -178,8 +178,8 @@ index, then `os` and `arch` will be used to extract the image manifest.
 <pre>
 load("@rules_oci//oci:defs.bzl", "oci_image_layer")
 
-oci_image_layer(<a href="#oci_image_layer-name">name</a>, <a href="#oci_image_layer-directory">directory</a>, <a href="#oci_image_layer-files">files</a>, <a href="#oci_image_layer-file_map">file_map</a>, <a href="#oci_image_layer-mode_map">mode_map</a>, <a href="#oci_image_layer-owner_map">owner_map</a>, <a href="#oci_image_layer-symlinks">symlinks</a>, <a href="#oci_image_layer-compression_method">compression_method</a>,
-                <a href="#oci_image_layer-kwargs">kwargs</a>)
+oci_image_layer(*, <a href="#oci_image_layer-name">name</a>, <a href="#oci_image_layer-directory">directory</a>, <a href="#oci_image_layer-files">files</a>, <a href="#oci_image_layer-file_map">file_map</a>, <a href="#oci_image_layer-mode_map">mode_map</a>, <a href="#oci_image_layer-owner_map">owner_map</a>, <a href="#oci_image_layer-symlinks">symlinks</a>,
+                <a href="#oci_image_layer-compression_method">compression_method</a>, <a href="#oci_image_layer-kwargs">**kwargs</a>)
 </pre>
 
 Creates a tarball and an OCI descriptor for it
