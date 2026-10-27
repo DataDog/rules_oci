@@ -7,7 +7,7 @@ import (
 	"io"
 	"os"
 
-	dref "github.com/containerd/containerd/reference/docker"
+	dref "github.com/containerd/containerd/v2/reference/docker"
 	"github.com/opencontainers/go-digest"
 	ocispec "github.com/opencontainers/image-spec/specs-go/v1"
 )
