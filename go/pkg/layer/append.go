@@ -7,9 +7,9 @@ import (
 
 	"github.com/DataDog/rules_oci/go/pkg/ociutil"
 
-	"github.com/containerd/containerd/content"
-	"github.com/containerd/containerd/images/converter"
-	dreference "github.com/containerd/containerd/reference/docker"
+	"github.com/containerd/containerd/v2/content"
+	"github.com/containerd/containerd/v2/images/converter"
+	dreference "github.com/containerd/containerd/v2/reference/docker"
 	"github.com/opencontainers/go-digest"
 	ocispec "github.com/opencontainers/image-spec/specs-go/v1"
 )

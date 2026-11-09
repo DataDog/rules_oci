@@ -6,8 +6,8 @@ import (
 	"github.com/DataDog/rules_oci/go/internal/flagutil"
 	"github.com/DataDog/rules_oci/go/pkg/ociutil"
 
-	"github.com/containerd/containerd/content"
-	"github.com/containerd/containerd/images"
+	"github.com/containerd/containerd/v2/content"
+	"github.com/containerd/containerd/v2/images"
 	"github.com/urfave/cli/v2"
 )
 
